@@ -424,6 +424,18 @@ pebble_red0 WALL_PEBBLE WALL_PEBBLE_RED
 pebble_red1
 pebble_red2
 pebble_red3
+pebble_red4
+pebble_red5
+pebble_red6
+pebble_red7
+pebble_red8
+pebble_red9
+pebble_red10
+pebble_red11
+pebble_red12
+pebble_red13
+pebble_red14
+pebble_red15
 
 %variation WALL_PEBBLE blue
 %hue 0 240
