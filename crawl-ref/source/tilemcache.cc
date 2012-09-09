@@ -46,10 +46,12 @@ public:
     static bool valid(const monster_info& mon);
 
     static bool get_weapon_offset(tileidx_t mon_tile, int *ofs_x, int *ofs_y);
+    static bool get_shield_offset(tileidx_t mon_tile, int *ofs_x, int *ofs_y);
 
 protected:
     tileidx_t m_mon_tile;
     tileidx_t m_equ_tile;
+    tileidx_t m_shd_tile;
 };
 
 class mcache_draco : public mcache_entry
@@ -65,6 +67,7 @@ protected:
     tileidx_t m_mon_tile;
     tileidx_t m_job_tile;
     tileidx_t m_equ_tile;
+    tileidx_t m_shd_tile;
 };
 
 class mcache_ghost : public mcache_entry
@@ -211,6 +214,7 @@ mcache_monster::mcache_monster(const monster_info& mon)
     m_mon_tile = tileidx_monster(mon) & TILE_FLAG_MASK;
 
     m_equ_tile = tilep_equ_weapon(*mon.inv[MSLOT_WEAPON]);
+    m_shd_tile = tilep_equ_shield(*mon.inv[MSLOT_SHIELD]);
 }
 
 // Returns the amount of pixels necessary to shift a wielded weapon
@@ -390,6 +394,10 @@ bool mcache_monster::get_weapon_offset(tileidx_t mon_tile,
         *ofs_x = -2;
         *ofs_y = -4;
         break;
+    case TILEP_MONS_ARACHNE_STAVELESS:
+        *ofs_x = -2;
+        *ofs_y = -5;
+        break;
     // Shift upwards and to the right.
     case TILEP_MONS_NECROMANCER:
     case TILEP_MONS_WIZARD:
@@ -464,6 +472,38 @@ bool mcache_monster::get_weapon_offset(tileidx_t mon_tile,
     return true;
 }
 
+// Returns the amount of pixels necessary to shift a worn shield, like
+// it's done with weapon.  Tiles that have a shield hard-drawn should not
+// be listed here.
+bool mcache_monster::get_shield_offset(tileidx_t mon_tile,
+                                       int *ofs_x, int *ofs_y)
+{
+    switch (mon_tile)
+    {
+    case TILEP_MONS_ORC:
+    case TILEP_MONS_URUG:
+    case TILEP_MONS_BLORK_THE_ORC:
+    case TILEP_MONS_SAINT_ROKA:
+    case TILEP_MONS_ORC_WARRIOR:
+    case TILEP_MONS_ORC_KNIGHT:
+    case TILEP_MONS_ORC_WARLORD:
+        *ofs_x = 1;
+        *ofs_y = 2;
+        break;
+
+    case TILEP_MONS_ARACHNE_STAVELESS:
+        *ofs_x = -6;
+        *ofs_y = 1;
+        break;
+
+    default:
+        // This monster cannot be displayed with a shield.
+        return false;
+    }
+
+    return true;
+}
+
 int mcache_monster::info(tile_draw_info *dinfo) const
 {
     int ofs_x, ofs_y;
@@ -495,6 +535,11 @@ int mcache_monster::info(tile_draw_info *dinfo) const
         if (eq2)
             dinfo[count++].set(eq2, -ofs_x, ofs_y);
     }
+    else if (m_shd_tile)
+    {
+        get_shield_offset(m_mon_tile, &ofs_x, &ofs_y);
+        dinfo[count++].set(m_shd_tile, ofs_x, ofs_y);
+    }
 
     return count;
 }
@@ -520,6 +565,8 @@ mcache_draco::mcache_draco(const monster_info& mon)
     m_mon_tile = tileidx_draco_base(mon);
     const item_info* mon_wep = mon.inv[MSLOT_WEAPON].get();
     m_equ_tile = (mon_wep != NULL) ? tilep_equ_weapon(*mon_wep) : 0;
+    mon_wep = mon.inv[MSLOT_SHIELD].get();
+    m_shd_tile = (mon_wep != NULL) ? tilep_equ_shield(*mon_wep) : 0;
     m_job_tile = tileidx_draco_job(mon);
 }
 
@@ -532,6 +579,8 @@ int mcache_draco::info(tile_draw_info *dinfo) const
         dinfo[i++].set(m_job_tile);
     if (m_equ_tile)
         dinfo[i++].set(m_equ_tile, -2, 0);
+    if (m_shd_tile)
+        dinfo[i++].set(m_shd_tile, 2, 0);
 
     return i;
 }
