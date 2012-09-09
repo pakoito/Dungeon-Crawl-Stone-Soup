@@ -470,48 +470,56 @@ pebble_red15
 
 %variation WALL_PEBBLE darkgray
 %desat 0
-%lum 0 -30
+%lum 0 -25
 %repeat WALL_PEBBLE WALL_PEBBLE_DARKGRAY
 %resetcol
 
+%variation WALL_PEBBLE lightred
+pebble_red0 WALL_PEBBLE_LIGHT WALL_PEBBLE_LIGHTRED
+pebble_red1
+pebble_red2
+pebble_red3
+pebble_red4
+pebble_red5
+pebble_red6
+pebble_red7
+pebble_red8
+pebble_red9
+pebble_red10
+pebble_red11
+pebble_red12
+pebble_red13
+pebble_red14
+pebble_red15
+
 %variation WALL_PEBBLE lightblue
 %hue 0 240
-%lum 0 15
-%repeat WALL_PEBBLE WALL_PEBBLE_LIGHTBLUE
+%repeat WALL_PEBBLE_LIGHT WALL_PEBBLE_LIGHTBLUE
 %resetcol
 
 %variation WALL_PEBBLE lightgreen
 %hue 0 90
-%lum 0 15
-%repeat WALL_PEBBLE WALL_PEBBLE_LIGHTGREEN
+%repeat WALL_PEBBLE_LIGHT WALL_PEBBLE_LIGHTGREEN
 %resetcol
 
 %variation WALL_PEBBLE lightcyan
 %hue 0 180
-%lum 0 15
-%repeat WALL_PEBBLE WALL_PEBBLE_LIGHTCYAN
-%resetcol
-
-%variation WALL_PEBBLE lightred
-%lum 0 15
-%repeat WALL_PEBBLE WALL_PEBBLE_LIGHTRED
+%repeat WALL_PEBBLE_LIGHT WALL_PEBBLE_LIGHTCYAN
 %resetcol
 
 %variation WALL_PEBBLE lightmagenta
 %hue 0 300
-%lum 0 15
-%repeat WALL_PEBBLE WALL_PEBBLE_LIGHTMAGENTA
+%repeat WALL_PEBBLE_LIGHT WALL_PEBBLE_LIGHTMAGENTA
 %resetcol
 
 %variation WALL_PEBBLE yellow
 %hue 0 60
-%repeat WALL_PEBBLE WALL_PEBBLE_YELLOW
+%repeat WALL_PEBBLE_LIGHT WALL_PEBBLE_YELLOW
 %resetcol
 
 %variation WALL_PEBBLE white
 %desat 0
-%lum 0 20
-%repeat WALL_PEBBLE WALL_PEBBLE_WHITE
+%repeat WALL_PEBBLE_LIGHT WALL_PEBBLE_WHITE
 %resetcol
 
 shoals_wall1 WALL_SHOALS
