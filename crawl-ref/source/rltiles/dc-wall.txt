@@ -475,22 +475,22 @@ pebble_red15
 %resetcol
 
 %variation WALL_PEBBLE lightred
-pebble_red0 WALL_PEBBLE_LIGHT WALL_PEBBLE_LIGHTRED
-pebble_red1
-pebble_red2
-pebble_red3
-pebble_red4
-pebble_red5
-pebble_red6
-pebble_red7
-pebble_red8
-pebble_red9
-pebble_red10
-pebble_red11
-pebble_red12
-pebble_red13
-pebble_red14
-pebble_red15
+pebble_lred0 WALL_PEBBLE_LIGHT WALL_PEBBLE_LIGHTRED
+pebble_lred1
+pebble_lred2
+pebble_lred3
+pebble_lred4
+pebble_lred5
+pebble_lred6
+pebble_lred7
+pebble_lred8
+pebble_lred9
+pebble_lred10
+pebble_lred11
+pebble_lred12
+pebble_lred13
+pebble_lred14
+pebble_lred15
 
 %variation WALL_PEBBLE lightblue
 %hue 0 240
