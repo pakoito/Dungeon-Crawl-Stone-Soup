@@ -2636,6 +2636,13 @@ bool describe_item(item_def &item, bool allow_inscribe, bool shopping)
     tiles_crt_control show_as_menu(CRT_MENU, "describe_item");
 #endif
 
+    if (item.base_type == OBJ_MERCENARY)
+    {
+        monster_info mi(
+            merc_to_monster_type(static_cast<mercenary_type>(item.sub_type)));
+        return describe_monsters(mi, true);
+    }
+
     if (_can_show_spells(item))
         return _describe_spellbook(item);
 

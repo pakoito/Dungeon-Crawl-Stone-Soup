@@ -5484,8 +5484,11 @@ static void _place_spec_shop(const coord_def& where,
         (force_s_type != SHOP_RANDOM) ? force_s_type
                                       : random2(NUM_SHOPS));
 
-    if (env.shop[i].type == SHOP_FOOD)
+    if (env.shop[i].type == SHOP_FOOD
+        || env.shop[i].type == SHOP_MERCENARY)
+    {
         env.shop[i].greed = 10 + random2(5);
+    }
     else if (env.shop[i].type != SHOP_WEAPON_ANTIQUE
              && env.shop[i].type != SHOP_ARMOUR_ANTIQUE
              && env.shop[i].type != SHOP_GENERAL_ANTIQUE)
@@ -5682,6 +5685,9 @@ static object_class_type _item_in_shop(shop_type shop_type)
 
     case SHOP_MISCELLANY:
         return OBJ_MISCELLANY;
+
+    case SHOP_MERCENARY:
+        return OBJ_MERCENARY;
 
     default:
         die("unknown shop type");

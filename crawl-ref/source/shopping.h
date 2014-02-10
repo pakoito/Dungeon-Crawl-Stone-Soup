@@ -7,6 +7,7 @@
 #define SHOPPING_H
 
 #include "externs.h"
+#include "itemprop-enum.h"
 
 int artefact_value(const item_def &item);
 
@@ -28,6 +29,8 @@ string shop_name(const coord_def& where);
 string shop_name(const coord_def& where, bool add_stop);
 
 bool shoptype_identifies_stock(shop_type type);
+
+monster_type merc_to_monster_type(mercenary_type merc);
 
 bool is_shop_item(const item_def &item);
 bool shop_item_unknown(const item_def &item);

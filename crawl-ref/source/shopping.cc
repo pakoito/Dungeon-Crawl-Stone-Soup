@@ -28,7 +28,9 @@
 #include "libutil.h"
 #include "macro.h"
 #include "menu.h"
+#include "mgen_data.h"
 #include "misc.h"
+#include "mon-place.h"
 #include "notes.h"
 #include "place.h"
 #include "player.h"
@@ -1036,6 +1038,55 @@ bool shoptype_identifies_stock(shop_type type)
            && type != SHOP_GENERAL_ANTIQUE;
 }
 
+monster_type merc_to_monster_type(mercenary_type merc)
+{
+    switch (merc)
+    {
+        case MERC_BIG_KOBOLD:
+            return MONS_BIG_KOBOLD;
+        case MERC_ORC_WARRIOR:
+            return MONS_ORC_WARRIOR;
+        case MERC_TENGU:
+            return MONS_TENGU;
+        case MERC_NAGA:
+            return MONS_NAGA;
+        case MERC_DEEP_ELF_FIGHTER:
+            return MONS_DEEP_ELF_FIGHTER;
+        case MERC_MERFOLK:
+            return MONS_MERFOLK;
+        case MERC_TENGU_CONJURER:
+            return MONS_TENGU_CONJURER;
+        case MERC_DEEP_ELF_CONJURER:
+            return MONS_DEEP_ELF_CONJURER;
+        case MERC_ORC_KNIGHT:
+            return MONS_ORC_KNIGHT;
+        case MERC_CENTAUR_WARRIOR:
+            return MONS_CENTAUR_WARRIOR;
+        case MERC_NAGA_WARRIOR:
+            return MONS_NAGA_WARRIOR;
+        case MERC_TENGU_WARRIOR:
+            return MONS_TENGU_WARRIOR;
+        case MERC_OGRE_MAGE:
+            return MONS_OGRE_MAGE;
+        case MERC_SPRIGGAN_RIDER:
+            return MONS_SPRIGGAN_RIDER;
+        case MERC_MINOTAUR:
+            return MONS_MINOTAUR;
+        case MERC_DRACONIAN:
+            return RANDOM_BASE_DRACONIAN;
+        case MERC_ORC_WARLORD:
+            return MONS_ORC_WARLORD;
+        case MERC_TENGU_REAVER:
+            return MONS_TENGU_REAVER;
+        case MERC_DEEP_ELF_MASTER_ARCHER:
+            return MONS_DEEP_ELF_MASTER_ARCHER;
+        case MERC_DEEP_ELF_BLADEMASTER:
+            return MONS_DEEP_ELF_BLADEMASTER;
+        default:
+            return MONS_PROGRAM_BUG;
+    }
+}
+
 static bool _purchase(int shop, int item_got, int cost, bool id)
 {
     you.del_gold(cost);
@@ -1045,6 +1096,30 @@ static bool _purchase(int shop, int item_got, int cost, bool id)
     item_def& item = mitm[item_got];
 
     origin_purchased(item);
+
+    if (item.base_type == OBJ_MERCENARY)
+    {
+        monster_type merc =
+            merc_to_monster_type(static_cast<mercenary_type>(item.sub_type));
+        ASSERT(merc != MONS_PROGRAM_BUG);
+        mgen_data mg(merc, BEH_FRIENDLY, &you, 0, 0, you.pos(), MHITYOU,
+                     MG_FORCE_BEH, you.religion);
+        mg.extra_flags |= MF_NO_REWARD;
+        mg.mname = item.props["name"].get_string();
+
+        monster* mon = create_monster(mg);
+        if (mon)
+        {
+            mon->props["dbname"].get_string() = mons_class_name(merc);
+
+            if (player_will_anger_monster(mon))
+                simple_monster_message(mon, " is repulsed!");
+        }
+        else
+            mpr("You see a puff of smoke,");
+        dec_mitm_item_quantity(item_got, item.quantity);
+        return true;
+    }
 
     if (id)
     {
@@ -2257,6 +2332,10 @@ unsigned int item_value(item_def item, bool ident)
         valued = 250000;
         break;
 
+    case OBJ_MERCENARY:
+        valued = item.props["exp"].get_int();
+        break;
+
     default:
         break;
     }                           // end switch
@@ -2421,6 +2500,8 @@ static string _shop_type_name(shop_type type)
             return "General Store";
         case SHOP_MISCELLANY:
             return "Gadget";
+        case SHOP_MERCENARY:
+            return "Mercenary";
         default:
             return "Bug";
     }

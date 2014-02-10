@@ -3191,6 +3191,7 @@ enum object_class_type                 // mitm[].base_type
     OBJ_CORPSES,
     OBJ_GOLD,
     OBJ_RODS,
+    OBJ_MERCENARY,   // dummy for shops
     NUM_OBJECT_CLASSES,
     OBJ_UNASSIGNED = 100,
     OBJ_RANDOM,      // used for blanket random sub_type .. see dungeon::items()
@@ -3365,6 +3366,7 @@ enum shop_type
     SHOP_SCROLL,
     SHOP_GENERAL,
     SHOP_MISCELLANY,
+    SHOP_MERCENARY,
     NUM_SHOPS, // must remain last 'regular' member {dlb}
     SHOP_UNASSIGNED = 100,
     SHOP_RANDOM,

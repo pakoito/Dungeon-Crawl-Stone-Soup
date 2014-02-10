@@ -147,6 +147,7 @@ static string shoptype_to_string(shop_type s)
     case SHOP_DISTILLERY:      return "<w>!</w>";
     case SHOP_SCROLL:          return "<w>?</w>";
     case SHOP_MISCELLANY:      return "<w>}</w>";
+    case SHOP_MERCENARY:       return "<w>@</w>";
     default:                   return "<w>x</w>";
     }
 }

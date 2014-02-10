@@ -2986,6 +2986,7 @@ int get_max_subtype(object_class_type base_type)
         -1,              // corpses     -- handled specially
         1,              // gold         -- handled specially
         NUM_RODS,
+        NUM_MERCS,
     };
     COMPILE_CHECK(ARRAYSZ(max_subtype) == NUM_OBJECT_CLASSES);
 
