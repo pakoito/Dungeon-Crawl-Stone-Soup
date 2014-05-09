@@ -700,6 +700,16 @@ bool summon_holy_warrior(int pow, bool punish)
     return true;
 }
 
+/*
+ * Cast Tukima's Dance
+ *
+ * @param pow The power of the case.
+ * @param god The god performing the spell, if any.
+ * @param force_hostile If true, the resulting dancing weapon is always hostile.
+ * @param fail If true, this cast will always fail, but other failures
+ *             to get failure message priority.
+ * @returns An spret_type indicating the spell result.
+ */
 // This function seems to have very little regard for encapsulation.
 spret_type cast_tukimas_dance(int pow, god_type god, bool force_hostile,
                               bool fail)
@@ -770,8 +780,6 @@ spret_type cast_tukimas_dance(int pow, god_type god, bool force_hostile,
         simple_god_message(" booms: How dare you animate that foul thing!");
         did_god_conduct(why, 10, true, mons);
     }
-
-    burden_change();
 
     return SPRET_SUCCESS;
 }

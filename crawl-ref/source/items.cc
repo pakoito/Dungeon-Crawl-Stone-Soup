@@ -822,7 +822,7 @@ static int _menu_selection_weight(const Menu* menu)
     {
         const item_def *item = static_cast<item_def*>(se[i]->data);
         if (se[i]->selected_qty > 0)
-            weight += item_mass(*item) * se[i]->selected_qty;
+            weight += item_mass(*item, true) * se[i]->selected_qty;
     }
     return weight;
 }
@@ -1574,8 +1574,17 @@ void note_inscribe_item(item_def &item)
     _check_note_item(item);
 }
 
-// Returns quantity of items moved into player's inventory and -1 if
-// the player's inventory is full.
+/*
+ * Move the given item and quantity to the player's inventory
+ * @param obj The item index in mitm.
+ * @param quant_got The quantity of this item to move.
+ * @param quiet If true, most messages notifying the player of item
+ *              pickup (or item pickup failure) aren't printed.
+ * @param ignore_burden Don't consider the player's carrying capacity
+ *                      when moving the item.
+ * @returns The quantity of items moved and -1 if the player's
+ *          inventory is full.
+ */
 int move_item_to_player(int obj, int quant_got, bool quiet,
                         bool ignore_burden)
 {
@@ -1664,7 +1673,6 @@ int move_item_to_player(int obj, int quant_got, bool quiet,
 
         mprf(MSGCH_ORB, "You pick up the Orb of Zot!");
         you.char_direction = GDT_ASCENDING;
-        burden_change();
 
         env.orb_pos = you.pos(); // can be wrong in wizmode
         orb_pickup_noise(you.pos(), 30);
@@ -1688,7 +1696,7 @@ int move_item_to_player(int obj, int quant_got, bool quiet,
         return retval;
     }
 
-    const int unit_mass = item_mass(it);
+    const int unit_mass = item_mass(it, true);
     if (quant_got > it.quantity || quant_got <= 0)
         quant_got = it.quantity;
 
@@ -1734,12 +1742,6 @@ int move_item_to_player(int obj, int quant_got, bool quiet,
     }
 
     int imass = unit_mass * quant_got;
-    if (!ignore_burden && (you.burden + imass > carrying_capacity()))
-    {
-        if (drop_spoiled_chunks(you.burden + imass - carrying_capacity()))
-            imass = unit_mass * quant_got;
-    }
-
     bool partial_pickup = false;
 
     if (!ignore_burden && (you.burden + imass > carrying_capacity()))
@@ -1802,7 +1804,7 @@ int move_item_to_player(int obj, int quant_got, bool quiet,
 
     // Can't combine, check for slot space.
     if (inv_count() >= ENDOFPACK)
-        drop_spoiled_chunks(1, true);
+        drop_spoiled_chunks();
     if (inv_count() >= ENDOFPACK)
         return -1;
 
@@ -2903,20 +2905,11 @@ static void _do_autopickup()
         if (item_needs_autopickup(mitm[o]))
         {
             int num_to_take = mitm[o].quantity;
-            int unit_mass = item_mass(mitm[o]);
+            int unit_mass = item_mass(mitm[o], true);
             if (Options.autopickup_no_burden && unit_mass != 0)
             {
                 int capacity = carrying_capacity(you.burden_state);
                 int num_can_take = (capacity - you.burden) / unit_mass;
-
-                if (num_can_take < num_to_take
-                    && drop_spoiled_chunks(you.burden
-                           + num_to_take * unit_mass - capacity))
-                {
-                    // Yay, some new space, retry.
-                    // Compare to the old burden capacity, not the new one.
-                    num_can_take = (capacity - you.burden) / unit_mass;
-                }
 
                 if (num_can_take < num_to_take)
                 {

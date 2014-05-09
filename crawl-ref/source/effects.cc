@@ -1788,6 +1788,11 @@ static bool _food_item_needs_time_check(item_def &item)
 
 #define ROTTING_WARNED_KEY "rotting_warned"
 
+/*
+ * Rot the chunks, skeletons, and corpses in the player's inventory based on
+ * the given amount of aut.
+ * @param time_delta The time passed in aut.
+ */
 static void _rot_inventory_food(int time_delta)
 {
     // Update all of the corpses and food chunks in the player's
@@ -1981,7 +1986,6 @@ static void _rot_inventory_food(int time_delta)
             msg += "rotted away.";
             mprf(MSGCH_ROTTEN_MEAT, "%s", msg.c_str());
         }
-        burden_change();
     }
 }
 

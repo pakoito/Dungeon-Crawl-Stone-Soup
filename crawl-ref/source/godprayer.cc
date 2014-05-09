@@ -80,6 +80,16 @@ string god_prayer_reaction()
     return result;
 }
 
+/*
+ * Have a god bless a weapon of the player.
+ *
+ * This means applying a given brand, possibly upgrading the base
+ * weapon type, and possibly carryign out a blessing effect in LOS.
+ * @param god The god to perform the blessing.
+ * @param brand The brand to apply to the weapon.
+ * @param colour The colour of the new weapon.
+ * @returns True if the weapon was blessed, false otherwise.
+ */
 static bool _bless_weapon(god_type god, brand_type brand, int colour)
 {
     int item_slot = prompt_invent_item("Brand which weapon?", MT_INVLIST,
@@ -133,16 +143,11 @@ static bool _bless_weapon(god_type god, brand_type brand, int colour)
             origin_acquired(wpn, GOD_SHINING_ONE);
             wpn.flags |= ISFLAG_BLESSED_WEAPON;
         }
-
-        burden_change();
     }
     else if (is_evil_god(god))
     {
         convert2bad(wpn);
-
         wpn.flags &= ~ISFLAG_BLESSED_WEAPON;
-
-        burden_change();
     }
 
     you.wield_change = true;

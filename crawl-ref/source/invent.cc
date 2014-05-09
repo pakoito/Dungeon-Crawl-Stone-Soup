@@ -252,7 +252,7 @@ string InvEntry::get_text(bool need_cursor) const
 
     if (show_weight)
     {
-        const int mass = item_mass(*item) * item->quantity;
+        const int mass = item_mass(*item, true) * item->quantity;
         // Note: If updating the " (%i aum)" format, remember to update
         // w_weight above.
         tstr << setw(max_chars_in_line - strwidth(tstr.str())

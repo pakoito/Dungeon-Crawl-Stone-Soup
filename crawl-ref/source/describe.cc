@@ -1645,11 +1645,17 @@ bool is_dumpable_artefact(const item_def &item, bool verbose)
     return false;
 }
 
-//---------------------------------------------------------------
-//
-// get_item_description
-//
-//---------------------------------------------------------------
+/*
+ * Return a string containing the item description.
+ * @param item The item to describe.
+
+ * @param verbose If true, provide the extended information seen when
+ *                examining an item.
+ * @param dump If true, provide a description "dump" of the kind used
+ *             by the stash system.
+ * @param noquote If true, the item quote won't be included.
+ * @returns A string with the item description.
+ */
 string get_item_description(const item_def &item, bool verbose,
                             bool dump, bool noquote)
 {
@@ -2027,16 +2033,26 @@ string get_item_description(const item_def &item, bool verbose,
     {
         if (verbose)
         {
+            bool is_cursed = item_known_cursed(item);
+            const int mass = item_mass(item, true);
+
             if (need_extra_line)
                 description << "\n";
-            description << "\nIt";
-            if (item_known_cursed(item))
-                description << " has a curse placed upon it, and it";
-
-            const int mass = item_mass(item);
-            description << " weighs around " << (mass / 10)
-                        << "." << (mass % 10)
-                        << " aum. "; // arbitrary unit of mass
+            if (is_cursed || mass > 0)
+                description << "\nIt";
+            if (is_cursed)
+            {
+                description << " has a curse placed upon it";
+                if (mass > 0)
+                    description << ", and it";
+                else
+                    description << ".";
+            }
+            if (mass > 0) {
+                description << " weighs around " << (mass / 10)
+                            << "." << (mass % 10)
+                            << " aum. "; // arbitrary unit of mass
+            }
 
             if (is_artefact(item))
             {

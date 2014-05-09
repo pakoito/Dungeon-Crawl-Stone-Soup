@@ -779,6 +779,14 @@ spret_type cast_portal_projectile(int pow, bool fail)
     return SPRET_SUCCESS;
 }
 
+/*
+ * Cast apportation.
+ * @param pow The spell power.
+ * @param beam The bolt information of the cast.
+ * @param fail If true, the spell cast will fail, but other failures
+ *             get message priority.
+ * @returns An spret_type indicating the casting result.
+ */
 spret_type cast_apportation(int pow, bolt& beam, bool fail)
 {
     const coord_def where = beam.target;
@@ -820,7 +828,7 @@ spret_type cast_apportation(int pow, bolt& beam, bool fail)
 
     fail_check();
     // Mass of one unit.
-    const int unit_mass = item_mass(item);
+    const int unit_mass = item_mass(item, false);
     const int max_mass = pow * 30 + random2(pow * 20);
 
     int max_units = item.quantity;

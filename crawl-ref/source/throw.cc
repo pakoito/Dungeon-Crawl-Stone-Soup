@@ -653,13 +653,18 @@ static void _throw_noise(actor* act, const bolt &pbolt, const item_def &ammo)
     noisy(level, act->pos(), msg, act->mindex());
 }
 
-// throw_it - currently handles player throwing only.  Monster
-// throwing is handled in mon-act:_mons_throw()
-// Note: If teleport is true, assume that pbolt is already set up,
-// and teleport the projectile onto the square.
-//
-// Return value is only relevant if dummy_target is non-NULL, and returns
-// true if dummy_target is hit.
+/*
+ * Handle player throwing.
+ *
+ * Monster throwing is handled in _mons_throw().
+ * @param pbolt A bolt used to make the throw.
+ * @param throw_2 The inventory slot of the item to be thrown.
+ * @param teleport If true assume the pbolt is already set up, and we teleport
+ *                 the projectile onto the square (portal projectile).
+ * @param acc_bonus Use this to-hit for the throw.
+ * @returns True if if pbolt.dummy_target is non-NULL and the target was hit,
+ *          false otherwise.
+ */
 bool throw_it(bolt &pbolt, int throw_2, bool teleport, int acc_bonus,
               dist *target)
 {
@@ -740,7 +745,8 @@ bool throw_it(bolt &pbolt, int throw_2, bool teleport, int acc_bonus,
     else
     {
         // Range based on mass & strength, between 1 and 9.
-        max_range = range = max(you.strength()-item_mass(thrown)/10 + 3, 1);
+        max_range = range = max(you.strength() - item_mass(thrown)
+                                / 10 + 3, 1);
     }
 
     range = min(range, (int)you.current_vision);
@@ -892,7 +898,7 @@ bool throw_it(bolt &pbolt, int throw_2, bool teleport, int acc_bonus,
     pbolt.is_beam   = false;
     pbolt.is_tracer = false;
 
-    pbolt.loudness = int(sqrt(item_mass(item))/3 + 0.5);
+    pbolt.loudness = int(sqrt(item_mass(item)) / 3 + 0.5);
 
     // Mark this item as thrown if it's a missile, so that we'll pick it up
     // when we walk over it.

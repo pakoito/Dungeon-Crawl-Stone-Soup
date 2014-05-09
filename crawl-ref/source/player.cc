@@ -2740,20 +2740,21 @@ int carrying_capacity(burden_state_type bs)
         return cap;
 }
 
+/*
+ * Calculate the player's burden based on the current inventory.
+ * @returns you.burden: the player's current burden state.
+ */
 int burden_change(void)
 {
     const burden_state_type old_burdenstate = you.burden_state;
 
-    // XXX: the 600 here is the weight of the Orb.
-    // TODO: make this use a dummy item or similar?
-    you.burden = player_has_orb() ? 600 : 0;
-
+    you.burden = 0;
     for (int bu = 0; bu < ENDOFPACK; bu++)
     {
         if (you.inv[bu].quantity < 1)
             continue;
 
-        you.burden += item_mass(you.inv[bu]) * you.inv[bu].quantity;
+        you.burden += item_mass(you.inv[bu], true) * you.inv[bu].quantity;
     }
 
     you.burden_state = BS_UNENCUMBERED;

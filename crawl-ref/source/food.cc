@@ -617,6 +617,12 @@ bool butchery(int which_corpse, bool bottle_blood)
     return success;
 }
 
+/*
+ * Eat an item from inventory, prompting the player for the item if necessary.
+ * @param slot If -1, prompt the player for an item, otherwise eat the item in
+ *             this inventory slot.
+ * @returns True if an item was successfully eaten, false otherwise.
+ */
 bool prompt_eat_inventory_item(int slot)
 {
     if (inv_count() < 1)
@@ -666,10 +672,7 @@ bool prompt_eat_inventory_item(int slot)
         return false;
 
     eat_item(item);
-
-    burden_change();
     you.turn_is_over = true;
-
     return true;
 }
 
@@ -2555,31 +2558,17 @@ static bool _compare_second(const pair<int, int> &a, const pair<int, int> &b)
     return a.second < b.second;
 }
 
-static int _chunk_mass()
-{
-    item_def chunk;
-    chunk.base_type = OBJ_FOOD;
-    chunk.sub_type = FOOD_CHUNK;
-    return item_mass(chunk);
-}
-
 /**
- * Try to make space in the inventory.  Caller must call pickup_burden() later.
- * @param num_needed Try to free at least that much carrying capacity.
+ * Try to make space in the inventory.
 **/
-maybe_bool drop_spoiled_chunks(int weight_needed, bool whole_slot)
+void drop_spoiled_chunks()
 {
     if (Options.auto_drop_chunks == ADC_NEVER)
-        return MB_FALSE;
-
-    int num_needed = 1 + (weight_needed - 1) / _chunk_mass();
+        return;
 
     bool wants_any = you.has_spell(SPELL_SIMULACRUM)
                   || you.has_spell(SPELL_SUBLIMATION_OF_BLOOD);
-
     int nchunks = 0;
-    maybe_bool result = MB_FALSE;
-
     vector<pair<int, int> > chunk_slots;
     for (int slot = 0; slot < ENDOFPACK; slot++)
     {
@@ -2595,13 +2584,8 @@ maybe_bool drop_spoiled_chunks(int weight_needed, bool whole_slot)
         bool rotten = food_is_rotten(item);
         if (rotten && !you.mutation[MUT_SAPROVOROUS] && !wants_any)
         {
-            num_needed -= item.quantity;
-            if (!drop_item(slot, item.quantity))
-                return result; // level full, error out
-            if (num_needed <= 0)
-                return MB_TRUE;
-            result = MB_MAYBE; // at least a bit lighter
-            continue;
+            ASSERT(drop_item(slot, item.quantity));
+            return;
         }
 
         corpse_effect_type ce = _determine_chunk_effect(mons_corpse_effect(
@@ -2619,29 +2603,14 @@ maybe_bool drop_spoiled_chunks(int weight_needed, bool whole_slot)
 
     // No rotten ones to drop, and we're not allowed to drop others.
     if (Options.auto_drop_chunks == ADC_ROTTEN)
-        return result;
+        return;
 
     nchunks -= _chunks_needed();
-
     sort(chunk_slots.begin(), chunk_slots.end(), _compare_second);
+    int slot = chunk_slots.back().first;
+    int quant = min<int>(nchunks, you.inv[slot].quantity);
+    if (quant >= you.inv[slot].quantity)
+        ASSERT(drop_item(slot, quant));
 
-    while (nchunks > 0 && !chunk_slots.empty())
-    {
-        int slot = chunk_slots.back().first;
-        chunk_slots.pop_back();
-
-        int quant = min<int>(nchunks, you.inv[slot].quantity);
-        if (whole_slot && quant < you.inv[slot].quantity)
-            return result;
-
-        if (!drop_item(slot, quant))
-            return result; // level full, error out
-
-        if (num_needed -= quant <= 0)
-            return MB_TRUE;
-
-        result = MB_MAYBE; // at least a bit lighter
-    }
-
-    return result;
+    return;
 }

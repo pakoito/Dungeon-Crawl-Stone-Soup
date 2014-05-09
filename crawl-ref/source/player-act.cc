@@ -414,6 +414,14 @@ bool player::can_wield(const item_def& item, bool ignore_curse,
     return could_wield(item, ignore_brand, ignore_transform);
 }
 
+/*
+   Could the player wield the given item?
+   @param item The item to consider.
+   @param ignore_brand If true, don't consider the item's brand.
+   @param ignore_transformation If true, don't consider the player's current
+                                form.
+   @returns True if the player could wield the given item, false otherwise.
+ */
 bool player::could_wield(const item_def &item, bool ignore_brand,
                          bool ignore_transform) const
 {
@@ -421,9 +429,8 @@ bool player::could_wield(const item_def &item, bool ignore_brand,
         return false;
 
     if (body_size(PSIZE_TORSO, ignore_transform) < SIZE_LARGE
-            && (item_mass(item) >= 500
-                || item.base_type == OBJ_WEAPONS
-                    && item_mass(item) >= 300))
+        && (item_mass(item) >= 500 || item.base_type == OBJ_WEAPONS
+            && item_mass(item) >= 300))
         return false;
 
     // Anybody can wield missiles to enchant, item_mass permitting

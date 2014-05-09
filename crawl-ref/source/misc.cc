@@ -520,9 +520,11 @@ static void _potion_stack_changed_message(item_def &potion, int num_changed,
          verb.c_str());
 }
 
-// Returns true if the total number of potions in inventory decreased,
-// in which case burden_change() will need to be called.
-// Also handles coagulation messages.
+/* Coagulate a potion of blood in the player's inventory if necessary.
+ * @param blood The blood potion item.
+ * @returns True if the total number of potions in inventory decreased, false
+ *          otherwise.
+ */
 bool maybe_coagulate_blood_potions_inv(item_def &blood)
 {
     ASSERT(blood.defined());

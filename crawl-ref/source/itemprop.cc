@@ -2449,9 +2449,23 @@ bool gives_resistance(const item_def &item)
     return false;
 }
 
-int item_mass(const item_def &item)
+/*
+ * Return the mass of an item (aum).
+ *
+ * For inventory purposes (inventory is true), only large rocks have mass.
+ * @param item      The item.
+ * @param inventory Should the mass value be the inventory value?
+ * @returns The mass of the item.
+ */
+int item_mass(const item_def &item, bool inventory)
 {
     int unit_mass = 0;
+
+    if (inventory)
+    {
+        return item.base_type == OBJ_MISSILES && item.sub_type == MI_LARGE_ROCK
+            ? Missile_prop[ Missile_index[item.sub_type] ].mass : 0;
+    }
 
     switch (item.base_type)
     {

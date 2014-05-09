@@ -70,8 +70,22 @@
 static bool _safe_to_remove_or_wear(const item_def &item, bool remove,
                                     bool quiet = false);
 
-// Rather messy - we've gathered all the can't-wield logic from wield_weapon()
-// here.
+/*
+ * Can the player wield the given weapon?
+ *
+ * Temporary considerations governed by ignore_temporary_disability include
+ * things such as player forms, curses, shields with two-handed weapons, and
+ * vampiric brand.
+ * @param weapon A pointer to the weapon's item definition.
+ * @param say_reason If we can't wield the weapon, should we report the reason
+ *                   to the player?
+ * @param ignore_temporary_disability If true don't consider temporary reasons
+ *                                    that prevent wielding the weapon.
+ * @param unwield If true, determine if we can unwield the wielded weapon.
+ * @param only_known If true, only consider the known (identified) properties
+ *                   of weapons.
+ * @returns True if the player can wield this weapon, false otherwise.
+ */
 bool can_wield(item_def *weapon, bool say_reason,
                bool ignore_temporary_disability, bool unwield, bool only_known)
 {
@@ -140,7 +154,7 @@ bool can_wield(item_def *weapon, bool say_reason,
     // and large rocks (60 aum).
     if (you.body_size() < SIZE_LARGE && (item_mass(*weapon) >= 500
                                          || weapon->base_type == OBJ_WEAPONS
-                                            && item_mass(*weapon) >= 300))
+                                         && item_mass(*weapon) >= 300))
     {
         SAY(mpr("That's too large and heavy for you to wield."));
         return false;
