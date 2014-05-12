@@ -159,7 +159,16 @@ bool attribute_increase()
     }
 }
 
-// Rearrange stats, biased based on your armour and skills.
+/*
+ * Have Jiyva increase a player stat by one and decrease a different stat by
+ * one.
+ *
+ * This considers being burdened/overloaded, armour evp, and skills to
+ * determine which stats to change. A target stat vector is created based on
+ * these factors, which is then fuzzed, and then a shuffle of the player's stat
+ * points that doesn't increase the l^2 distance to the target vector is
+ * chosen.
+ */
 void jiyva_stat_action()
 {
     int cur_stat[3];
@@ -170,9 +179,13 @@ void jiyva_stat_action()
         cur_stat[x] = you.stat(static_cast<stat_type>(x), false);
         stat_total += cur_stat[x];
     }
-    // Try to avoid burdening people or making their armour difficult to use.
+
     int current_capacity = carrying_capacity(BS_UNENCUMBERED);
-    int carrying_strength = cur_stat[0] + (you.burden - current_capacity + 207)/208;
+    // If the player is burdened, considered whichever is highest as the
+    // starting value of strength in our target stats before armour/skill
+    // consideration: 9, evp, or 2 + a value based on how overburdened the
+    // player is.
+    int carrying_strength = cur_stat[0] + (max(0, you.burden - current_capacity) + 207) / 208;
     int evp = you.unadjusted_body_armour_penalty();
     target_stat[0] = max(max(9, evp), 2 + carrying_strength);
     target_stat[1] = 9;
@@ -197,16 +210,16 @@ void jiyva_stat_action()
         }
 
         // Heavy armour weights towards strength, Dodging skill towards
-        // dexterity.  EVP 15 (chain) is enough to weight towards pure
-        // Str in the absence of dodging skill, but 15 dodging will
-        // will push that back to pure Dex.
-        int str_weight = (10*evp - you.skill(SK_DODGING, 10))/15;
+        // dexterity.  EVP 15 (chain) is enough to weight towards pure Str in
+        // the absence of dodging skill, but 15 dodging will will push that
+        // back to pure Dex.
+        int str_weight = (10 * evp - you.skill(SK_DODGING, 10)) / 15;
         // Clip weight between 0 (pure dex) and 10 (pure strength).
         str_weight = min(10, max(0, str_weight));
 
         // If you are in really heavy armour, then you already are getting a
         // lot of Str and more won't help much, so weight magic more.
-        other_weights = max(other_weights - (evp >= 15 ? 4 : 1) * magic_weights/2, 0);
+        other_weights = max(other_weights - (evp >= 15 ? 4 : 1) * magic_weights / 2, 0);
         magic_weights = div_rand_round(remaining * magic_weights, magic_weights + other_weights);
         other_weights = remaining - magic_weights;
         target_stat[1] += magic_weights;
