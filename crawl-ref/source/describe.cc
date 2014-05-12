@@ -1323,7 +1323,7 @@ static string _describe_armour(const item_def &item, bool verbose)
 
         // This is only for gloves.
         case SPARM_ARCHERY:
-            description += "These improve your skills with ranged weaponry.";
+            description += "It improves your effectiveness with ranged weaponry.";
             break;
         }
     }
@@ -3442,12 +3442,6 @@ static string _monster_stat_description(const monster_info& mi)
                << ".\n";
     }
 
-    if (mons_is_statue(mi.type, true))
-    {
-        result << uppercase_first(pronoun) << " is very brittle "
-               << "and susceptible to disintegration.\n";
-    }
-
     // Is monster susceptible to anything? (On a new line.)
     if (!suscept.empty())
     {
@@ -4308,6 +4302,9 @@ static string _religion_help(god_type god)
         {
             result += "Evolving plants requires fruit, and evolving "
                       "fungi requires piety.";
+        }
+        break;
+
     case GOD_QAZLAL:
         if (!player_under_penance()
             && you.piety >= piety_breakpoint(5)
@@ -4317,7 +4314,6 @@ static string _religion_help(god_type god)
                       "resistances.";
         }
         break;
-        }
 
     case GOD_GOZAG:
         if (!player_under_penance()

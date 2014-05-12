@@ -174,7 +174,7 @@ static monsterentry mondata[] =
 },
 
 // Use this to replace removed monsters, to retain save compatibility.
-// Please put it in #if TAG_MAJOR_VERSION <= X, so they will go away
+// Please put it in #if TAG_MAJOR_VERSION == X, so they will go away
 // after save compat is broken.
 #define AXED_MON(id) \
 { \
@@ -244,7 +244,6 @@ static monsterentry mondata[] =
     AXED_MON(MONS_GRIZZLY_BEAR)
     AXED_MON(MONS_SPRIGGAN_ENCHANTER)
     AXED_MON(MONS_PHOENIX)
-    AXED_MON(MONS_SILVER_STATUE)
 #endif
 
 // Real monsters begin here {dlb}:
@@ -5668,13 +5667,25 @@ static monsterentry mondata[] =
 },
 
 {
+    MONS_SILVER_STATUE, '8', WHITE, "silver statue",
+    M_ARTIFICIAL | M_SPELLCASTER | M_FAKE_SPELLS | M_STATIONARY | M_SPEAKS,
+    mrd(MR_RES_POISON | MR_RES_FIRE | MR_RES_COLD | MR_RES_ELEC, 2),
+    0, 10, MONS_STATUE, MONS_SILVER_STATUE, MH_NONLIVING, MAG_IMMUNE,
+    { AT_NO_ATK, AT_NO_ATK, AT_NO_ATK, AT_NO_ATK },
+    { 10, 0, 0, 70 },
+    12, 1, MST_SILVER_STATUE, CE_NOCORPSE, Z_NOZOMBIE, S_SILENT,
+    I_HIGH, HT_LAND, FL_NONE, 10, DEFAULT_ENERGY,
+    MONUSE_NOTHING, MONEAT_NOTHING, SIZE_LARGE, MON_SHAPE_HUMANOID
+},
+
+{
     MONS_ORANGE_STATUE, '8', LIGHTRED, "orange crystal statue",
-    M_ARTIFICIAL | M_STATIONARY | M_SPEAKS,
+    M_ARTIFICIAL | M_SPELLCASTER | M_FAKE_SPELLS | M_STATIONARY | M_SPEAKS,
     mrd(MR_RES_POISON | MR_RES_FIRE | MR_RES_COLD | MR_RES_ELEC, 2),
     0, 10, MONS_STATUE, MONS_ORANGE_STATUE, MH_NONLIVING, MAG_IMMUNE,
     { AT_NO_ATK, AT_NO_ATK, AT_NO_ATK, AT_NO_ATK },
-    { 10, 0, 0, 160 },
-    20, 1, MST_NO_SPELLS, CE_NOCORPSE, Z_NOZOMBIE, S_SILENT,
+    { 10, 0, 0, 70 },
+    12, 1, MST_ORANGE_CRYSTAL_STATUE, CE_NOCORPSE, Z_NOZOMBIE, S_SILENT,
     I_HIGH, HT_LAND, FL_NONE, 6, DEFAULT_ENERGY,
     MONUSE_NOTHING, MONEAT_NOTHING, SIZE_LARGE, MON_SHAPE_HUMANOID
 },

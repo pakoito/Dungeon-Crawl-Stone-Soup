@@ -210,9 +210,7 @@ enum ability_type
     ABIL_MAKE_DART_TRAP,
     ABIL_MAKE_ICE_STATUE,
     ABIL_MAKE_OCS,
-#if TAG_MAJOR_VERSION == 34
     ABIL_MAKE_SILVER_STATUE,
-#endif
     ABIL_MAKE_CURSE_SKULL,
     ABIL_MAKE_TELEPORT,
     ABIL_MAKE_ARROW_TRAP,
@@ -445,7 +443,8 @@ enum beam_type                  // bolt::flavour
     BEAM_SAP_MAGIC,
     BEAM_CORRUPT_BODY,
     BEAM_CHAOTIC_REFLECTION,
-    BEAM_LAST_ENCHANTMENT = BEAM_CHAOTIC_REFLECTION,
+    BEAM_DRAIN_MAGIC,
+    BEAM_LAST_ENCHANTMENT = BEAM_DRAIN_MAGIC,
 
     BEAM_MEPHITIC,
 #if TAG_MAJOR_VERSION == 34
@@ -2770,9 +2769,7 @@ enum monster_type                      // menv[].type
 
     // Statuary
     MONS_ORANGE_STATUE,
-#if TAG_MAJOR_VERSION == 34
     MONS_SILVER_STATUE,
-#endif
     MONS_ICE_STATUE,
     MONS_STATUE,
     MONS_TRAINING_DUMMY,
@@ -3571,7 +3568,7 @@ enum artefact_prop_type
     ARTP_EYESIGHT,
     ARTP_INVISIBLE,
     ARTP_FLY,
-#if TAG_MAJOR_VERSION != 34
+#if TAG_MAJOR_VERSION > 34
     ARTP_FOG,
 #endif
     ARTP_BLINK,
@@ -4156,6 +4153,7 @@ enum spell_type
     SPELL_FORCEFUL_DISMISSAL,
     SPELL_SUMMON_MANA_VIPER,
     SPELL_PHANTOM_MIRROR,
+    SPELL_DRAIN_MAGIC,
     NUM_SPELLS
 };
 
@@ -4683,7 +4681,9 @@ enum timed_effect_type
     TIMER_ABYSS_SPEED,
     TIMER_JIYVA,
     TIMER_EVOLUTION,
+#if TAG_MAJOR_VERSION == 34
     TIMER_BRIBE_TIMEOUT,
+#endif
     NUM_TIMERS,
 };
 

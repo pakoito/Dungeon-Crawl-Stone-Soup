@@ -3573,6 +3573,8 @@ void level_change(int source, const char* aux, bool skip_attribute_increase)
                 mprf(MSGCH_INTRINSIC_GAIN, "Your Zot abilities now extend through making water.");
             if (you.experience_level == 19)
                 mprf(MSGCH_INTRINSIC_GAIN, "Your Zot abilities now extend through the making of lightning spires.");
+            if (you.experience_level == 20)
+                mprf(MSGCH_INTRINSIC_GAIN, "Your Zot abilities now extend through the making of silver statues.");
             // gold and bazaars gained together
             if (you.experience_level == 21)
                 mprf(MSGCH_INTRINSIC_GAIN, "Your Zot abilities now extend through the making of bazaars.");
@@ -4983,12 +4985,6 @@ bool confuse_player(int amount, bool quiet)
     {
         if (!quiet)
             mpr("You feel momentarily confused.");
-        // Identify the amulet if necessary.
-        if (you.wearing(EQ_AMULET, AMU_CLARITY, true))
-        {
-            item_def* const amu = you.slot_item(EQ_AMULET, false);
-            wear_id_type(*amu);
-        }
         return false;
     }
 
@@ -5434,7 +5430,7 @@ bool slow_player(int turns)
     if (turns <= 0)
         return false;
 
-    if (stasis_blocks_effect(true, true, "%s rumbles.", 20, "%s rumbles."))
+    if (stasis_blocks_effect(true, "%s rumbles.", 20, "%s rumbles."))
         return false;
 
     // Doubling these values because moving while slowed takes twice the
@@ -5501,7 +5497,7 @@ bool haste_player(int turns, bool rageext)
     if (turns <= 0)
         return false;
 
-    if (stasis_blocks_effect(true, true, "%s emits a piercing whistle.", 20,
+    if (stasis_blocks_effect(true, "%s emits a piercing whistle.", 20,
                              "%s makes your neck tingle."))
     {
         return false;
@@ -7147,7 +7143,7 @@ bool player::no_tele(bool calc_unid, bool permit_id, bool blinking) const
         return true;
 
     return has_notele_item(calc_unid)
-           || stasis_blocks_effect(calc_unid, permit_id, NULL)
+           || stasis_blocks_effect(calc_unid, NULL)
            || crawl_state.game_is_zotdef() && orb_haloed(pos());
 }
 
@@ -7345,7 +7341,7 @@ void player::paralyse(actor *who, int str, string source)
     ASSERT(!crawl_state.game_is_arena());
 
     // The shock is too mild to do damage.
-    if (stasis_blocks_effect(true, true, "%s gives you a mild electric shock."))
+    if (stasis_blocks_effect(true, "%s gives you a mild electric shock."))
         return;
 
     // The who check has an effect in a few cases, most notably making

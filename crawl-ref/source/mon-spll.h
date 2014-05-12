@@ -2453,4 +2453,26 @@
        SPELL_NO_SPELL
       }
     },
+
+    {  MST_SILVER_STATUE,
+      {
+       SPELL_SUMMON_MINOR_DEMON,
+       SPELL_SUMMON_DEMON,
+       SPELL_NO_SPELL,
+       SPELL_SUMMON_MINOR_DEMON,
+       SPELL_SUMMON_DEMON,
+       SPELL_NO_SPELL
+      }
+    },
+
+    {  MST_ORANGE_CRYSTAL_STATUE,
+      {
+       SPELL_BRAIN_FEED,
+       SPELL_DRAIN_MAGIC,
+       SPELL_CONFUSE,
+       SPELL_BRAIN_FEED,
+       SPELL_DRAIN_MAGIC,
+       SPELL_CONFUSE
+      }
+    },
 #endif

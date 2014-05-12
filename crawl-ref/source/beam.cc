@@ -3202,7 +3202,9 @@ bool bolt::harmless_to_player() const
 
     case BEAM_POISON:
         return player_res_poison(false) >= 3
-               || is_big_cloud && player_res_poison(false) > 0;
+               || is_big_cloud
+                  && (player_res_poison(false) > 0
+                      || you_worship(GOD_QAZLAL) && !player_under_penance());
 
     case BEAM_MEPHITIC:
         return player_res_poison(false) > 0 || you.clarity(false)
@@ -3216,7 +3218,9 @@ bool bolt::harmless_to_player() const
 
     // Fire and ice can destroy inventory items, acid damage equipment.
     case BEAM_COLD:
-        return is_big_cloud && you.mutation[MUT_ICEMAIL];
+        return is_big_cloud
+               && (you.mutation[MUT_ICEMAIL]
+                   || you_worship(GOD_QAZLAL) && !player_under_penance());
 
     case BEAM_ACID:
         return false;
@@ -3472,13 +3476,14 @@ bool bolt::misses_player()
     return miss;
 }
 
-void bolt::affect_player_enchantment()
+void bolt::affect_player_enchantment(bool resistible)
 {
-    if (((flavour != BEAM_MALMUTATE
-         && flavour != BEAM_CORRUPT_BODY
-         && flavour != BEAM_SAP_MAGIC
-         && has_saving_throw())
-          || flavour == BEAM_VIRULENCE)
+    if (resistible
+        && ((flavour != BEAM_MALMUTATE
+             && flavour != BEAM_CORRUPT_BODY
+             && flavour != BEAM_SAP_MAGIC
+             && has_saving_throw())
+              || flavour == BEAM_VIRULENCE)
         && you.check_res_magic(ench_power) > 0)
     {
         // You resisted it.
@@ -3823,6 +3828,17 @@ void bolt::affect_player_enchantment()
         else
            mpr("You feel corrupt for a moment.");
         break;
+
+    case BEAM_DRAIN_MAGIC:
+    {
+        int amount = min(you.magic_points, random2avg(ench_power / 8, 3));
+        if (!amount)
+            break;
+        mprf(MSGCH_WARN, "You feel your power leaking away.");
+        drain_mp(amount);
+        obvious_effect = true;
+        break;
+    }
 
     default:
         // _All_ enchantments should be enumerated here!
@@ -4800,36 +4816,6 @@ bool bolt::attempt_block(monster* mon)
     return rc;
 }
 
-bool bolt::handle_statue_disintegration(monster* mon)
-{
-    bool rc = false;
-    if ((flavour == BEAM_DISINTEGRATION || flavour == BEAM_NUKE)
-        && mons_is_statue(mon->type, true))
-    {
-        rc = true;
-        // Disintegrate the statue.
-        if (!silenced(you.pos()))
-        {
-            if (!you.see_cell(mon->pos()))
-                mprf(MSGCH_SOUND, "You hear a hideous screaming!");
-            else
-                mprf(MSGCH_SOUND, "The statue screams as its substance crumbles away!");
-        }
-        else if (you.see_cell(mon->pos()))
-        {
-            mpr("The statue twists and shakes as its substance "
-                "crumbles away!");
-        }
-        obvious_effect = true;
-        update_hurt_or_helped(mon);
-        mon->hurt(agent(), INSTANT_DEATH);
-        apply_hit_funcs(mon, INSTANT_DEATH);
-        // Stop here.
-        finish_beam();
-    }
-    return rc;
-}
-
 void bolt::affect_monster(monster* mon)
 {
     // Don't hit dead monsters.
@@ -4881,12 +4867,6 @@ void bolt::affect_monster(monster* mon)
         apply_hit_funcs(mon, 0);
         return;
     }
-
-    // Special case: disintegrate (or Shatter) a statue.
-    // Since disintegration is an enchantment, it has to be handled
-    // here.
-    if (handle_statue_disintegration(mon))
-        return;
 
     if (flavour == BEAM_MISSILE && item)
     {
@@ -5289,6 +5269,10 @@ bool ench_flavour_affects_monster(beam_type flavour, const monster* mon,
         rc = ignite_poison_affects(mon);
         break;
 
+    case BEAM_DRAIN_MAGIC:
+        rc = mons_antimagic_affected(mon);
+        break;
+
     default:
         break;
     }
@@ -5296,14 +5280,18 @@ bool ench_flavour_affects_monster(beam_type flavour, const monster* mon,
     return rc;
 }
 
-bool enchant_monster_with_flavour(monster* mon, actor *foe,
-                                  beam_type flavour, int powc)
+bool enchant_actor_with_flavour(actor* victim, actor *foe,
+                                beam_type flavour, int powc)
 {
     bolt dummy;
     dummy.flavour = flavour;
     dummy.ench_power = powc;
     dummy.set_agent(foe);
-    dummy.apply_enchantment_to_monster(mon);
+    dummy.animate = false;
+    if (victim->is_player())
+        dummy.affect_player_enchantment(false);
+    else
+        dummy.apply_enchantment_to_monster(victim->as_monster());
     return dummy.obvious_effect;
 }
 
@@ -5787,6 +5775,26 @@ mon_resist_type bolt::apply_enchantment_to_monster(monster* mon)
             }
         }
         break;
+
+    case BEAM_DRAIN_MAGIC:
+    {
+        if (!mons_antimagic_affected(mon))
+            break;
+
+        const int dur =
+            random2(div_rand_round(ench_power, mon->hit_dice) + 1)
+                    * BASELINE_DELAY;
+        mon->add_ench(mon_enchant(ENCH_ANTIMAGIC, 0,
+                                  agent(), // doesn't matter
+                                  dur));
+        if (you.can_see(mon))
+        {
+            mprf("%s magic leaks into the air.",
+                 apostrophise(mon->name(DESC_THE)).c_str());
+        }
+        obvious_effect = true;
+        break;
+    }
 
     default:
         break;
@@ -6646,6 +6654,7 @@ static string _beam_type_name(beam_type type)
     case BEAM_CORRUPT_BODY:          return "corrupt body";
     case BEAM_CHAOTIC_REFLECTION:    return "chaotic reflection";
     case BEAM_CRYSTAL:               return "crystal bolt";
+    case BEAM_DRAIN_MAGIC:           return "drain magic";
     case BEAM_BOUNCY_TRACER:         return "bouncy tracer";
 
     case NUM_BEAMS:                  die("invalid beam type");
