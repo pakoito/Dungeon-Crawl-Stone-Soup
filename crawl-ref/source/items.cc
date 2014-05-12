@@ -838,13 +838,6 @@ static string _menu_burden_invstatus(const Menu *menu, bool is_pickup = false)
         new_burd > carrying_capacity(BS_ENCUMBERED) ? "overloaded" :
       new_burd > carrying_capacity(BS_UNENCUMBERED) ? "burdened"
                                                     : "unencumbered";
-    if (Options.show_inventory_weights)
-    {
-        newstate = make_stringf("%.0f%s/%.0f aum",
-                       you.burden * BURDEN_TO_AUM,
-                       sw.c_str(),
-                       carrying_capacity(BS_UNENCUMBERED) * BURDEN_TO_AUM);
-    }
     return make_stringf("(Burden: %s)", newstate.c_str());
 }
 

@@ -800,7 +800,6 @@ void game_options::reset_options()
     auto_switch             = false;
     suppress_startup_errors = false;
 
-    show_inventory_weights = MB_MAYBE;
     show_uncursed          = true;
     travel_open_doors      = true;
     easy_unequip           = true;
@@ -2613,15 +2612,6 @@ void game_options::read_option_line(const string &str, bool runscript)
             show_god_gift = MB_FALSE;
         else
             report_error("Unknown show_god_gift value: %s\n", field.c_str());
-    }
-    else if (key == "show_inventory_weights")
-    {
-        if (field == "yes" || field == "true")
-            show_inventory_weights = MB_TRUE;
-        else if (field == "no" || field == "false")
-            show_inventory_weights = MB_FALSE;
-        else
-            show_inventory_weights = MB_MAYBE;
     }
     else if (key == "fire_order")
         set_fire_order(field, plus_equal, caret_equal);

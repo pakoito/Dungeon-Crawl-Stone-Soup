@@ -66,8 +66,7 @@ string InvTitle::get_text(const bool) const
 }
 
 InvEntry::InvEntry(const item_def &i, bool show_bg)
-    : MenuEntry("", MEL_ITEM), show_background(show_bg), item(&i),
-      show_weight(false)
+    : MenuEntry("", MEL_ITEM), show_background(show_bg), item(&i)
 {
     data = const_cast<item_def *>(item);
 
@@ -224,10 +223,6 @@ string InvEntry::get_text(bool need_cursor) const
     //XXX There should be a better way to determine this, for now we simply
     //estimate it by the following heuristics {kittel}.
     unsigned max_chars_in_line = get_number_of_cols() - 2;
-#ifdef USE_TILE_LOCAL
-    if (Options.tile_menu_icons && show_weight)
-        max_chars_in_line = get_number_of_cols() * 4 / 9 - 2;
-#endif
 
     int colour_tag_adjustment = 0;
     if (InvEntry::show_glyph)
@@ -238,29 +233,13 @@ string InvEntry::get_text(bool need_cursor) const
         colour_tag_adjustment = colour_tag.size() * 2 + 5;
     }
 
-    if (show_weight)
-        max_chars_in_line -= 1;
-
-    const int w_weight = show_weight ? 10 //length of " (999 aum)"
-                                     : 0;
     const int excess = strwidth(tstr.str()) - colour_tag_adjustment
-                     + strwidth(text) + w_weight - max_chars_in_line;
+                     + strwidth(text) - max_chars_in_line;
     if (excess > 0)
         tstr << chop_string(text, max(0, strwidth(text) - excess - 2)) << "..";
     else
         tstr << text;
 
-    if (show_weight)
-    {
-        const int mass = item_mass(*item, true) * item->quantity;
-        // Note: If updating the " (%i aum)" format, remember to update
-        // w_weight above.
-        tstr << setw(max_chars_in_line - strwidth(tstr.str())
-                     + colour_tag_adjustment)
-             << right
-             << make_stringf(" (%i aum)",
-                             static_cast<int>(0.5 + BURDEN_TO_AUM * mass));
-    }
     return tstr.str();
 }
 
@@ -867,15 +846,12 @@ menu_letter InvMenu::load_items(const vector<const item_def*> &mitems,
         items_in_class.clear();
 
         InvEntry *forced_first = NULL;
-        const bool show_weight = Options.show_inventory_weights
-                                 >= (flags & MF_DROP_PICKUP ? MB_MAYBE : MB_TRUE);
         for (int j = 0, count = mitems.size(); j < count; ++j)
         {
             if (mitems[j]->base_type != i)
                 continue;
 
             InvEntry * const ie = new InvEntry(*mitems[j]);
-            ie->show_weight = show_weight;
 
             if (mitems[j]->sub_type == get_max_subtype(mitems[j]->base_type))
                 forced_first = ie;
@@ -938,15 +914,6 @@ vector<SelItem> InvMenu::get_selitems() const
 
 bool InvMenu::process_key(int key)
 {
-    if (key == CONTROL('W'))
-    {
-        for (size_t i = 0; i < items.size(); i++)
-            if (InvEntry *ie = dynamic_cast<InvEntry *>(items[i]))
-                ie->show_weight = !ie->show_weight;
-        draw_menu();
-        return true;
-    }
-
     if (type == MT_KNOW)
     {
         bool resetting = (lastch == CONTROL('D'));
