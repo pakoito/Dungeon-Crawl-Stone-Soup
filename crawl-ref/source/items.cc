@@ -2270,6 +2270,41 @@ bool drop_item(int item_dropped, int quant_drop)
     return true;
 }
 
+void force_drop_item(int item_dropped, int quant_drop)
+{
+    if (quant_drop < 0 || quant_drop > you.inv[item_dropped].quantity)
+        quant_drop = you.inv[item_dropped].quantity;
+
+    if (item_dropped == you.equip[EQ_WEAPON]
+        && quant_drop >= you.inv[item_dropped].quantity)
+    {
+        unequip_item(EQ_WEAPON, showMsgs);
+        you.wield_change     = true;
+        you.redraw_quiver    = true;
+        you.attribute[ATTR_WEAPON_SWAP_INTERRUPTED] = 0;
+    }
+
+    const dungeon_feature_type my_grid = grd(you.pos());
+
+    if (!copy_item_to_grid(you.inv[item_dropped],
+                            you.pos(), quant_drop, true, true))
+    {
+        die("Unable to force drop item");
+    }
+
+    mprf("You drop %s.",
+         quant_name(you.inv[item_dropped], quant_drop, DESC_A).c_str());
+
+    bool quiet = silenced(you.pos());
+
+    // If you drop an item in as a merfolk, it is below the water line and
+    // makes no noise falling.
+    if (you.swimming())
+        quiet = true;
+    feat_destroys_item(my_grid, you.inv[item_dropped], !quiet);
+    dec_inv_item_quantity(item_dropped, quant_drop, true);
+}
+
 void drop_last()
 {
     vector<SelItem> items_to_drop;

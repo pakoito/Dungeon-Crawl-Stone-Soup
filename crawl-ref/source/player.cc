@@ -2744,58 +2744,53 @@ int carrying_capacity(burden_state_type bs)
  * Calculate the player's burden based on the current inventory.
  * @returns you.burden: the player's current burden state.
  */
-int burden_change(void)
+void burden_change(void)
 {
     const burden_state_type old_burdenstate = you.burden_state;
+    map<pair<object_class_type, int>, int> item_map;
+    pair<object_class_type, int> p;
 
-    you.burden = 0;
-    for (int bu = 0; bu < ENDOFPACK; bu++)
+    for (int i = 0; i < ENDOFPACK; ++i)
     {
-        if (you.inv[bu].quantity < 1)
+        if (you.inv[i].defined())
+        {
+            p.first = you.inv[i].base_type;
+            p.second = you.inv[i].sub_type;
+            if (item_map.count(p))
+                item_map[p] += inv[i].quantity;
+            else
+                item_map[p] = inv[i].quantity;
+        }
+    }
+
+    map<pair<object_class_type, int>, int>::iterator mi = item_map.begin();
+    bool did_drop = false;
+    for (; mi != item_map.end(); mi++)
+    {
+        int inv_limit = you.item_limit(mi->first->first, mi->first->second);
+        int need_drop = item_map[*mi] - inv_limit;
+        if (inv_limit >= item_map[*mi])
             continue;
 
-        you.burden += item_mass(you.inv[bu], true) * you.inv[bu].quantity;
-    }
-
-    you.burden_state = BS_UNENCUMBERED;
-    set_redraw_status(REDRAW_BURDEN);
-    you.redraw_evasion = true;
-
-    // changed the burdened levels to match the change to max_carried
-    if (you.burden <= carrying_capacity(BS_UNENCUMBERED))
-    {
-        you.burden_state = BS_UNENCUMBERED;
-
-        // this message may have to change, just testing {dlb}
-        if (old_burdenstate != you.burden_state)
-            mpr("Your possessions no longer seem quite so burdensome.");
-    }
-    else if (you.burden <= carrying_capacity(BS_ENCUMBERED))
-    {
-        you.burden_state = BS_ENCUMBERED;
-
-        if (old_burdenstate != you.burden_state)
+        for (int i = 0; i < ENDOFPACK; ++i)
         {
-            mpr("You are being weighed down by all of your possessions.");
-            learned_something_new(HINT_HEAVY_LOAD);
-        }
-    }
-    else
-    {
-        you.burden_state = BS_OVERLOADED;
+            int quant_drop = min(you.inv[i].quantity, need_drop);
+            if (you.inv[i].base_type == mi->first
+                && you.inv[i].sub_type == mi->second)
+            {
+                force_drop_item(i, quant_drop);
+                need_drop -= quant_drop;
+                did_drop = true;
+                if (!need_drop)
+                    break;
+            }
 
-        if (old_burdenstate != you.burden_state)
-        {
-            mpr("You are being crushed by all of your possessions.");
-            learned_something_new(HINT_HEAVY_LOAD);
         }
     }
 
-    // Stop travel if we get burdened (as from potions of might wearing off).
-    if (you.burden_state > old_burdenstate)
+    // Stop travel if we dropped items
+    if (did_drop)
         interrupt_activity(AI_BURDEN_CHANGE);
-
-    return you.burden;
 }
 
 void forget_map(bool rot)
