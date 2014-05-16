@@ -1418,10 +1418,6 @@ int player_hunger_rate(bool temp)
                 - player_mutation_level(MUT_SLOW_METABOLISM);
     }
 
-    // burden
-    if (temp)
-        hunger += you.burden_state;
-
     if (you.hp < you.hp_max
         && player_mutation_level(MUT_SLOW_HEALING) < 3)
     {
@@ -2228,7 +2224,7 @@ int player_prot_life(bool calc_unid, bool temp, bool items)
 // this isn't as fast as it used to be (6 for having anything), but
 // even a slight speed advantage is very good... and we certainly don't
 // want to go past 6 (see below). -- bwr
-int player_movement_speed(bool ignore_burden)
+int player_movement_speed()
 {
     int mv = 10;
 
@@ -2276,15 +2272,6 @@ int player_movement_speed(bool ignore_burden)
     {
         mv *= 10 + slow * 2;
         mv /= 10;
-    }
-
-    // Burden
-    if (!ignore_burden)
-    {
-        if (you.burden_state == BS_ENCUMBERED)
-            mv++;
-        else if (you.burden_state == BS_OVERLOADED)
-            mv += 3;
     }
 
     if (you.duration[DUR_SWIFTNESS] > 0 && !you.in_liquid())
@@ -2719,78 +2706,6 @@ int player_sust_abil(bool calc_unid)
         sa = 2;
 
     return sa;
-}
-
-int carrying_capacity(burden_state_type bs)
-{
-    // Use untransformed body weight, to prevent transformations
-    // causing frequent large changes in carrying capacity.
-    int cap = 2 * you.body_weight(true) + you.strength() * 250 + 1000;
-    // We are nice to the lighter species in that strength adds absolutely
-    // instead of relatively to body weight. --dpeg
-
-    if (you.stat_zero[STAT_STR])
-        cap /= 2;
-
-    if (bs == BS_UNENCUMBERED)
-        return cap * 5 / 6;
-    else if (bs == BS_ENCUMBERED)
-        return cap * 11 / 12;
-    else
-        return cap;
-}
-
-/*
- * Calculate the player's burden based on the current inventory.
- * @returns you.burden: the player's current burden state.
- */
-void burden_change(void)
-{
-    const burden_state_type old_burdenstate = you.burden_state;
-    map<pair<object_class_type, int>, int> item_map;
-    pair<object_class_type, int> p;
-
-    for (int i = 0; i < ENDOFPACK; ++i)
-    {
-        if (you.inv[i].defined())
-        {
-            p.first = you.inv[i].base_type;
-            p.second = you.inv[i].sub_type;
-            if (item_map.count(p))
-                item_map[p] += inv[i].quantity;
-            else
-                item_map[p] = inv[i].quantity;
-        }
-    }
-
-    map<pair<object_class_type, int>, int>::iterator mi = item_map.begin();
-    bool did_drop = false;
-    for (; mi != item_map.end(); mi++)
-    {
-        int inv_limit = you.item_limit(mi->first->first, mi->first->second);
-        int need_drop = item_map[*mi] - inv_limit;
-        if (inv_limit >= item_map[*mi])
-            continue;
-
-        for (int i = 0; i < ENDOFPACK; ++i)
-        {
-            int quant_drop = min(you.inv[i].quantity, need_drop);
-            if (you.inv[i].base_type == mi->first
-                && you.inv[i].sub_type == mi->second)
-            {
-                force_drop_item(i, quant_drop);
-                need_drop -= quant_drop;
-                did_drop = true;
-                if (!need_drop)
-                    break;
-            }
-
-        }
-    }
-
-    // Stop travel if we dropped items
-    if (did_drop)
-        interrupt_activity(AI_BURDEN_CHANGE);
 }
 
 void forget_map(bool rot)
@@ -3796,9 +3711,6 @@ int check_stealth(void)
 
     stealth += you.skill(SK_STEALTH, race_mod);
 
-    if (you.burden_state > BS_UNENCUMBERED)
-        stealth /= you.burden_state;
-
     if (you.confused())
         stealth /= 3;
 
@@ -4180,7 +4092,6 @@ void display_char_status()
         STATUS_STR_ZERO, STATUS_INT_ZERO, STATUS_DEX_ZERO,
         DUR_PETRIFYING,
         DUR_TRANSFORMATION,
-        STATUS_BURDEN,
         STATUS_MANUAL,
         DUR_BREATH_WEAPON,
         DUR_LIQUID_FLAMES,
@@ -5840,8 +5751,6 @@ void player::init()
     runes.reset();
     obtainable_runes = 15;
 
-    burden          = 0;
-    burden_state    = BS_UNENCUMBERED;
     spells.init(SPELL_NO_SPELL);
     old_vehumet_gifts.clear();
     spell_no        = 0;
@@ -7144,9 +7053,8 @@ bool player::no_tele(bool calc_unid, bool permit_id, bool blinking) const
 
 bool player::fights_well_unarmed(int heavy_armour_penalty)
 {
-    return burden_state == BS_UNENCUMBERED
-           && x_chance_in_y(skill(SK_UNARMED_COMBAT, 10), 200)
-           && x_chance_in_y(2, 1 + heavy_armour_penalty);
+    return x_chance_in_y(skill(SK_UNARMED_COMBAT, 10), 200)
+        && x_chance_in_y(2, 1 + heavy_armour_penalty);
 }
 
 bool player::cancellable_flight() const
@@ -8218,6 +8126,59 @@ void player::weaken(actor *attacker, int pow)
 }
 
 /*
+ * Auto-drop any items that have exceeded their current inventory limit.
+ *
+ * Currently only applies to large rocks.
+ */
+void player::item_limit_change()
+{
+    map<pair<object_class_type, int>, int> item_map;
+    pair<object_class_type, int> p;
+
+    for (int i = 0; i < ENDOFPACK; ++i)
+    {
+        if (you.inv[i].defined())
+        {
+            p.first = you.inv[i].base_type;
+            p.second = you.inv[i].sub_type;
+            if (item_map.count(p))
+                item_map[p] += you.inv[i].quantity;
+            else
+                item_map[p] = you.inv[i].quantity;
+        }
+    }
+
+    map<pair<object_class_type, int>, int>::iterator mi = item_map.begin();
+    bool did_drop = false;
+    for (; mi != item_map.end(); mi++)
+    {
+        int inv_limit = you.item_limit(mi->first.first, mi->first.second);
+        if (inv_limit < 0 || inv_limit >= item_map[mi->first])
+            continue;
+
+        short int need_drop = item_map[mi->first] - inv_limit;
+        for (int i = 0; i < ENDOFPACK; ++i)
+        {
+            int quant_drop = min(you.inv[i].quantity, need_drop);
+            if (you.inv[i].base_type == mi->first.first
+                && you.inv[i].sub_type == mi->first.second)
+            {
+                force_drop_item(i, quant_drop);
+                need_drop -= quant_drop;
+                did_drop = true;
+                if (!need_drop)
+                    break;
+            }
+        }
+    }
+
+    // Stop travel if we dropped items
+    if (did_drop)
+        interrupt_activity(AI_BURDEN_CHANGE);
+}
+
+
+/*
  * Check if the player is about to die from flight/form expiration.
  *
  * Check whether the player is on a cell which would be deadly if not for some
@@ -8353,7 +8314,12 @@ bool player::can_device_heal()
 
 int player::item_limit(const item_def& it) const
 {
-    if (it.base_type == OBJ_MISSILES && it.sub_type == MI_LARGE_ROCK)
+    return item_limit(it.base_type, it.sub_type);
+}
+
+int player::item_limit(object_class_type base_type, int sub_type) const
+{
+    if (base_type == OBJ_MISSILES && sub_type == MI_LARGE_ROCK)
         return strength(true) / 3;
     else
         return -1;

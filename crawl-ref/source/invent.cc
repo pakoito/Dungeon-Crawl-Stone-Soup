@@ -390,13 +390,8 @@ void InvMenu::set_title(const string &s)
         // so that get_number_of_cols returns the appropriate value.
         cgotoxy(1, 1);
 
-        const int cap = carrying_capacity(BS_UNENCUMBERED);
-
         stitle = make_stringf(
-            "Inventory: %.0f/%.0f aum (%d%%, %d/%d slots)",
-            BURDEN_TO_AUM * you.burden,
-            BURDEN_TO_AUM * cap,
-            (you.burden * 100) / cap,
+            "Inventory: %d/%d slots",
             inv_count(),
             ENDOFPACK);
 
@@ -1077,14 +1072,14 @@ const char* item_slot_name(equipment_type type, bool terse)
 
 vector<SelItem> select_items(const vector<const item_def*> &items,
                              const char *title, bool noselect,
-                             menu_type mtype, invtitle_annotator titlefn)
+                             menu_type mtype,
+                             invtitle_annotator titlefn)
 {
     vector<SelItem> selected;
     if (!items.empty())
     {
         InvMenu menu;
         menu.set_type(mtype);
-        menu.set_title_annotator(titlefn);
         menu.set_title(title);
         if (mtype == MT_PICKUP)
         {

@@ -1507,7 +1507,7 @@ static int _xom_swap_weapons(bool debug = false)
     note_inscribe_item(myitem);
     dec_mitm_item_quantity(monwpn, myitem.quantity);
     you.m_quiver->on_inv_quantity_changed(freeslot, myitem.quantity);
-    burden_change();
+    you.item_limit_change();
 
     mprf("You wield %s %s!",
          mon->name(DESC_ITS).c_str(),

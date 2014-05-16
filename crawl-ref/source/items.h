@@ -29,10 +29,11 @@ enum item_source_type
 int get_max_subtype(object_class_type base_type);
 bool item_type_has_unidentified(object_class_type base_type);
 
-bool dec_inv_item_quantity(int obj, int amount, bool suppress_burden = false);
+bool dec_inv_item_quantity(int obj, int amount,
+                           bool supress_item_limit = false);
 bool dec_mitm_item_quantity(int obj, int amount);
 
-void inc_inv_item_quantity(int obj, int amount, bool suppress_burden = false);
+void inc_inv_item_quantity(int obj, int amount);
 void inc_mitm_item_quantity(int obj, int amount);
 
 bool move_item_to_grid(int *const obj, const coord_def& p,
@@ -40,7 +41,7 @@ bool move_item_to_grid(int *const obj, const coord_def& p,
 void move_item_stack_to_grid(const coord_def& from, const coord_def& to);
 void note_inscribe_item(item_def &item);
 int  move_item_to_player(int obj, int quant_got, bool quiet = false,
-                         bool ignore_burden = false);
+                         bool ignore_item_limit = false);
 void mark_items_non_pickup_at(const coord_def &pos);
 void mark_items_non_visit_at(const coord_def &pos);
 void clear_item_pickup_flags(item_def &item);
@@ -98,6 +99,7 @@ int runes_in_pack();
 bool pickup_single_item(int link, int qty);
 
 bool drop_item(int item_dropped, int quant_drop);
+void force_drop_item(int item_dropped, int quant_drop);
 void drop_last();
 
 int          get_equip_slot(const item_def *item);

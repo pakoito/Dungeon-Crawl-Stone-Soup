@@ -600,13 +600,6 @@ enum branch_type                // you.where_are_you
     NUM_BRANCHES
 };
 
-enum burden_state_type          // you.burden_state
-{   // these values increase hunger and divide stealth
-    BS_UNENCUMBERED = 0,
-    BS_ENCUMBERED   = 2,
-    BS_OVERLOADED   = 5,
-};
-
 enum caction_type    // Primary categorization of counted actions.
 {                    // A subtype will also be given in each case:
     CACT_MELEE,      // weapon subtype or unrand index

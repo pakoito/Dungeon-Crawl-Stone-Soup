@@ -287,7 +287,7 @@ stack_iterator stack_iterator::operator++(int dummy)
 // Reduce quantity of an inventory item, do cleanup if item goes away.
 //
 // Returns true if stack of items no longer exists.
-bool dec_inv_item_quantity(int obj, int amount, bool suppress_burden)
+bool dec_inv_item_quantity(int obj, int amount, bool suppress_item_limit)
 {
     bool ret = false;
 
@@ -328,8 +328,8 @@ bool dec_inv_item_quantity(int obj, int amount, bool suppress_burden)
     else
         you.inv[obj].quantity -= amount;
 
-    if (!suppress_burden)
-        burden_change();
+    if (!suppress_item_limit)
+        you.item_limit_change();
 
     return ret;
 }
@@ -358,16 +358,13 @@ bool dec_mitm_item_quantity(int obj, int amount)
     return false;
 }
 
-void inc_inv_item_quantity(int obj, int amount, bool suppress_burden)
+void inc_inv_item_quantity(int obj, int amount)
 {
     if (you.equip[EQ_WEAPON] == obj)
         you.wield_change = true;
 
     you.m_quiver->on_inv_quantity_changed(obj, amount);
     you.inv[obj].quantity += amount;
-
-    if (!suppress_burden)
-        burden_change();
 }
 
 void inc_mitm_item_quantity(int obj, int amount)
@@ -814,38 +811,6 @@ void item_check(bool verbose)
     }
 }
 
-static int _menu_selection_weight(const Menu* menu)
-{
-    vector<MenuEntry*> se = menu->selected_entries();
-    int weight(0);
-    for (int i = 0, size = se.size(); i < size; ++i)
-    {
-        const item_def *item = static_cast<item_def*>(se[i]->data);
-        if (se[i]->selected_qty > 0)
-            weight += item_mass(*item, true) * se[i]->selected_qty;
-    }
-    return weight;
-}
-
-static string _menu_burden_invstatus(const Menu *menu, bool is_pickup = false)
-{
-    int sel_weight = _menu_selection_weight(menu);
-    int new_burd = you.burden + (is_pickup ? sel_weight : -sel_weight);
-    string sw = sel_weight ? make_stringf(">%.0f", new_burd * BURDEN_TO_AUM) : "";
-    //TODO: Should somehow colour burdened/overloaded in LIGHTRED/RED
-    //      respectively {kittel}
-    string newstate =
-        new_burd > carrying_capacity(BS_ENCUMBERED) ? "overloaded" :
-      new_burd > carrying_capacity(BS_UNENCUMBERED) ? "burdened"
-                                                    : "unencumbered";
-    return make_stringf("(Burden: %s)", newstate.c_str());
-}
-
-static string _pickup_menu_title(const Menu *menu, const string &oldt)
-{
-    return _menu_burden_invstatus(menu, true) + " " + oldt;
-}
-
 void pickup_menu(int item_link)
 {
     int n_did_pickup   = 0;
@@ -862,7 +827,7 @@ void pickup_menu(int item_link)
     if (items.size() == 1 && items[0]->quantity > 1)
         prompt = "Select pick up quantity by entering a number, then select the item";
     vector<SelItem> selected = select_items(items, prompt.c_str(), false,
-                                            MT_PICKUP, _pickup_menu_title);
+                                            MT_PICKUP);
     if (selected.empty())
         canned_msg(MSG_OK);
     redraw_screen();
@@ -911,7 +876,7 @@ void pickup_menu(int item_link)
     if (!pickup_warning.empty())
     {
         mpr(pickup_warning.c_str());
-        learned_something_new(HINT_HEAVY_LOAD);
+        learned_something_new(HINT_FULL_INVENTORY);
     }
 
     if (n_did_pickup)
@@ -1203,13 +1168,13 @@ bool pickup_single_item(int link, int qty)
     if (num == -1)
     {
         mpr("You can't carry that many items.");
-        learned_something_new(HINT_HEAVY_LOAD);
+        learned_something_new(HINT_FULL_INVENTORY);
         return false;
     }
     else if (num == 0)
     {
         mpr("You can't carry that much weight.");
-        learned_something_new(HINT_HEAVY_LOAD);
+        learned_something_new(HINT_FULL_INVENTORY);
         return false;
     }
 
@@ -1774,7 +1739,6 @@ int move_item_to_player(int obj, int quant_got, bool quiet,
 
                 inc_inv_item_quantity(m, quant_got);
                 dec_mitm_item_quantity(obj, quant_got);
-                burden_change();
 
                 _got_item(it, quant_got);
 
@@ -1847,7 +1811,6 @@ int move_item_to_player(int obj, int quant_got, bool quiet,
     }
     dec_mitm_item_quantity(obj, quant_got);
     you.m_quiver->on_inv_quantity_changed(freeslot, quant_got);
-    burden_change();
 
     if (!quiet)
     {
@@ -2278,7 +2241,7 @@ void force_drop_item(int item_dropped, int quant_drop)
     if (item_dropped == you.equip[EQ_WEAPON]
         && quant_drop >= you.inv[item_dropped].quantity)
     {
-        unequip_item(EQ_WEAPON, showMsgs);
+        unequip_item(EQ_WEAPON, true);
         you.wield_change     = true;
         you.redraw_quiver    = true;
         you.attribute[ATTR_WEAPON_SWAP_INTERRUPTED] = 0;
@@ -2289,7 +2252,7 @@ void force_drop_item(int item_dropped, int quant_drop)
     if (!copy_item_to_grid(you.inv[item_dropped],
                             you.pos(), quant_drop, true, true))
     {
-        die("Unable to force drop item");
+        die("Unable to force drop item to grid");
     }
 
     mprf("You drop %s.",
@@ -2324,11 +2287,6 @@ void drop_last()
         you.last_pickup.clear();
         _multidrop(items_to_drop);
     }
-}
-
-static string _drop_menu_title(const Menu *menu, const string &oldt)
-{
-    return _menu_burden_invstatus(menu) + " " + oldt;
 }
 
 int get_equip_slot(const item_def *item)
@@ -2435,7 +2393,7 @@ void drop()
 #else
     tmp_items = prompt_invent_items("Drop what? (_ for help)", MT_DROP,
 #endif
-                                     -1, _drop_menu_title, true, true, 0,
+                                     -1, NULL, true, true, 0,
                                      &Options.drop_filter, _drop_selitem_text,
                                      &items_for_multidrop);
 

@@ -621,8 +621,6 @@ bool maybe_coagulate_blood_potions_inv(item_def &blood)
 
             ASSERT(props2.exists("timer"));
             CrawlVector &timer2 = props2["timer"].get_vector();
-            // Don't recalculate burden here, since we will add the same
-            // same number of potions back in.
             if (!dec_inv_item_quantity(blood.link, coag_count + rot_count, true))
                 _compare_blood_quantity(blood, timer.size());
 
@@ -2088,7 +2086,7 @@ void revive()
     mpr("You rejoin the land of the living...");
     more();
 
-    burden_change();
+    you.item_limit_change();
 }
 
 ////////////////////////////////////////////////////////////////////////////

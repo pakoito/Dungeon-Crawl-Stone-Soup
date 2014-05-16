@@ -576,7 +576,7 @@ void game_options::set_default_activity_interrupts()
         "interrupt_multidrop = hp_loss, monster_attack, teleport, stat",
         "interrupt_macro = interrupt_multidrop",
         "interrupt_travel = interrupt_butcher, statue, hungry, "
-                            "burden, hit_monster, sense_monster",
+                            "item_limit, hit_monster, sense_monster",
         "interrupt_run = interrupt_travel, message",
         "interrupt_rest = interrupt_run, full_hp, full_mp",
 
@@ -815,7 +815,6 @@ void game_options::reset_options()
     allow_self_target      = CONFIRM_PROMPT;
     hp_warning             = 30;
     magic_point_warning    = 0;
-    autopickup_no_burden   = true;
     skill_focus            = SKM_FOCUS_ON;
 
     user_note_prefix       = "";
@@ -2645,7 +2644,6 @@ void game_options::read_option_line(const string &str, bool runscript)
         macro_dir = field;
 #endif
 #endif
-    else BOOL_OPTION(autopickup_no_burden);
 #ifdef DGL_SIMPLE_MESSAGING
     else BOOL_OPTION(messaging);
 #endif

@@ -1801,7 +1801,7 @@ bool interrupt_activity(activity_interrupt_type ai,
 static const char *activity_interrupt_names[] =
 {
     "force", "keypress", "full_hp", "full_mp", "statue",
-    "hungry", "message", "hp_loss", "burden", "stat",
+    "hungry", "message", "hp_loss", "item_limit", "stat",
     "monster", "monster_attack", "teleport", "hit_monster", "sense_monster"
 };
 

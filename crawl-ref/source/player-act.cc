@@ -300,12 +300,8 @@ random_var player::attack_delay(item_def *weap, item_def *projectile,
                              rv::roll_dice(2, armour_penalty),
                              20)));
 
-            // Unarmed speed. Min delay is 10 - 270/54 = 5.
-            if (you.burden_state == BS_UNENCUMBERED)
-            {
-                skill_type sk = projectile ? SK_THROWING : SK_UNARMED_COMBAT;
-                attk_delay -= div_rand_round(constant(you.skill(sk, 10)), 54);
-            }
+            skill_type sk = projectile ? SK_THROWING : SK_UNARMED_COMBAT;
+            attk_delay -= div_rand_round(constant(you.skill(sk, 10)), 54);
 
             // Bats are faster (for what good it does them).
             if (you.form == TRAN_BAT && !projectile)

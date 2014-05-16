@@ -248,7 +248,7 @@ static void _post_init(bool newc)
 #endif
 
     init_properties();
-    burden_change();
+    you.item_limit_change();
 
     you.redraw_stats.init(true);
     you.redraw_hit_points   = true;

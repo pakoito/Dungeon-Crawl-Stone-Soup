@@ -1574,7 +1574,6 @@ void scorefile_entry::init(time_t dt)
         DUR_SENTINEL_MARK,
         STATUS_AIRBORNE,
         STATUS_BEHELD,
-        STATUS_BURDEN,
         STATUS_CONTAMINATION,
         STATUS_BACKLIT,
         STATUS_UMBRA,

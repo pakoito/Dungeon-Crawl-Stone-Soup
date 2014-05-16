@@ -163,11 +163,10 @@ bool attribute_increase()
  * Have Jiyva increase a player stat by one and decrease a different stat by
  * one.
  *
- * This considers being burdened/overloaded, armour evp, and skills to
- * determine which stats to change. A target stat vector is created based on
- * these factors, which is then fuzzed, and then a shuffle of the player's stat
- * points that doesn't increase the l^2 distance to the target vector is
- * chosen.
+ * This considers being armour evp, and skills to determine which stats to
+ * change. A target stat vector is created based on these factors, which is
+ * then fuzzed, and then a shuffle of the player's stat points that doesn't
+ * increase the l^2 distance to the target vector is chosen.
  */
 void jiyva_stat_action()
 {
@@ -180,14 +179,8 @@ void jiyva_stat_action()
         stat_total += cur_stat[x];
     }
 
-    int current_capacity = carrying_capacity(BS_UNENCUMBERED);
-    // If the player is burdened, considered whichever is highest as the
-    // starting value of strength in our target stats before armour/skill
-    // consideration: 9, evp, or 2 + a value based on how overburdened the
-    // player is.
-    int carrying_strength = cur_stat[0] + (max(0, you.burden - current_capacity) + 207) / 208;
     int evp = you.unadjusted_body_armour_penalty();
-    target_stat[0] = max(max(9, evp), 2 + carrying_strength);
+    target_stat[0] = max(max(9, evp), 2 + cur_stat[0]);
     target_stat[1] = 9;
     target_stat[2] = 9;
     int remaining = stat_total - 18 - target_stat[0];
@@ -671,7 +664,7 @@ static void _handle_stat_change(stat_type stat, const char* cause, bool see_sour
     switch (stat)
     {
     case STAT_STR:
-        burden_change();
+        you.item_limit_change();
         you.redraw_armour_class = true; // includes shields
         break;
 
@@ -713,7 +706,7 @@ void update_stat_zero()
                 mprf("Your %s has recovered.", stat_desc(s, SD_NAME));
                 you.redraw_stats[s] = true;
                 if (i == STAT_STR)
-                    burden_change();
+                    you.item_limit_change();
             }
         }
         else // no stat penalty at all
