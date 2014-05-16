@@ -8356,6 +8356,27 @@ bool player::can_device_heal()
     return mutation[MUT_NO_DEVICE_HEAL] < 2;
 }
 
+int player::item_limit(const item_def& it) const
+{
+    if (it.base_type == OBJ_MISSILES && it.sub_type == MI_LARGE_ROCK)
+        return strength(true) / 3;
+    else
+        return -1;
+}
+
+int player::item_count(const item_def& it) const
+{
+    int count = 0;
+    for (int i = 0; i < ENDOFPACK; ++i)
+    {
+        if (inv[i].defined() && inv[i].base_type == it.base_type
+            && inv[i].sub_type == it.sub_type)
+        {
+            count += inv[i].quantity;
+        }
+    }
+    return count;
+}
 
 // Lava orcs!
 int temperature()

@@ -214,11 +214,14 @@ string item_def::name(description_level_type descrip, bool terse, bool ident,
     bool equipped = false;
     if (descrip == DESC_INVENTORY_EQUIP)
     {
+        string equip_desc = "";
+        const int inv_limit = you.item_limit(*this);
         equipment_type eq = item_equip_slot(*this);
         if (eq != EQ_NONE)
         {
+            equipped = true;
             if (you.melded[eq])
-                buff << " (melded)";
+                equip_desc = "melded";
             else
             {
                 switch (eq)
@@ -227,12 +230,12 @@ string item_def::name(description_level_type descrip, bool terse, bool ident,
                     if (base_type == OBJ_WEAPONS || base_type == OBJ_STAVES
                         || base_type == OBJ_RODS)
                     {
-                        buff << " (weapon)";
+                        equip_desc = "weapon";
                     }
                     else if (you.species == SP_FELID)
-                        buff << " (in mouth)";
+                        equip_desc = "in mouth";
                     else
-                        buff << " (in " << you.hand_name(false) << ")";
+                        equip_desc = "in " + you.hand_name(false);
                     break;
                 case EQ_CLOAK:
                 case EQ_HELMET:
@@ -240,24 +243,21 @@ string item_def::name(description_level_type descrip, bool terse, bool ident,
                 case EQ_BOOTS:
                 case EQ_SHIELD:
                 case EQ_BODY_ARMOUR:
-                    buff << " (worn)";
+                    equip_desc = "worn";
                     break;
                 case EQ_LEFT_RING:
                 case EQ_RIGHT_RING:
                 case EQ_RING_ONE:
                 case EQ_RING_TWO:
-                    buff << " (";
-                    buff << ((eq == EQ_LEFT_RING || eq == EQ_RING_ONE)
+                    equip_desc = ((eq == EQ_LEFT_RING || eq == EQ_RING_ONE)
                              ? "left" : "right");
-                    buff << " ";
-                    buff << you.hand_name(false);
-                    buff << ")";
+                    equip_desc += " " + you.hand_name(false);
                     break;
                 case EQ_AMULET:
                     if (you.species == SP_OCTOPODE && form_keeps_mutations())
-                        buff << " (around mantle)";
+                        equip_desc = "around mantle";
                     else
-                        buff << " (around neck)";
+                        equip_desc = "around neck";
                     break;
                 case EQ_RING_THREE:
                 case EQ_RING_FOUR:
@@ -265,10 +265,10 @@ string item_def::name(description_level_type descrip, bool terse, bool ident,
                 case EQ_RING_SIX:
                 case EQ_RING_SEVEN:
                 case EQ_RING_EIGHT:
-                    buff << " (on tentacle)";
+                    equip_desc = "on tentacle";
                     break;
                 case EQ_RING_AMULET:
-                    buff << " (on amulet)";
+                    equip_desc = "on amulet";
                     break;
                 default:
                     die("Item in an invalid slot");
@@ -278,13 +278,21 @@ string item_def::name(description_level_type descrip, bool terse, bool ident,
         else if (item_is_quivered(*this))
         {
             equipped = true;
-            buff << " (quivered)";
+            equip_desc = "quivered";
         }
+        if (inv_limit > 0)
+        {
+            if (equipped)
+                equip_desc += ", ";
+            equip_desc += make_stringf("max %d", inv_limit);
+        }
+        if (equip_desc.length())
+            buff << " (" << equip_desc << ")";
     }
 
     if (descrip != DESC_BASENAME && descrip != DESC_DBNAME && with_inscription)
     {
-        const bool  tried  =  !ident && !equipped && item_type_tried(*this);
+        const bool tried = !ident && !equipped && item_type_tried(*this);
         string tried_str;
 
         if (tried)

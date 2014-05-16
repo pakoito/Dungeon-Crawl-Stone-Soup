@@ -2034,25 +2034,11 @@ string get_item_description(const item_def &item, bool verbose,
         if (verbose)
         {
             bool is_cursed = item_known_cursed(item);
-            const int mass = item_mass(item, true);
 
             if (need_extra_line)
                 description << "\n";
-            if (is_cursed || mass > 0)
-                description << "\nIt";
             if (is_cursed)
-            {
-                description << " has a curse placed upon it";
-                if (mass > 0)
-                    description << ", and it";
-                else
-                    description << ".";
-            }
-            if (mass > 0) {
-                description << " weighs around " << (mass / 10)
-                            << "." << (mass % 10)
-                            << " aum. "; // arbitrary unit of mass
-            }
+                description << "\nIt has a curse placed upon it.";
 
             if (is_artefact(item))
             {

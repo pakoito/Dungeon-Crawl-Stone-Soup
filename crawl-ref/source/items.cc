@@ -1573,13 +1573,13 @@ void note_inscribe_item(item_def &item)
  * @param quant_got The quantity of this item to move.
  * @param quiet If true, most messages notifying the player of item
  *              pickup (or item pickup failure) aren't printed.
- * @param ignore_burden Don't consider the player's carrying capacity
- *                      when moving the item.
+ * @param ignore_item_limit Don't consider the player's inventory limit for
+ *                          this item type when moving the item.
  * @returns The quantity of items moved and -1 if the player's
  *          inventory is full.
  */
 int move_item_to_player(int obj, int quant_got, bool quiet,
-                        bool ignore_burden)
+                        bool ignore_item_limit)
 {
     item_def &it = mitm[obj];
 
@@ -1689,7 +1689,8 @@ int move_item_to_player(int obj, int quant_got, bool quiet,
         return retval;
     }
 
-    const int unit_mass = item_mass(it, true);
+    const int inv_limit = you.item_limit(it);
+    const int num_inv = you.item_count(it);
     if (quant_got > it.quantity || quant_got <= 0)
         quant_got = it.quantity;
 
@@ -1734,14 +1735,11 @@ int move_item_to_player(int obj, int quant_got, bool quiet,
         }
     }
 
-    int imass = unit_mass * quant_got;
     bool partial_pickup = false;
-
-    if (!ignore_burden && (you.burden + imass > carrying_capacity()))
+    if (!ignore_item_limit && inv_limit >= 0 && inv_limit < num_inv + quant_got)
     {
         // calculate quantity we can actually pick up
-        int part = (carrying_capacity() - you.burden) / unit_mass;
-
+        int part = inv_limit - num_inv;
         if (part < 1)
             return 0;
 
@@ -2898,19 +2896,14 @@ static void _do_autopickup()
         if (item_needs_autopickup(mitm[o]))
         {
             int num_to_take = mitm[o].quantity;
-            int unit_mass = item_mass(mitm[o], true);
-            if (Options.autopickup_no_burden && unit_mass != 0)
+            int item_limit = you.item_limit(mitm[o]);
+            if (item_limit > 0)
             {
-                int capacity = carrying_capacity(you.burden_state);
-                int num_can_take = (capacity - you.burden) / unit_mass;
-
+                int num_can_take = item_limit - you.item_count(mitm[o]);
                 if (num_can_take < num_to_take)
                 {
                     if (!n_tried_pickup)
-                    {
-                        mpr("You can't pick everything up without burdening "
-                            "yourself.");
-                    }
+                        mpr("You can't pick up everything.");
                     n_tried_pickup++;
                     num_to_take = num_can_take;
                 }
