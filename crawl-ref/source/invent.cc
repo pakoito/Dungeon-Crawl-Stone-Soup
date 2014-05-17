@@ -501,7 +501,10 @@ static string _no_selectables_message(int item_selector)
         return "You aren't wearing any piece of uncursed jewellery.";
     case OSEL_BRANDABLE_WEAPON:
         return "You aren't carrying any weapons that can be branded.";
-    case OSEL_ENCHANTABLE_WEAPON:
+    case OSEL_ENCHANTABLE_WEAPON_I:
+    case OSEL_ENCHANTABLE_WEAPON_II:
+    case OSEL_ENCHANTABLE_WEAPON_III:
+        // TODO: this message isn't quite right for _I and _II
         return "You aren't carrying any weapons that can be enchanted.";
     }
 
@@ -1202,14 +1205,32 @@ static bool _item_class_selected(const item_def &i, int selector)
     case OSEL_BRANDABLE_WEAPON:
         return is_brandable_weapon(i, true);
 
-    case OSEL_ENCHANTABLE_WEAPON:
-        return is_weapon(i)
-               && (itype == OBJ_WEAPONS
-                    && !is_artefact(i)
-                    && (i.plus < MAX_WPN_ENCHANT
-                        || i.plus2 < MAX_WPN_ENCHANT
-                        || !(item_ident(i, ISFLAG_KNOW_PLUSES)))
-                   || i.cursed());
+    case OSEL_ENCHANTABLE_WEAPON_I:
+    case OSEL_ENCHANTABLE_WEAPON_II:
+    case OSEL_ENCHANTABLE_WEAPON_III:
+    {
+        if (!is_weapon(i))
+            return false;
+        // Ashenzari would just preserve the curse.
+        if (i.cursed() && !you_worship(GOD_ASHENZARI))
+            return true;
+        if (itype != OBJ_WEAPONS || is_artefact(i))
+            return false;
+        if (!item_ident(i, ISFLAG_KNOW_PLUSES))
+            return true;
+
+        // Might this enchant +acc?
+        const bool acc = selector != OSEL_ENCHANTABLE_WEAPON_II
+                         || i.sub_type == WPN_BLOWGUN;
+        const bool dam = selector != OSEL_ENCHANTABLE_WEAPON_I
+                         && i.sub_type != WPN_BLOWGUN;
+
+        if (acc && i.plus < MAX_WPN_ENCHANT)
+            return true;
+        if (dam && i.plus2 < MAX_WPN_ENCHANT)
+            return true;
+        return false;
+    }
 
     default:
         return false;
@@ -1806,9 +1827,11 @@ bool check_warning_inscriptions(const item_def& item,
         prompt += (in_inventory(item) ? item.name(DESC_INVENTORY)
                                       : item.name(DESC_A));
         if (_nasty_stasis(item, oper))
+        {
             prompt += string(" while ")
                       + (you.duration[DUR_TELEPORT] ? "about to teleport" :
                          you.duration[DUR_SLOW] ? "slowed" : "hasted");
+        }
         prompt += "?";
         return yesno(prompt.c_str(), false, 'n')
                && check_old_item_warning(item, oper);

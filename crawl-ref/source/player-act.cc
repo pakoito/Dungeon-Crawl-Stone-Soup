@@ -165,10 +165,15 @@ bool player::is_habitable_feat(dungeon_feature_type actual_grid) const
             || species == SP_DJINNI
 #endif
             )
+    {
         return true;
+    }
 
-    if (actual_grid == DNGN_LAVA && species != SP_LAVA_ORC
-        || actual_grid == DNGN_DEEP_WATER && !can_swim())
+    if (
+#if TAG_MAJOR_VERSION == 34
+        actual_grid == DNGN_LAVA && species != SP_LAVA_ORC ||
+#endif
+        actual_grid == DNGN_DEEP_WATER && !can_swim())
     {
         return false;
     }
@@ -418,6 +423,20 @@ bool player::could_wield(const item_def &item, bool ignore_brand,
 {
     if (species == SP_FELID)
         return false;
+
+    // Only ogres and trolls can wield giant clubs or large rocks (sandblast).
+    if (body_size(PSIZE_TORSO, ignore_transform) < SIZE_LARGE
+        && ((item.base_type == OBJ_WEAPONS
+             && is_giant_club_type(item.sub_type))
+            || (item.base_type == OBJ_MISSILES &&
+                item.sub_type == MI_LARGE_ROCK)))
+    {
+        return false;
+    }
+
+    // Anybody can wield missiles to enchant, item_mass permitting
+    if (item.base_type == OBJ_MISSILES)
+        return true;
 
     // Or any other object, although there's no point here.
     if (!is_weapon(item))

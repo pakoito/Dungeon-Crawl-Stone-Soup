@@ -201,19 +201,7 @@ static bool _set_allied_target(monster* caster, bolt& pbolt, bool ignore_genus)
 
         bool got_target = false;
 
-        // Shedu only heal each other.
-        if (mons_is_shedu(caster))
-        {
-            if (mons_is_shedu(*targ) && caster->mid == targ->number
-                && caster->number == targ->mid
-                && _flavour_benefits_monster(pbolt.flavour, **targ))
-            {
-                got_target = true;
-            }
-            else
-                continue;
-        }
-        else if ((mons_genus(targ->type) == caster_genus
+        if ((mons_genus(targ->type) == caster_genus
                  || mons_genus(targ->base_monster) == caster_genus
                  || (caster_genus == MONS_SALAMANDER        // Let mystics haste
                      && mons_genus(targ->type) == MONS_NAGA)// their brethren
@@ -1813,7 +1801,9 @@ static bool _ms_waste_of_time(const monster* mon, spell_type monspell)
             if (mons_aligned(mon, *mi) && !mi->has_ench(ENCH_CHARM)
                 && *mi != mon && mon->see_cell_no_trans(mi->pos())
                 && !mi->has_ench(ENCH_INJURY_BOND))
+            {
                     return false; // We found at least one target; that's enough.
+            }
         }
         ret = true;
         break;
@@ -1937,7 +1927,9 @@ static bool _ms_waste_of_time(const monster* mon, spell_type monspell)
             && !adjacent(you.pos(), mon->pos())
             || (mon->foe != MHITYOU && mon->foe != MHITNOT
                 && !adjacent(menv[mon->foe].pos(), mon->pos())))
+        {
             ret = true;
+        }
         break;
 
     case SPELL_PORTAL_PROJECTILE:
@@ -3307,7 +3299,9 @@ bool handle_mon_spell(monster* mons, bolt &beem)
         {
             if (cast_los_attack_spell(spell_cast, mons->spell_hd(spell_cast),
                                       mons, false) != SPRET_SUCCESS)
+            {
                 return false;
+            }
         }
         else if (spell_cast == SPELL_OLGREBS_TOXIC_RADIANCE)
         {
@@ -4146,7 +4140,9 @@ static coord_def _mons_fragment_target(monster *mons)
         bolt beam;
         if (!setup_fragmentation_beam(beam, pow, mons, *di, false, true, true,
                                       NULL, temp, temp))
+        {
             continue;
+        }
 
         beam.range = range;
         fire_tracer(mons, beam, true);
@@ -4156,7 +4152,9 @@ static coord_def _mons_fragment_target(monster *mons)
         bolt beam2;
         if (!setup_fragmentation_beam(beam2, pow, mons, *di, false, false, true,
                                       NULL, temp, temp))
+        {
             continue;
+        }
 
         beam2.range = range;
         fire_tracer(mons, beam2, true);
@@ -4760,8 +4758,10 @@ void mons_cast(monster* mons, bolt &pbolt, spell_type spell_cast,
     case SPELL_STONESKIN:
     {
         if (you.can_see(mons))
+        {
             mprf("%s skin hardens.",
                  apostrophise(mons->name(DESC_THE)).c_str());
+        }
         const int power = (mons->spell_hd(spell_cast) * 15) / 10;
         mons->add_ench(mon_enchant(ENCH_STONESKIN, 0, mons,
                        BASELINE_DELAY * (10 + (2 * random2(power)))));

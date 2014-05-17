@@ -360,7 +360,7 @@ const char* god_gain_power_messages[NUM_GODS][MAX_GOD_ABILITIES] =
       ""
     },
     // Qazlal
-    { "You are surrounded by a storm which can block enemy attacks.",
+    { "You are surrounded by a storm.",
       "call upon nature to destroy your foes",
       "give life to nearby clouds",
       "You adapt resistances upon receiving elemental damage.",
@@ -2498,8 +2498,10 @@ bool do_god_gift(bool forced)
 string god_name(god_type which_god, bool long_name)
 {
     if (which_god == GOD_JIYVA)
+    {
         return god_name_jiyva(long_name) +
                (long_name? " the Shapeless" : "");
+    }
 
     if (long_name)
     {
@@ -3675,7 +3677,7 @@ int gozag_service_fee()
 {
     const int gold = you.attribute[ATTR_GOLD_GENERATED];
     int fee =
-        100 + (int)((double)gold - (double)gold / log10((double)(gold + 10)))/2;
+        50 + (int)((double)gold - (double)gold / log10((double)(gold + 10)))/2;
 
     if (you.char_class == JOB_MONK && had_gods() == 0)
         fee /= 2;
@@ -3705,16 +3707,15 @@ bool player_can_join_god(god_type which_god)
     if (which_god == GOD_SIF_MUNA && !you.spell_no)
         return false;
 
+#if TAG_MAJOR_VERSION == 34
     // Dithmenos hates fiery species.
     if (which_god == GOD_DITHMENOS
-        && (
-#if TAG_MAJOR_VERSION == 34
-            you.species == SP_DJINNI ||
-#endif
-            you.species == SP_LAVA_ORC))
+        && (you.species == SP_DJINNI
+            || you.species == SP_LAVA_ORC))
     {
         return false;
     }
+#endif
 
     if (which_god == GOD_GOZAG && you.gold < gozag_service_fee())
         return false;
@@ -4338,6 +4339,7 @@ int elyvilon_lifesaving()
 bool god_protects_from_harm()
 {
     if (you.duration[DUR_LIFESAVING])
+    {
         switch (elyvilon_lifesaving())
         {
         case 1:
@@ -4349,6 +4351,7 @@ bool god_protects_from_harm()
             lose_piety(21 + random2(20));
             return true;
         }
+    }
 
     if (god_can_protect_from_harm(you.religion)
         && (one_chance_in(10) || x_chance_in_y(piety_scale(you.piety), 1000)))

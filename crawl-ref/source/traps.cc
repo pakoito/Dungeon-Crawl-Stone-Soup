@@ -1506,8 +1506,10 @@ void trap_def::shoot_ammo(actor& act, bool was_known)
     else if (!force_hit && one_chance_in(5))
     {
         if (was_known && you.see_cell(pos) && you.can_see(&act))
+        {
             mprf("%s avoids triggering %s trap.", act.name(DESC_THE).c_str(),
                  name(DESC_A).c_str());
+        }
         return;
     }
 
@@ -1676,19 +1678,6 @@ bool is_valid_shaft_level(const level_id &place)
         min_delta = 2;
 
     return (brdepth[place.branch] - place.depth) >= min_delta;
-}
-
-// Shafts can be generated visible.
-//
-// Starts about 50% of the time and approaches 0% for randomly
-// placed traps, and starts at 100% and approaches 50% for
-// others (e.g. at end of corridor).
-bool shaft_known(int depth, bool randomly_placed)
-{
-    if (randomly_placed)
-        return coinflip() && x_chance_in_y(3, depth);
-    else
-        return coinflip() || x_chance_in_y(3, depth);
 }
 
 static level_id _generic_shaft_dest(level_pos lpos, bool known = false)

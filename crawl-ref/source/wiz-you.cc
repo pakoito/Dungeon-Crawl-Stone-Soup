@@ -98,24 +98,24 @@ void wizard_change_species(void)
     uint8_t prev_muts[NUM_MUTATIONS];
     for (int i = 0; i < NUM_MUTATIONS; ++i)
     {
-        if (you.innate_mutations[i] > 0)
+        if (you.innate_mutation[i] > 0)
         {
-            if (you.innate_mutations[i] > you.mutation[i])
+            if (you.innate_mutation[i] > you.mutation[i])
                 you.mutation[i] = 0;
             else
-                you.mutation[i] -= you.innate_mutations[i];
+                you.mutation[i] -= you.innate_mutation[i];
 
-            you.innate_mutations[i] = 0;
+            you.innate_mutation[i] = 0;
         }
         prev_muts[i] = you.mutation[i];
     }
     give_basic_mutations(sp);
     for (int i = 0; i < NUM_MUTATIONS; ++i)
     {
-        if (prev_muts[i] > you.innate_mutations[i])
-            you.innate_mutations[i] = 0;
+        if (prev_muts[i] > you.innate_mutation[i])
+            you.innate_mutation[i] = 0;
         else
-            you.innate_mutations[i] -= prev_muts[i];
+            you.innate_mutation[i] -= prev_muts[i];
     }
 
     switch (sp)
@@ -165,7 +165,7 @@ void wizard_change_species(void)
                 continue;
 
             ++you.mutation[m];
-            ++you.innate_mutations[m];
+            ++you.innate_mutation[m];
         }
         break;
     }
@@ -841,7 +841,9 @@ static const char* dur_names[] =
     "drowning",
     "drowning immunity",
     "flayed",
+#if TAG_MAJOR_VERSION == 34
     "retching",
+#endif
     "weak",
     "dimension anchor",
     "antimagic",
@@ -879,7 +881,8 @@ static const char* dur_names[] =
     "qazlal fire resistance",
     "qazlal cold resistance",
     "qazlal elec resistance",
-    "qazlal ac"
+    "qazlal ac",
+    "corrosion"
 };
 
 void wizard_edit_durations(void)
@@ -905,8 +908,7 @@ void wizard_edit_durations(void)
             mprf_nocap(MSGCH_PROMPT, "%c) %-*s : %d", 'a' + i, (int)max_len,
                  dur_names[dur], you.duration[dur]);
         }
-        mprf(MSGCH_PROMPT, "");
-        mprf(MSGCH_PROMPT, "Edit which duration (letter or name)? ");
+        mprf(MSGCH_PROMPT, "\nEdit which duration (letter or name)? ");
     }
     else
         mprf(MSGCH_PROMPT, "Edit which duration (name)? ");

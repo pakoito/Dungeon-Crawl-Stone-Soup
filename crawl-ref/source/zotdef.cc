@@ -110,8 +110,10 @@ static branch_type _zotdef_random_branch()
     while (!_is_branch_fitting(pb, wavenum));
 
     if (one_chance_in(4))
+    {
         return wavenum < 15 ? BRANCH_DUNGEON : BRANCH_DEPTHS;
         // strong bias to main dungeon and depths
+    }
 
     return pb;
 }
@@ -223,7 +225,7 @@ static void _fire_wave(int power)
         MONS_FIRE_DRAGON, MONS_FIRE_VORTEX, MONS_FIRE_GIANT, MONS_HELLION,
         MONS_MOLTEN_GARGOYLE, MONS_SALAMANDER, MONS_SUN_DEMON,
         MONS_RED_DRACONIAN, MONS_MOTTLED_DRACONIAN, MONS_DRACONIAN_SCORCHER,
-        MONS_FLAMING_CORPSE, MONS_MOTTLED_DRAGON, MONS_EFREET,
+        MONS_MOTTLED_DRAGON, MONS_EFREET,
         MONS_HELL_KNIGHT, MONS_BRIMSTONE_FIEND, MONS_BALRUG, MONS_HELL_HOUND,
         MONS_HELL_HOG, END};
     monster_type boss[] = {MONS_AZRAEL, MONS_XTAHUA, MONS_SERPENT_OF_HELL,

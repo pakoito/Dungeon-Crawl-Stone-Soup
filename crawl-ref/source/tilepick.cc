@@ -1267,8 +1267,6 @@ static tileidx_t _tileidx_monster_base(int type, bool in_water, int colour,
         return TILEP_MONS_NECROPHAGE;
     case MONS_GHOUL:
         return TILEP_MONS_GHOUL;
-    case MONS_PLAGUE_SHAMBLER:
-        return TILEP_MONS_ROTTING_HULK;
 
     // orcs ('o')
     case MONS_ORC:
@@ -1581,8 +1579,6 @@ static tileidx_t _tileidx_monster_base(int type, bool in_water, int colour,
         return TILEP_MONS_HARPY;
     case MONS_MINOTAUR:
         return TILEP_MONS_MINOTAUR;
-    case MONS_SHEDU:
-        return TILEP_MONS_SHEDU;
     case MONS_TENGU:
         return TILEP_MONS_TENGU;
     case MONS_TENGU_CONJURER:
@@ -2415,7 +2411,7 @@ static tentacle_type _get_tentacle_type(const int mtype)
             return TYPE_VINE;
 
         default:
-            ASSERT("Invalid tentacle type!");
+            die("Invalid tentacle type!");
             return TYPE_KRAKEN; // Silence a warning
     }
 }
@@ -3651,8 +3647,6 @@ static tileidx_t _tileidx_corpse(const item_def &item)
         return TILE_CORPSE_NECROPHAGE;
     case MONS_GHOUL:
         return TILE_CORPSE_GHOUL;
-    case MONS_PLAGUE_SHAMBLER:
-        return TILE_CORPSE_ROTTING_HULK;
 
     // orcs ('o')
     case MONS_ORC:
@@ -3848,8 +3842,6 @@ static tileidx_t _tileidx_corpse(const item_def &item)
         return TILE_CORPSE_TENGU;
     case MONS_SPHINX:
         return TILE_CORPSE_SPHINX;
-    case MONS_SHEDU:
-        return TILE_CORPSE_SHEDU;
     case MONS_ARACHNE:
         return TILE_CORPSE_ARACHNE;
 

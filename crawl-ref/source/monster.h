@@ -299,7 +299,8 @@ public:
     bool fumbles_attack(bool verbose = true);
     bool cannot_fight() const;
 
-    int  skill(skill_type skill, int scale = 1, bool real = false) const;
+    int  skill(skill_type skill, int scale = 1,
+               bool real = false, bool drained = true) const;
 
     void attacking(actor *other, bool ranged);
     bool can_go_frenzy() const;
@@ -387,7 +388,9 @@ public:
     int silence_radius2() const;
     int liquefying_radius2() const;
     int umbra_radius2() const;
+#if TAG_MAJOR_VERSION == 34
     int heat_radius2() const;
+#endif
     bool glows_naturally() const;
     bool petrified() const;
     bool petrifying() const;

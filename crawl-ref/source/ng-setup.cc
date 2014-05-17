@@ -70,7 +70,9 @@ static void _species_stat_init(species_type which_species)
     case SP_MINOTAUR:           s = 12; i =  5; d =  5;      break;  // 22
     case SP_GARGOYLE:           s = 11; i =  8; d =  5;      break;  // 24
     case SP_HILL_ORC:           s = 10; i =  8; d =  6;      break;  // 24
+#if TAG_MAJOR_VERSION == 34
     case SP_LAVA_ORC:           s = 10; i =  8; d =  6;      break;  // 24
+#endif
     case SP_CENTAUR:            s = 10; i =  7; d =  4;      break;  // 21
     case SP_NAGA:               s = 10; i =  8; d =  6;      break;  // 24
 
@@ -220,16 +222,13 @@ void give_basic_mutations(species_type speci)
 {
     switch (speci)
     {
+#if TAG_MAJOR_VERSION == 34
     case SP_LAVA_ORC:
         you.mutation[MUT_CONSERVE_SCROLLS] = 1;
-    // Intentional fallthrough.
-    case SP_HILL_ORC:
-        you.mutation[MUT_SAPROVOROUS] = 1;
         break;
+#endif
     case SP_OGRE:
         you.mutation[MUT_TOUGH_SKIN]      = 1;
-        you.mutation[MUT_FAST_METABOLISM] = 1;
-        you.mutation[MUT_SAPROVOROUS]     = 1;
         break;
     case SP_HALFLING:
         you.mutation[MUT_SLOW_METABOLISM]     = 1;
@@ -298,7 +297,6 @@ void give_basic_mutations(species_type speci)
         you.mutation[MUT_SHAGGY_FUR]      = 1;
         break;
     case SP_KOBOLD:
-        you.mutation[MUT_SAPROVOROUS] = 2;
         you.mutation[MUT_CARNIVOROUS] = 3;
         break;
     case SP_VAMPIRE:
@@ -344,7 +342,7 @@ void give_basic_mutations(species_type speci)
 
     // Starting mutations are unremovable.
     for (int i = 0; i < NUM_MUTATIONS; ++i)
-        you.innate_mutations[i] = you.mutation[i];
+        you.innate_mutation[i] = you.mutation[i];
 }
 
 static void _newgame_make_item_tutorial(int slot, equipment_type eqslot,

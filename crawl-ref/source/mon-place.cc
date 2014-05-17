@@ -204,6 +204,7 @@ bool monster_can_submerge(const monster* mon, dungeon_feature_type feat)
     if (!mon->is_habitable_feat(feat))
         return false;
     if (mons_class_flag(mon->type, M_SUBMERGES))
+    {
         switch (mons_habitat(mon))
         {
         case HT_WATER:
@@ -218,6 +219,7 @@ bool monster_can_submerge(const monster* mon, dungeon_feature_type feat)
         default:
             return false;
         }
+    }
     else
         return false;
 }
@@ -1105,7 +1107,9 @@ monster* place_monster(mgen_data mg, bool force_pos, bool dont_place)
     if (mon->mindex() >= MAX_MONSTERS - 30
         || (mg.proximity == PROX_NEAR_STAIRS && !crawl_state.game_is_zotdef())
         || (crawl_state.game_is_zotdef() && you.num_turns < 2000))
+    {
         return mon;
+    }
 
     // Not PROX_NEAR_STAIRS, so it will be part of a band, if there is any.
     if (band_size > 1)
@@ -1160,12 +1164,6 @@ monster* place_monster(mgen_data mg, bool force_pos, bool dont_place)
             }
             else if (mon->type == MONS_KIRKE)
                 member->props["kirke_band"] = true;
-            else if (mon->type == MONS_SHEDU)
-            {
-                // We store these here for later resurrection, etc.
-                member->number = mon->mid;
-                mon->number = member->mid;
-            }
         }
     }
 
@@ -1289,6 +1287,7 @@ static monster* _place_monster_aux(const mgen_data &mg, const monster *leader,
 
     // Pick the correct Serpent of Hell.
     if (mon->type == MONS_SERPENT_OF_HELL)
+    {
         switch (place.branch)
         {
         case BRANCH_COCYTUS:
@@ -1302,6 +1301,7 @@ static monster* _place_monster_aux(const mgen_data &mg, const monster *leader,
             break;
         default: ; // if it spawns out of Hell (sprint, wizmode), use Gehenna
         }
+    }
 
     // Generate a brand shiny new monster, or zombie.
     if (mons_class_is_zombified(mg.cls))
@@ -2565,11 +2565,6 @@ static band_type _choose_band(monster_type mon_type, int &band_size,
         band_size = 2 + random2(4);
         break;
 
-    case MONS_SHEDU:
-        band = BAND_SHEDU;
-        band_size = 1;
-        break;
-
     case MONS_REDBACK:
         band = BAND_REDBACK;
         band_size = 1 + random2(5);
@@ -3069,13 +3064,15 @@ static monster_type _band_member(band_type band, int which)
     case BAND_GHOULS:
         return random_choose_weighted(4, MONS_GHOUL,
                                       3, MONS_NECROPHAGE,
-                                      2, MONS_PLAGUE_SHAMBLER,
+                                      2, MONS_BOG_BODY,
                                       0);
     case BAND_DEEP_TROLLS:
         if (one_chance_in(4))
+        {
             return random_choose(MONS_DEEP_TROLL_EARTH_MAGE,
                                  MONS_DEEP_TROLL_SHAMAN,
                                  -1);
+        }
         return MONS_DEEP_TROLL;
     case BAND_HOGS:
         return MONS_HOG;
@@ -3148,9 +3145,6 @@ static monster_type _band_member(band_type band, int which)
     case BAND_ELEPHANT:
         return MONS_ELEPHANT;
 
-    case BAND_SHEDU:
-        return MONS_SHEDU;
-
     case BAND_REDBACK:
         return random_choose_weighted(30, MONS_REDBACK,
                                        5, MONS_TARANTELLA,
@@ -3180,10 +3174,12 @@ static monster_type _band_member(band_type band, int which)
 
     case BAND_VAULT_WARDEN:
         if (which == 1 || which == 2 && coinflip())
+        {
             return random_choose_weighted( 8, MONS_VAULT_SENTINEL,
                                           12, MONS_IRONBRAND_CONVOKER,
                                           10, MONS_IRONHEART_PRESERVER,
                                            0);
+        }
         else
             return MONS_VAULT_GUARD;
 
@@ -3194,7 +3190,6 @@ static monster_type _band_member(band_type band, int which)
             return random_choose_weighted(5, MONS_WRAITH,
                                           6, MONS_FREEZING_WRAITH,
                                           3, MONS_PHANTASMAL_WARRIOR,
-                                          2, MONS_PLAGUE_SHAMBLER,
                                           3, MONS_SKELETAL_WARRIOR,
                                           0);
 
@@ -3302,10 +3297,12 @@ static monster_type _band_member(band_type band, int which)
 
     case BAND_PUTRID_DEMONSPAWN:
         if (which == 1 || one_chance_in(5))
+        {
             return random_choose_weighted( 2, MONS_HELLWING,
                                            2, MONS_ORANGE_DEMON,
                                            3, MONS_PUTRID_DEMONSPAWN,
                                            0);
+        }
         return random_demonspawn_monster_species();
 
     case BAND_TORTUROUS_DEMONSPAWN:
@@ -3779,11 +3776,6 @@ bool player_angers_monster(monster* mon)
                 break;
             }
         }
-
-        // Anger a shedu's mate.  This won't be an infinite recursion
-        // because the original is already hostile.
-        if (mons_is_shedu(mon) && shedu_pair_alive(mon))
-            player_angers_monster(get_shedu_pair(mon));
 
         return true;
     }

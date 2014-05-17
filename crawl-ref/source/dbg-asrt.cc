@@ -248,8 +248,10 @@ static void _dump_player(FILE *file)
         const unsigned int flags = get_spell_flags(spell);
 
         if (flags & SPFLAG_MONSTER)
+        {
             fprintf(file, "    spell slot #%d: monster only spell %s\n",
                     (int)i, spell_title(spell));
+        }
         else if (flags & SPFLAG_TESTING)
             fprintf(file, "    spell slot #%d: testing spell %s\n",
                     (int)i, spell_title(spell));
@@ -278,8 +280,8 @@ static void _dump_player(FILE *file)
     {
         mutation_type mut = static_cast<mutation_type>(i);
         int normal = you.mutation[i];
-        int innate = you.innate_mutations[i];
-        int temp   = you.temp_mutations[i];
+        int innate = you.innate_mutation[i];
+        int temp   = you.temp_mutation[i];
 
         // Normally innate and temp imply normal, but a crash handler should
         // expect the spanish^Wunexpected.
@@ -456,8 +458,10 @@ static void _debug_marker_scan()
             }
         }
         if (!found)
+        {
             mprf(MSGCH_ERROR, "Marker #%d, type %d at (%d, %d) unlinked",
                  i, (int) type, marker->pos.x, marker->pos.y);
+        }
     }
 
     const coord_def start(MAPGEN_BORDER, MAPGEN_BORDER);

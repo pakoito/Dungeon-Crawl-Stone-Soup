@@ -1003,8 +1003,9 @@ static bool _will_starcursed_scream(monster* mon)
 static bool _siren_movement_effect(const monster* mons)
 {
     bool do_resist = (you.attribute[ATTR_HELD]
-                      || you.cannot_act() || you.asleep()
-                      || you.clarity());
+                      || you.cannot_act()
+                      || you.clarity()
+                      || you.is_stationary());
 
     if (!do_resist)
     {
@@ -1760,7 +1761,7 @@ static bool _flay_creature(monster* mon, actor* victim)
     vector<coord_def> old_blood;
     CrawlVector &new_blood = victim->props["flay_blood"].get_vector();
 
-    // Find current blood splatters
+    // Find current blood spatters
     for (radius_iterator ri(victim->pos(), LOS_SOLID); ri; ++ri)
     {
         if (env.pgrid(*ri) & FPROP_BLOODY)
@@ -1769,7 +1770,7 @@ static bool _flay_creature(monster* mon, actor* victim)
 
     blood_spray(victim->pos(), victim->type, 20);
 
-    // Compute and store new blood splatters
+    // Compute and store new blood spatters
     unsigned int i = 0;
     for (radius_iterator ri(victim->pos(), LOS_SOLID); ri; ++ri)
     {
@@ -3672,20 +3673,6 @@ bool mon_special_ability(monster* mons, bolt & beem)
         }
         break;
 
-    case MONS_BOG_BODY:
-        if (one_chance_in(8))
-        {
-            // A hacky way of making these rot regularly.
-            if (mons->has_ench(ENCH_ROT))
-                break;
-
-            mon_enchant rot = mon_enchant(ENCH_ROT, 0, 0, 10);
-            mons->add_ench(rot);
-
-            simple_monster_message(mons, " begins to rapidly decay!");
-        }
-        break;
-
     case MONS_SNAPPING_TURTLE:
     case MONS_ALLIGATOR_SNAPPING_TURTLE:
         // Use the same calculations as for low-HP casting
@@ -4534,9 +4521,11 @@ void mon_nearby_ability(monster* mons)
         {
             const bool can_see = you.can_see(mons);
             if (can_see && you.can_see(foe))
+            {
                 mprf("%s blinks at %s.",
                      mons->name(DESC_THE).c_str(),
                      foe->name(DESC_THE).c_str());
+            }
 
             int confuse_power = 2 + random2(3);
 
@@ -4571,9 +4560,11 @@ void mon_nearby_ability(monster* mons)
         {
             const bool can_see = you.can_see(mons);
             if (can_see && you.can_see(foe))
+            {
                 mprf("%s stares at %s.",
                      mons->name(DESC_THE).c_str(),
                      foe->name(DESC_THE).c_str());
+            }
 
             if (foe->is_player() && !can_see)
                 canned_msg(MSG_BEING_WATCHED);
@@ -5108,7 +5099,7 @@ static int _throw_site_score(actor *thrower, actor *victim, coord_def site)
     if (tmons->friendly() || (vmons && vmons->friendly()))
         return score;
 
-    for(adjacent_iterator ai(site); ai; ++ai)
+    for (adjacent_iterator ai(site); ai; ++ai)
     {
         if (!thrower->see_cell(*ai))
             continue;

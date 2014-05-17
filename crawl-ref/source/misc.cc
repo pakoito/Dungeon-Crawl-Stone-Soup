@@ -17,6 +17,7 @@
 #include <cstdlib>
 #include <cstdio>
 #include <cmath>
+#include <cfloat>
 
 #include "externs.h"
 #include "misc.h"
@@ -1371,12 +1372,14 @@ bool go_berserk(bool intentional, bool potion)
 
     you.redraw_quiver = true; // Account for no firing.
 
+#if TAG_MAJOR_VERSION == 34
     if (you.species == SP_LAVA_ORC)
     {
         mpr("You burn with rage!");
         // This will get sqrt'd later, so.
         you.temperature = TEMP_MAX;
     }
+#endif
 
     if (player_equip_unrand(UNRAND_JIHAD))
         for (monster_near_iterator mi(you.pos(), LOS_NO_TRANS); mi; ++mi)
@@ -1979,7 +1982,7 @@ void bring_to_safety()
     }
 
     coord_def best_pos, pos;
-    double min_threat = 1e38;
+    double min_threat = DBL_MAX;
     int tries = 0;
 
     // Up to 100 valid spots, but don't lock up when there's none.  This can happen
@@ -2020,7 +2023,7 @@ void bring_to_safety()
         tries += 1000;
     }
 
-    if (min_threat != 1e38)
+    if (min_threat < DBL_MAX)
         you.moveto(best_pos);
 }
 

@@ -95,7 +95,9 @@ enum monster_info_flags
     MB_WATER_HOLD,
     MB_WATER_HOLD_DROWN,
     MB_FLAYED,
+#if TAG_MAJOR_VERSION == 34
     MB_RETCHING,
+#endif
     MB_WEAK,
     MB_DIMENSION_ANCHOR,
     MB_CONTROL_WINDS,
@@ -117,6 +119,7 @@ enum monster_info_flags
     MB_BLACK_MARK,
     MB_SAP_MAGIC,
     MB_SHROUD,
+    MB_CORROSION,
     NUM_MB_FLAGS
 };
 

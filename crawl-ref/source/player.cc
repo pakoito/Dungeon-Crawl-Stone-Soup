@@ -358,12 +358,13 @@ void moveto_location_effects(dungeon_feature_type old_feat,
                 // Extra time if you stepped in.
                 if (stepped)
                     you.time_taken *= 2;
-
+#if TAG_MAJOR_VERSION == 34
                 // This gets called here because otherwise you wouldn't heat
                 // until your second turn in lava.
                 if (temperature() < TEMP_FIRE)
                     mpr("The lava instantly superheats you.");
                 you.temperature = TEMP_MAX;
+#endif
             }
 
             else if (!feat_is_lava(new_grid) && feat_is_lava(old_feat))
@@ -599,8 +600,10 @@ monster_type player_mons(bool transform)
     if (mons == MONS_ORC)
     {
         if (you_worship(GOD_BEOGH))
+        {
             mons = (you.piety >= piety_breakpoint(4)) ? MONS_ORC_HIGH_PRIEST
                                                       : MONS_ORC_PRIEST;
+        }
     }
     else if (mons == MONS_OGRE)
     {
@@ -1531,6 +1534,7 @@ int player_res_fire(bool calc_unid, bool temp, bool items)
     if (you.species == SP_MUMMY)
         rf--;
 
+#if TAG_MAJOR_VERSION == 34
     if (you.species == SP_LAVA_ORC)
     {
         if (temperature_effect(LORC_FIRE_RES_I))
@@ -1540,6 +1544,7 @@ int player_res_fire(bool calc_unid, bool temp, bool items)
         if (temperature_effect(LORC_FIRE_RES_III))
             rf++;
     }
+#endif
 
     // mutations:
     rf += player_mutation_level(MUT_HEAT_RESISTANCE, temp);
@@ -1669,8 +1674,10 @@ int player_res_cold(bool calc_unid, bool temp, bool items)
                 rc++;
         }
 
+#if TAG_MAJOR_VERSION == 34
         if (you.species == SP_LAVA_ORC && temperature_effect(LORC_COLD_VULN))
             rc--;
+#endif
     }
 
     if (items)
@@ -2015,8 +2022,10 @@ int player_spec_fire()
     // rings of fire:
     sf += you.wearing(EQ_RINGS, RING_FIRE);
 
+#if TAG_MAJOR_VERSION == 34
     if (you.species == SP_LAVA_ORC && temperature_effect(LORC_FIRE_BOOST))
         sf++;
+#endif
 
     if (you.duration[DUR_FIRE_SHIELD])
         sf++;
@@ -2034,12 +2043,14 @@ int player_spec_cold()
     // rings of ice:
     sc += you.wearing(EQ_RINGS, RING_ICE);
 
+#if TAG_MAJOR_VERSION == 34
     if (you.species == SP_LAVA_ORC
         && (temperature_effect(LORC_LAVA_BOOST)
             || temperature_effect(LORC_FIRE_BOOST)))
     {
         sc--;
     }
+#endif
 
     return sc;
 }
@@ -2695,17 +2706,10 @@ int player_shield_class(void)
     return (shield + stat + 50) / 100;
 }
 
-int player_sust_abil(bool calc_unid)
+bool player_sust_abil(bool calc_unid)
 {
-    int sa = 0;
-
-    sa += you.wearing(EQ_RINGS, RING_SUSTAIN_ABILITIES, calc_unid);
-    sa += you.scan_artefacts(ARTP_SUSTAB);
-
-    if (sa > 2)
-        sa = 2;
-
-    return sa;
+    return you.wearing(EQ_RINGS, RING_SUSTAIN_ABILITIES, calc_unid)
+           || you.scan_artefacts(ARTP_SUSTAB);
 }
 
 void forget_map(bool rot)
@@ -2758,7 +2762,7 @@ void forget_map(bool rot)
 #endif
 }
 
-static void _remove_temp_mutations()
+static void _remove_temp_mutation()
 {
     int num_remove = min(you.attribute[ATTR_TEMP_MUTATIONS],
         max(you.attribute[ATTR_TEMP_MUTATIONS] * 5 / 12 - random2(3),
@@ -2877,7 +2881,7 @@ void gain_exp(unsigned int exp_gained, unsigned int* actual_gain)
     {
         you.attribute[ATTR_TEMP_MUT_XP] -= exp_gained;
         if (you.attribute[ATTR_TEMP_MUT_XP] <= 0)
-            _remove_temp_mutations();
+            _remove_temp_mutation();
     }
 
     recharge_xp_evokers(exp_gained);
@@ -3122,7 +3126,9 @@ void level_change(int source, const char* aux, bool skip_attribute_increase)
                 break;
 
             case SP_HILL_ORC:
+#if TAG_MAJOR_VERSION == 34
             case SP_LAVA_ORC:
+#endif
                 if (!(you.experience_level % 5))
                     modify_stat(STAT_STR, 1, false, "level gain");
                 break;
@@ -4146,7 +4152,6 @@ void display_char_status()
         STATUS_LIQUEFIED,
         DUR_WATER_HOLD,
         DUR_FLAYED,
-        DUR_RETCHING,
         DUR_WEAK,
         DUR_DIMENSION_ANCHOR,
         DUR_INFUSION,
@@ -4170,6 +4175,7 @@ void display_char_status()
         DUR_QAZLAL_COLD_RES,
         DUR_QAZLAL_ELEC_RES,
         DUR_QAZLAL_AC,
+        DUR_CORROSION,
     };
 
     status_info inf;
@@ -5779,8 +5785,10 @@ void player::init()
     lives = 0;
     deaths = 0;
 
+#if TAG_MAJOR_VERSION == 34
     temperature = 1; // 1 is min; 15 is max.
     temperature_last = 1;
+#endif
 
     xray_vision = false;
 
@@ -5828,8 +5836,8 @@ void player::init()
     exp_docked_total = 0;
 
     mutation.init(0);
-    innate_mutations.init(0);
-    temp_mutations.init(0);
+    innate_mutation.init(0);
+    temp_mutation.init(0);
     demonic_traits.clear();
 
     magic_contamination = 0;
@@ -5913,7 +5921,9 @@ void player::init()
     redraw_status_flags = 0;
     redraw_hit_points   = false;
     redraw_magic_points = false;
+#if TAG_MAJOR_VERSION == 34
     redraw_temperature  = false;
+#endif
     redraw_stats.init(false);
     redraw_experience   = false;
     redraw_armour_class = false;
@@ -6389,7 +6399,7 @@ int player::shield_tohit_penalty(bool random_factor, int scale) const
     return maybe_roll_dice(1, adjusted_shield_penalty(scale), random_factor);
 }
 
-int player::skill(skill_type sk, int scale, bool real) const
+int player::skill(skill_type sk, int scale, bool real, bool drained) const
 {
     // wizard racechange, or upgraded old save
     if (is_useless_skill(sk))
@@ -6418,10 +6428,16 @@ int player::skill(skill_type sk, int scale, bool real) const
     int level = actual_skill * scale + get_skill_progress(sk, actual_skill, skill_points[sk], scale);
     if (real)
         return level;
+    if (drained && you.attribute[ATTR_XP_DRAIN])
+    {
+        int drain_scale = max(0, (30 * 100 - you.attribute[ATTR_XP_DRAIN]) * scale);
+        level = skill(sk, drain_scale, real, false);
+        return max(0, (level - 30 * scale * you.attribute[ATTR_XP_DRAIN]) / (30 * 100));
+    }
     if (duration[DUR_HEROISM] && sk <= SK_LAST_MUNDANE)
         level = min(level + 5 * scale, 27 * scale);
     if (penance[GOD_ASHENZARI])
-        level = max(level - min(4 * scale, level / 2), 0);
+        level = max(level - 4 * scale, level / 2);
     else if (religion == GOD_ASHENZARI && piety_rank() > 2)
     {
         if (skill_boost.count(sk)
@@ -6429,11 +6445,6 @@ int player::skill(skill_type sk, int scale, bool real) const
         {
             level = ash_skill_boost(sk, scale);
         }
-    }
-    if (you.attribute[ATTR_XP_DRAIN])
-    {
-        level = (int) max(0.0, level - you.attribute[ATTR_XP_DRAIN] / 100.0
-                                       * (scale + level/30.0));
     }
 
     return level;
@@ -6449,6 +6460,7 @@ int player_icemail_armour_class()
 
 bool player_stoneskin()
 {
+#if TAG_MAJOR_VERSION == 34
     // Lava orcs ignore DUR_STONESKIN
     if (you.species == SP_LAVA_ORC)
     {
@@ -6459,7 +6471,8 @@ bool player_stoneskin()
         return temperature_effect(LORC_STONESKIN);
     }
     else
-        return you.duration[DUR_STONESKIN];
+#endif
+    return you.duration[DUR_STONESKIN];
 }
 
 static int _stoneskin_bonus()
@@ -6469,19 +6482,23 @@ static int _stoneskin_bonus()
 
     // Max +7.4 base
     int boost = 200;
+#if TAG_MAJOR_VERSION == 34
     if (you.species == SP_LAVA_ORC)
         boost += 20 * you.experience_level;
     else
-        boost += you.skill(SK_EARTH_MAGIC, 20);
+#endif
+    boost += you.skill(SK_EARTH_MAGIC, 20);
 
     // Max additional +7.75 from statue form
     if (you.form == TRAN_STATUE)
     {
         boost += 100;
+#if TAG_MAJOR_VERSION == 34
         if (you.species == SP_LAVA_ORC)
             boost += 25 * you.experience_level;
         else
-            boost += you.skill(SK_EARTH_MAGIC, 25);
+#endif
+        boost += you.skill(SK_EARTH_MAGIC, 25);
     }
 
     return boost;
@@ -6540,6 +6557,9 @@ int player::armour_class() const
 
     if (you.attribute[ATTR_DIVINE_AC] && !player_under_penance(GOD_QAZLAL))
         AC += 300;
+
+    if (you.duration[DUR_CORROSION])
+        AC -= 500 * you.props["corrosion_amount"].get_int();
 
     if (!player_is_shapechanged()
         || (form == TRAN_DRAGON && player_genus(GENPC_DRACONIAN))
@@ -7593,8 +7613,10 @@ bool player::backlit(bool check_haloed, bool self_halo) const
         return true;
     }
     if (check_haloed)
+    {
         return !umbraed() && haloed()
                && (self_halo || halo_radius2() == -1);
+    }
     return false;
 }
 
@@ -7604,8 +7626,10 @@ bool player::umbra(bool check_haloed, bool self_halo) const
         return false;
 
     if (check_haloed)
+    {
         return umbraed() && !haloed()
                && (self_halo || umbra_radius2() == -1);
+    }
     return false;
 }
 
@@ -8339,6 +8363,7 @@ int player::item_count(const item_def& it) const
     return count;
 }
 
+#if TAG_MAJOR_VERSION == 34
 // Lava orcs!
 int temperature()
 {
@@ -8589,3 +8614,4 @@ string temperature_text(int temp)
             return "";
     }
 }
+#endif

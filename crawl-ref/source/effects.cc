@@ -430,37 +430,6 @@ void banished(const string &who)
     }
 }
 
-bool forget_spell(void)
-{
-    ASSERT(!crawl_state.game_is_arena());
-
-    if (!you.spell_no)
-        return false;
-
-    // find a random spell to forget:
-    int slot = -1;
-    int num  = 0;
-
-    for (int i = 0; i < MAX_KNOWN_SPELLS; i++)
-    {
-        if (you.spells[i] != SPELL_NO_SPELL)
-        {
-            num++;
-            if (one_chance_in(num))
-                slot = i;
-        }
-    }
-
-    if (slot == -1)              // should never happen though
-        return false;
-
-    mprf("Your knowledge of %s becomes hazy all of a sudden, and you forget "
-         "the spell!", spell_title(you.spells[slot]));
-
-    del_spell_from_memory_by_slot(slot);
-    return true;
-}
-
 void direct_effect(monster* source, spell_type spell,
                    bolt &pbolt, actor *defender)
 {
@@ -2031,7 +2000,58 @@ static void _handle_magic_contamination()
 }
 
 // Bad effects from magic contamination.
-static void _magic_contamination_effects(int time_delta)
+static void _magic_contamination_effects()
+{
+    mprf(MSGCH_WARN, "Your body shudders with the violent release "
+                     "of wild energies!");
+
+    const int contam = you.magic_contamination;
+
+    // For particularly violent releases, make a little boom.
+    if (contam > 10000 && coinflip())
+    {
+        bolt beam;
+
+        beam.flavour      = BEAM_RANDOM;
+        beam.glyph        = dchar_glyph(DCHAR_FIRED_BURST);
+        beam.damage       = dice_def(3, div_rand_round(contam, 2000 ));
+        beam.target       = you.pos();
+        beam.name         = "magical storm";
+        beam.beam_source  = NON_MONSTER;
+        beam.aux_source   = "a magical explosion";
+        beam.ex_size      = max(1, min(9, div_rand_round(contam, 15000)));
+        beam.ench_power   = div_rand_round(contam, 200);
+        beam.is_explosion = true;
+
+        // Undead enjoy extra contamination explosion damage because
+        // the magical contamination has a harder time dissipating
+        // through non-living flesh. :-)
+        if (you.is_undead)
+            beam.damage.size *= 2;
+
+        beam.explode();
+    }
+
+    // We want to warp the player, not do good stuff!
+    mutate(one_chance_in(5) ? RANDOM_MUTATION : RANDOM_BAD_MUTATION,
+           "mutagenic glow", true,
+           coinflip(),
+           false, false, false, false,
+#if TAG_MAJOR_VERSION == 34
+           you.species == SP_DJINNI
+#else
+           false
+#endif
+           );
+
+    // we're meaner now, what with explosions and whatnot, but
+    // we dial down the contamination a little faster if its actually
+    // mutating you.  -- GDL
+    contaminate_player(-(random2(contam / 4) + 1000));
+}
+// Checks if the player should be hit with magic contaimination effects,
+// then actually does it if they should be.
+static void _handle_magic_contamination(int time_delta)
 {
     UNUSED(time_delta);
 
@@ -2039,59 +2059,15 @@ static void _magic_contamination_effects(int time_delta)
     const bool glow_effect = get_contamination_level() > 1
             && x_chance_in_y(you.magic_contamination, 12000);
 
-    if (glow_effect && is_sanctuary(you.pos()))
+    if (glow_effect)
     {
-        mprf(MSGCH_GOD, "Your body momentarily shudders from a surge of wild "
-                        "energies until Zin's power calms it.");
-    }
-    else if (glow_effect)
-    {
-        mprf(MSGCH_WARN, "Your body shudders with the violent release "
-                         "of wild energies!");
-
-        // For particularly violent releases, make a little boom.
-        if (you.magic_contamination > 10000 && coinflip())
+        if (is_sanctuary(you.pos()))
         {
-            bolt beam;
-
-            beam.flavour      = BEAM_RANDOM;
-            beam.glyph        = dchar_glyph(DCHAR_FIRED_BURST);
-            beam.damage       = dice_def(3,
-                                 div_rand_round(you.magic_contamination, 2000));
-            beam.target       = you.pos();
-            beam.name         = "magical storm";
-            beam.beam_source  = NON_MONSTER;
-            beam.aux_source   = "a magical explosion";
-            beam.ex_size      = max(1, min(9,
-                               div_rand_round(you.magic_contamination, 15000)));
-            beam.ench_power   = div_rand_round(you.magic_contamination, 200);
-            beam.is_explosion = true;
-
-            // Undead enjoy extra contamination explosion damage because
-            // the magical contamination has a harder time dissipating
-            // through non-living flesh. :-)
-            if (you.is_undead)
-                beam.damage.size *= 2;
-
-            beam.explode();
+            mprf(MSGCH_GOD, "Your body momentarily shudders from a surge of wild "
+                            "energies until Zin's power calms it.");
         }
-
-        // We want to warp the player, not do good stuff!
-        mutate(one_chance_in(5) ? RANDOM_MUTATION : RANDOM_BAD_MUTATION,
-               "mutagenic glow", true,
-               coinflip(),
-               false, false, false, false,
-#if TAG_MAJOR_VERSION == 34
-               you.species == SP_DJINNI
-#else
-               false
-#endif
-               );
-
-        // we're meaner now, what with explosions and whatnot, but
-        // we dial down the contamination a little faster if its actually
-        // mutating you.  -- GDL
-        contaminate_player(-(random2(you.magic_contamination / 4) + 1000));
+        else
+            _magic_contamination_effects();
     }
 }
 
@@ -2300,7 +2276,7 @@ static struct timed_effect timed_effects[] =
     { TIMER_CORPSES,       _update_corpses,               200,   200, true  },
     { TIMER_HELL_EFFECTS,  _hell_effects,                 200,   600, false },
     { TIMER_STAT_RECOVERY, _recover_stats,                100,   300, false },
-    { TIMER_CONTAM,        _magic_contamination_effects,  200,   600, false },
+    { TIMER_CONTAM,        _handle_magic_contamination,   200,   600, false },
     { TIMER_DETERIORATION, _deteriorate,                  100,   300, false },
     { TIMER_GOD_EFFECTS,   handle_god_time,               100,   300, false },
     { TIMER_SCREAM,        _scream,                       100,   300, false },
@@ -2710,9 +2686,11 @@ int place_ring(vector<coord_def> &ring_points,
         prototype.pos = ring_points.at(i);
 
         if (create_monster(prototype, false))
+        {
             spawned_count++;
             if (you.see_cell(ring_points.at(i)))
                 seen_count++;
+        }
     }
 
     return spawned_count;

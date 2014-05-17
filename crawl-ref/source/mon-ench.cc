@@ -703,12 +703,7 @@ void monster::remove_enchantment_effect(const mon_enchant &me, bool quiet)
 
     case ENCH_ROT:
         if (!quiet)
-        {
-            if (type == MONS_BOG_BODY)
-                simple_monster_message(this, "'s decay slows.");
-            else
-                simple_monster_message(this, " is no longer rotting.");
-        }
+            simple_monster_message(this, " is no longer rotting.");
         break;
 
     case ENCH_HELD:
@@ -1011,14 +1006,21 @@ void monster::remove_enchantment_effect(const mon_enchant &me, bool quiet)
 
     case ENCH_BLACK_MARK:
         if (!quiet)
+        {
             simple_monster_message(this, " is no longer absorbing vital"
                                          " energies.");
+        }
         calc_speed();
         break;
 
     case ENCH_SAP_MAGIC:
         if (!quiet)
             simple_monster_message(this, " is no longer being sapped.");
+        break;
+
+    case ENCH_CORROSION:
+        if (!quiet)
+           simple_monster_message(this, " is no longer covered in acid.");
         break;
 
     default:
@@ -1131,7 +1133,7 @@ void monster::timeout_enchantments(int levels)
         case ENCH_FLAYED: case ENCH_BARBS:
         case ENCH_AGILE: case ENCH_FROZEN: case ENCH_EPHEMERAL_INFUSION:
         case ENCH_BLACK_MARK: case ENCH_SAP_MAGIC: case ENCH_BRIBED:
-        case ENCH_PERMA_BRIBED:
+        case ENCH_PERMA_BRIBED: case ENCH_CORROSION:
             lose_ench_levels(i->second, levels);
             break;
 
@@ -1181,14 +1183,6 @@ void monster::timeout_enchantments(int levels)
             const int actdur = speed_to_duration(speed) * levels;
             if (lose_ench_duration(i->first, actdur))
                 monster_die(this, KILL_MISC, NON_MONSTER, true);
-            break;
-        }
-
-        case ENCH_PREPARING_RESURRECT:
-        {
-            const int actdur = speed_to_duration(speed) * levels;
-            if (lose_ench_duration(i->first, actdur))
-                shedu_do_actual_resurrection(this);
             break;
         }
 
@@ -1341,13 +1335,13 @@ void monster::apply_enchantment(const mon_enchant &me)
     case ENCH_FIRE_VULN:
     case ENCH_BARBS:
     case ENCH_POISON_VULN:
-    case ENCH_RETCHING:
     case ENCH_DIMENSION_ANCHOR:
     case ENCH_AGILE:
     case ENCH_FROZEN:
     case ENCH_EPHEMERAL_INFUSION:
     case ENCH_SAP_MAGIC:
     case ENCH_PERMA_BRIBED:
+    case ENCH_CORROSION:
     // case ENCH_ROLLING:
         decay_enchantment(en);
         break;
@@ -1686,11 +1680,6 @@ void monster::apply_enchantment(const mon_enchant &me)
 
             monster_die(this, KILL_MISC, NON_MONSTER, true);
         }
-        break;
-
-    case ENCH_PREPARING_RESURRECT:
-        if (decay_enchantment(en))
-            shedu_do_actual_resurrection(this);
         break;
 
     case ENCH_SPORE_PRODUCTION:
@@ -2212,17 +2201,24 @@ static const char *enchant_names[] =
     "insane", "silenced", "awaken_forest", "exploding", "bleeding",
     "tethered", "severed", "antimagic",
 #if TAG_MAJOR_VERSION == 34
-    "fading_away",
+    "fading_away", "preparing_resurrect",
 #endif
-    "preparing_resurrect", "regen",
+    "regen",
     "magic_res", "mirror_dam", "stoneskin", "fear inspiring", "temporarily pacified",
     "withdrawn", "attached", "guardian_timer", "flight",
     "liquefying", "tornado", "fake_abjuration",
     "dazed", "mute", "blind", "dumb", "mad", "silver_corona", "recite timer",
     "inner_flame", "roused", "breath timer", "deaths_door", "rolling",
     "ozocubus_armour", "wretched", "screamed", "rune_of_recall", "injury bond",
-    "drowning", "flayed", "haunting", "retching", "weak", "dimension_anchor",
-    "awaken vines", "control_winds", "wind_aided", "summon_capped",
+    "drowning", "flayed", "haunting",
+#if TAG_MAJOR_VERSION == 34
+    "retching",
+#endif
+    "weak", "dimension_anchor", "awaken vines", "control_winds",
+#if TAG_MAJOR_VERSION == 34
+    "wind_aided",
+#endif
+    "summon_capped",
     "toxic_radiance", "grasping_roots_source", "grasping_roots",
     "iood_charged", "fire_vuln", "tornado_cooldown", "siren_song",
     "barbs",
@@ -2232,7 +2228,7 @@ static const char *enchant_names[] =
     "poison_vuln", "icemail", "agile",
     "frozen", "ephemeral_infusion", "black_mark", "grand_avatar",
     "sap magic", "shroud", "phantom_mirror", "bribed", "permabribed",
-    "buggy",
+    "corrosion", "buggy",
 };
 
 static const char *_mons_enchantment_name(enchant_type ench)
@@ -2389,6 +2385,7 @@ int mon_enchant::calc_duration(const monster* mons,
         cturn = 300 / _mod_speed(25, mons->speed);
         break;
     case ENCH_SLOW:
+    case ENCH_CORROSION:
         cturn = 250 / (1 + modded_speed(mons, 10));
         break;
     case ENCH_FEAR:
@@ -2439,10 +2436,6 @@ int mon_enchant::calc_duration(const monster* mons,
         // This is used as a simple timer, when the enchantment runs out
         // the monster will create a giant spore.
         return random_range(475, 525) * 10;
-
-    case ENCH_PREPARING_RESURRECT:
-        // A timer. When it runs out, the creature will cast resurrect.
-        return random_range(4, 7) * 10;
 
     case ENCH_EXPLODING:
         return random_range(3, 7) * 10;

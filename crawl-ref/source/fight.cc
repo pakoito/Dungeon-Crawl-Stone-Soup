@@ -44,12 +44,22 @@
 #include "travel.h"
 #include "traps.h"
 
-/* Handles melee combat between attacker and defender
+/**
+ * Handle melee combat between attacker and defender.
  *
  * Works using the new fight rewrite. For a monster attacking, this method
  * loops through all their available attacks, instantiating a new melee_attack
  * for each attack. Combat effects should not go here, if at all possible. This
  * is merely a wrapper function which is used to start combat.
+ *
+ * @param[in] attacker,defender The (non-null) participants in the attack.
+ *                              Either may be killed as a result of the attack.
+ * @param[out] did_hit If non-null, receives true if the attack hit the
+ *                     defender, and false otherwise.
+ * @param simu Is this a simulated attack?  Disables a few problematic
+ *             effects such as blood spatter and distortion teleports.
+ *
+ * @return Whether the attack took time (i.e. wasn't cancelled).
  */
 bool fight_melee(actor *attacker, actor *defender, bool *did_hit, bool simu)
 {
@@ -110,7 +120,7 @@ bool fight_melee(actor *attacker, actor *defender, bool *did_hit, bool simu)
             // Attack was cancelled or unsuccessful...
             if (attk.cancel_attack)
                 you.turn_is_over = false;
-            return false;
+            return !attk.cancel_attack;
         }
 
         if (did_hit)

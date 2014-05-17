@@ -2093,8 +2093,10 @@ static void _build_overflow_temples()
                 vault = random_map_for_tag(vault_tag, true);
 #ifdef DEBUG_TEMPLES
                 if (vault == NULL)
+                {
                     mprf(MSGCH_DIAGNOSTICS, "Couldn't find overflow temple "
                          "for combination of tags %s", vault_tag.c_str());
+                }
 #endif
             }
 
@@ -3259,6 +3261,12 @@ static bool _builder_normal()
 
     if (vault)
     {
+        // TODO: figure out a good way to do this only in Temple
+        dgn_map_parameters mp(
+            you.props.exists(TEMPLE_SIZE_KEY)
+            ? make_stringf("temple_altars_%d",
+                           you.props[TEMPLE_SIZE_KEY].get_int())
+            : "");
         env.level_build_method += " random_map_for_place";
         _ensure_vault_placed_ex(_build_primary_vault(vault), vault);
         // Only place subsequent random vaults on non-encompass maps
@@ -3375,6 +3383,14 @@ static void _place_gozag_shop(dungeon_feature_type stair)
         grd(*shop_place) = DNGN_ABANDONED_SHOP;
 }
 
+// Shafts can be generated visible.
+//
+// Starts about 50% of the time and approaches 0%
+static bool _shaft_known(int depth)
+{
+    return coinflip() && x_chance_in_y(3, depth);
+}
+
 static void _place_traps()
 {
     const int num_traps = num_traps_for_place();
@@ -3429,7 +3445,7 @@ static void _place_traps()
 
         grd(ts.pos) = DNGN_UNDISCOVERED_TRAP;
         env.tgrid(ts.pos) = i;
-        if (ts.type == TRAP_SHAFT && shaft_known(level_number, true))
+        if (ts.type == TRAP_SHAFT && _shaft_known(level_number))
             ts.reveal();
         ts.prepare_ammo();
     }
@@ -3593,7 +3609,9 @@ static coord_def _dgn_random_point_in_bounds(dungeon_feature_type searchfeat,
             const coord_def c = random_in_bounds();
             if (_point_matches_feat(c, searchfeat, mapmask, adjacent_feat,
                                     monster_free))
+            {
                 return c;
+            }
         }
         return coord_def(0, 0);
     }
@@ -4320,7 +4338,7 @@ static const vault_placement *_build_vault_impl(const map_def *vault,
         _ruin_vault(place);
 
     if (place.exits.empty() && placed_vault_orientation != MAP_ENCOMPASS
-        && (!place.map.is_minivault() || place.map.has_tag("mini_float")))
+        && (!place.map.is_minivault() || !place.map.has_tag("no_exits")))
     {
         _pick_float_exits(place, place.exits);
     }
@@ -4740,7 +4758,9 @@ static void _dgn_give_mon_spec_items(mons_spec &mspec,
 
         if (spec.base_type == OBJ_UNASSIGNED
             || (spec.base_type == OBJ_MISCELLANY && spec.sub_type == MISC_RUNE_OF_ZOT))
+        {
             continue;
+        }
 
         // Don't give monster a randart, and don't randomly give
         // monster an ego item.

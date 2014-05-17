@@ -307,9 +307,11 @@ bool melee_attack::handle_phase_attempted()
     if (attk_flavour == AF_SHADOWSTAB && defender && !defender->can_see(attacker))
     {
         if (you.see_cell(attack_position))
+        {
             mprf("%s strikes at %s from the darkness!",
                  attacker->name(DESC_THE, true).c_str(),
                  defender->name(DESC_THE).c_str());
+        }
         to_hit = AUTOMATIC_HIT;
         needs_message = false;
     }
@@ -416,7 +418,7 @@ void melee_attack::apply_black_mark_effects()
         if (!defender->alive())
             return;
 
-        switch(random2(3))
+        switch (random2(3))
         {
             case 0:
                 antimagic_affects_defender(damage_done * 8);
@@ -440,7 +442,7 @@ void melee_attack::apply_black_mark_effects()
         if (!defender->alive())
             return;
 
-        switch(random2(3))
+        switch (random2(3))
         {
             case 0:
                 antimagic_affects_defender(damage_done * 8);
@@ -589,7 +591,9 @@ bool melee_attack::handle_phase_hit()
         // the player is hit, each of them will verify their own required
         // parameters.
         do_passive_freeze();
+#if TAG_MAJOR_VERSION == 34
         do_passive_heat();
+#endif
         emit_foul_stench();
     }
 
@@ -1725,31 +1729,6 @@ void melee_attack::set_attack_verb()
             break;
         case TRAN_STATUE:
         case TRAN_LICH:
-            if (you.has_usable_claws())
-            {
-                if (damage_to_display < HIT_WEAK)
-                    attack_verb = "scratch";
-                else if (damage_to_display < HIT_MED)
-                    attack_verb = "claw";
-                else if (damage_to_display < HIT_STRONG)
-                    attack_verb = "mangle";
-                else
-                    attack_verb = "eviscerate";
-                break;
-            }
-            else if (you.has_usable_tentacles())
-            {
-                if (damage_to_display < HIT_WEAK)
-                    attack_verb = "tentacle-slap";
-                else if (damage_to_display < HIT_MED)
-                    attack_verb = "bludgeon";
-                else if (damage_to_display < HIT_STRONG)
-                    attack_verb = "batter";
-                else
-                    attack_verb = "thrash";
-                break;
-            }
-            // or fall-through
         case TRAN_NONE:
         case TRAN_APPENDAGE:
         case TRAN_ICE_BEAST:
@@ -2933,10 +2912,6 @@ void melee_attack::mons_apply_attack_flavour()
             rot_defender(2 + random2(3), damage_done > 5 ? 1 : 0);
         break;
 
-    case AF_DISEASE:
-        defender->sicken(50 + random2(100));
-        break;
-
     case AF_FIRE:
         base_damage = attacker->get_experience_level()
                       + random2(attacker->get_experience_level());
@@ -3338,28 +3313,6 @@ void melee_attack::mons_apply_attack_flavour()
         }
         break;
 
-    case AF_PLAGUE:
-        if (defender->sicken(30 + random2(50), true, true))
-        {
-            if (defender->is_player())
-            {
-                you.increase_duration(DUR_RETCHING, 7 + random2(9), 25);
-                mpr("You feel violently ill.");
-            }
-            else
-            {
-                if (!defender->as_monster()->has_ench(ENCH_RETCHING)
-                    && you.can_see(defender))
-                {
-                    simple_monster_message(defender->as_monster(),
-                                           " looks violently ill.");
-                }
-                defender->as_monster()->add_ench(mon_enchant(ENCH_RETCHING, 1,
-                                                             attacker, 7 + random2(9)));
-            }
-        }
-        break;
-
     case AF_WEAKNESS_POISON:
         if (coinflip() && mons_do_poison())
             defender->weaken(attacker, 12);
@@ -3476,6 +3429,7 @@ void melee_attack::do_passive_freeze()
     }
 }
 
+#if TAG_MAJOR_VERSION == 34
 void melee_attack::do_passive_heat()
 {
     if (you.species == SP_LAVA_ORC && temperature_effect(LORC_PASSIVE_HEAT)
@@ -3509,6 +3463,7 @@ void melee_attack::do_passive_heat()
         }
     }
 }
+#endif
 
 void melee_attack::mons_do_eyeball_confusion()
 {
@@ -3881,9 +3836,11 @@ bool melee_attack::_extra_aux_attack(unarmed_attack_type atk, bool is_uc)
         return false;
 
     if (atk == UNAT_CONSTRICT)
+    {
         return is_uc
                 || you.species == SP_NAGA && you.experience_level > 12
                 || you.species == SP_OCTOPODE && you.has_usable_tentacle();
+    }
 
     if (you.strength() + you.dex() <= random2(50))
         return false;

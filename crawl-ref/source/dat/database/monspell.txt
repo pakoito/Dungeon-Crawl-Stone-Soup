@@ -357,7 +357,7 @@ orb of fire cast
 %%%%
 silver statue cast
 
-@The_monster@'s eyes glow @glowing_colour_name@.
+@The_monster@'s eyes glow briefly.
 %%%%
 # Sphinxes can't gesture or point.
 sphinx cast
@@ -488,15 +488,6 @@ Bolt of Fire ophan cast
 unseen Bolt of Fire ophan cast
 
 Something harnesses the cleansing power of fire!
-%%%%
-shedu cast
-
-@The_monster@ performs a healing ritual in @possessive_God@ name.
-%%%%
-# Should only be casting spells at each other.
-shedu cast targeted
-
-@The_monster@ beseeches @possessive_God@ to heal @possessive@ mate!
 %%%%
 Shock shock serpent cast
 

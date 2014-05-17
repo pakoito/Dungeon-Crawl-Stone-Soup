@@ -305,8 +305,10 @@ void player_reacts_to_monsters()
     }
 
     if (you.duration[DUR_TELEPATHY])
+    {
         detect_creatures(1 + you.duration[DUR_TELEPATHY] /
                          (2 * BASELINE_DELAY), true);
+    }
 
     // We have to do the messaging here, because a simple wand of flame will
     // call _maybe_melt_player_enchantments twice. It also avoid duplicate
@@ -368,7 +370,9 @@ static void _handle_recitation(int step)
 
     if (apply_area_visible(_zin_recite_to_monsters,
                            you.attribute[ATTR_RECITE_TYPE], &you))
+    {
         viewwindow();
+    }
 
     // Recite trains more than once per use, because it has a
     // long timer in between uses and actually takes up multiple
@@ -800,8 +804,10 @@ static void _decrement_durations()
         if (!you.duration[DUR_PARALYSIS] && !you.petrified())
             mprf(MSGCH_WARN, "You are exhausted.");
 
+#if TAG_MAJOR_VERSION == 34
         if (you.species == SP_LAVA_ORC)
             mpr("You feel less hot-headed.");
+#endif
 
         // This resets from an actual penalty or from NO_BERSERK_PENALTY.
         you.berserk_penalty = 0;
@@ -993,9 +999,9 @@ static void _decrement_durations()
                           "Your shroud begins to fray at the edges.");
 
     _decrement_a_duration(DUR_INFUSION, delay,
-                          "Your attacks are no longer magically infused.",
+                          "You are no longer magically infusing your attacks.",
                           0,
-                          "You are feeling less magically infused.");
+                          "Your magical infusion is running out.");
 
     _decrement_a_duration(DUR_SONG_OF_SLAYING, delay,
                           "Your song has ended.",
@@ -1015,6 +1021,14 @@ static void _decrement_durations()
 
     _decrement_a_duration(DUR_SAP_MAGIC, delay,
                           "Your magic seems less tainted.");
+
+    if (_decrement_a_duration(DUR_CORROSION, delay,
+                          "You repair your equipment."))
+    {
+        you.props["corrosion_amount"] = 0;
+        you.redraw_armour_class = true;
+        you.wield_change = true;
+    }
 
     if (!you.duration[DUR_SAP_MAGIC])
     {
@@ -1049,8 +1063,6 @@ static void _decrement_durations()
         else if (you.duration[DUR_FLAYED] < 80)
             you.duration[DUR_FLAYED] += div_rand_round(50, delay);
     }
-
-    _decrement_a_duration(DUR_RETCHING, delay, "Your fit of retching subsides.");
 
     if (you.duration[DUR_TOXIC_RADIANCE])
     {
@@ -1245,8 +1257,10 @@ void player_reacts()
     if (you.attribute[ATTR_SHADOWS])
         shadow_lantern_effect();
 
+#if TAG_MAJOR_VERSION == 34
     if (you.species == SP_LAVA_ORC)
         temperature_check();
+#endif
 
     if (player_mutation_level(MUT_DEMONIC_GUARDIAN))
         check_demonic_guardian();

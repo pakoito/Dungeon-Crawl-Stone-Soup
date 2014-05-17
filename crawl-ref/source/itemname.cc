@@ -1602,7 +1602,7 @@ string item_def::name_aux(description_level_type desc, bool terse, bool ident,
         case FOOD_CHUNK:
             if (!basename && !dbname)
             {
-                if (food_is_rotten(*this) && it_plus != MONS_PLAGUE_SHAMBLER)
+                if (food_is_rotten(*this))
                     buff << "rotting ";
 
                 buff << "chunk of "
@@ -1870,7 +1870,7 @@ string item_def::name_aux(description_level_type desc, bool terse, bool ident,
         if (dbname && item_typ == CORPSE_SKELETON)
             return "decaying skeleton";
 
-        if (food_is_rotten(*this) && !dbname && it_plus != MONS_PLAGUE_SHAMBLER)
+        if (food_is_rotten(*this) && !dbname)
             buff << "rotting ";
 
         uint64_t name_type, name_flags = 0;
@@ -3268,8 +3268,10 @@ bool is_useless_item(const item_def &item, bool temp)
         return !can_wear_armour(item, false, true);
 
     case OBJ_SCROLLS:
+#if TAG_MAJOR_VERSION == 34
         if (you.species == SP_LAVA_ORC && temperature_effect(LORC_NO_SCROLLS))
             return true;
+#endif
 
         if (!item_type_known(item))
             return false;
@@ -3360,8 +3362,10 @@ bool is_useless_item(const item_def &item, bool temp)
         case POT_GAIN_DEXTERITY:
 #endif
             if (you.species == SP_VAMPIRE)
+            {
                 return temp && you.hunger_state < HS_SATIATED
                        && item.sub_type != POT_BENEFICIAL_MUTATION;
+            }
             if (you.form == TRAN_LICH)
                 return temp;
             return you.is_undead;
@@ -3654,7 +3658,9 @@ string item_prefix(const item_def &item, bool temp)
         if (item.sub_type != BOOK_MANUAL
             && item.sub_type != BOOK_DESTRUCTION
             && item.sub_type != NUM_BOOKS)
+        {
             prefixes.push_back("spellbook");
+        }
         break;
 
     default:

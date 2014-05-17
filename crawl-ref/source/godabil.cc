@@ -514,15 +514,11 @@ static int _zin_check_recite_to_single_monster(const monster *mon,
     // Hits monsters that have these brands.
     if (mon->has_attack_flavour(AF_VAMPIRIC))
         eligibility[RECITE_IMPURE]++;
-    if (mon->has_attack_flavour(AF_DISEASE))
-        eligibility[RECITE_IMPURE]++;
     if (mon->has_attack_flavour(AF_HUNGER))
         eligibility[RECITE_IMPURE]++;
     if (mon->has_attack_flavour(AF_ROT))
         eligibility[RECITE_IMPURE]++;
     if (mon->has_attack_flavour(AF_STEAL))
-        eligibility[RECITE_IMPURE]++;
-    if (mon->has_attack_flavour(AF_PLAGUE))
         eligibility[RECITE_IMPURE]++;
 
     // Being naturally mutagenic isn't good either.
@@ -739,9 +735,9 @@ bool zin_recite_to_single_monster(const coord_def& where)
         return false;
 
     recite_type prayertype = RECITE_CHAOTIC;
-    for(int i = RECITE_CHAOTIC; i != NUM_RECITE_TYPES; i++)
+    for (int i = RECITE_CHAOTIC; i != NUM_RECITE_TYPES; i++)
     {
-            if(eligibility[i] > eligibility[prayertype])
+            if (eligibility[i] > eligibility[prayertype])
                     prayertype = static_cast <recite_type>(i);
     }
 
@@ -1331,7 +1327,6 @@ void elyvilon_purification()
     you.duration[DUR_CONF] = 0;
     you.duration[DUR_SLOW] = 0;
     you.duration[DUR_PETRIFYING] = 0;
-    you.duration[DUR_RETCHING] = 0;
     you.duration[DUR_WEAK] = 0;
     restore_stat(STAT_ALL, 0, false);
     unrot_hp(9999);
@@ -4287,9 +4282,11 @@ int gozag_type_bribable(monster_type type, bool force)
     for (unsigned int i = 0; i < ARRAYSZ(mons_bribability); i++)
     {
         if (mons_bribability[i].type == type)
+        {
             return force || branch_bribe[mons_bribability[i].branch]
                    ? mons_bribability[i].susceptibility
                    : 0;
+        }
     }
 
     return 0;
@@ -4475,7 +4472,7 @@ bool qazlal_upheaval(coord_def target, bool quiet)
 
     string message = "";
 
-    switch(random2(4))
+    switch (random2(4))
     {
         case 0:
             beam.name     = "blast of magma";
@@ -4603,7 +4600,7 @@ void qazlal_elemental_force()
     {
         if (env.cgrid(*ri) != EMPTY_CLOUD)
         {
-            switch(env.cloud[env.cgrid(*ri)].type)
+            switch (env.cloud[env.cgrid(*ri)].type)
             {
             case CLOUD_FIRE:
             case CLOUD_COLD:
@@ -4649,7 +4646,7 @@ void qazlal_elemental_force()
                        agent->is_player() ? BEH_FRIENDLY
                                           : SAME_ATTITUDE(agent->as_monster());
         mg.pos       = pos;
-        switch(cl.type)
+        switch (cl.type)
         {
         case CLOUD_FIRE:
         case CLOUD_FOREST_FIRE:

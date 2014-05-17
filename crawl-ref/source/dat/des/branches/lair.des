@@ -694,7 +694,7 @@ ENDMAP
 #
 NAME:   bobbens_dragon_lair_wall
 DEPTH:  Lair:2-
-TAGS:   no_monster_gen mini_float
+TAGS:   no_monster_gen
 : if you.depth() >= 7 then
 MONS:   fire dragon w:9 / lindwurm w:1
 MONS:   fire drake / w:2 mottled dragon / w:4 nothing
@@ -784,7 +784,7 @@ ENDMAP
 #
 NAME:   hibernation_bobbens
 DEPTH:  Lair
-TAGS:   allow_dup no_monster_gen no_item_gen mini_float
+TAGS:   allow_dup no_monster_gen no_item_gen
 MONS:   ice dragon / fire dragon / swamp dragon / anaconda w:5
 MONS:   swamp dragon / hydra / catoblepas
 MONS:   swamp drake / w:20 spiny frog / w:20 komodo dragon /\
@@ -998,7 +998,6 @@ ENDMAP
 # Two stream minivaults
 NAME:   guppyfry_lair_drakes
 DEPTH:  Lair
-TAGS:   mini_float
 WEIGHT: 15
 : if you.depth() > 3 and crawl.coinflip() then
 MONS:   fire drake / swamp drake / mottled dragon
@@ -1027,7 +1026,7 @@ ENDMAP
 ###############################################################################
 # A polar bear lost in the jungle, how odd
 NAME:  roderic_lost_polar_bear
-TAGS:  no_monster_gen mini_float
+TAGS:  no_monster_gen
 DEPTH: Lair:3-7
 MONS:  plant, polar_bear, bush
 SUBST: ? = 1t
@@ -1170,7 +1169,6 @@ t1..t1.t.tt.t111.t...c..4C4..c..1t.1.tt.t.
 ENDMAP
 
 NAME:   wad_woods_01
-TAGS:   mini_float
 DEPTH:  Lair, Forest
 : wad_woods_setup(_G, "small", 2, true, 21, 2, 8)
 MAP
@@ -1191,7 +1189,6 @@ ttt.tt4ttt..%.4ttOttt
 ENDMAP
 
 NAME:   wad_woods_02
-TAGS:   mini_float
 DEPTH:  Lair, Forest
 : wad_woods_setup(_G, "small", 2, false, 0, 0, 0)
 MAP
@@ -1233,7 +1230,6 @@ MAP
 ENDMAP
 
 NAME:   wad_woods_04
-TAGS:   mini_float
 DEPTH:  Lair, Forest
 : wad_woods_setup(_G, "rock", 2, false, 0, 0, 0)
 FTILE:  '+*0 = floor_dirt
@@ -1258,7 +1254,7 @@ xxxxxxxxxxxxxxxxxxxxxxxxx
 ENDMAP
 
 NAME:   wad_woods_06
-TAGS:   mini_float extra
+TAGS:   extra
 DEPTH:  Lair, Forest
 : wad_woods_setup(_G, "small", 2, false, 0, 0, 0)
 MAP
@@ -1276,7 +1272,7 @@ t1tt1ttt21tt
 ENDMAP
 
 NAME:   wad_woods_antlair
-TAGS:   mini_float uniq_anthill
+TAGS:   uniq_anthill
 DEPTH:  Lair, Forest
 : wad_woods_setup(_G, "rock", 5, false, 0, 0, 0)
 MONS:   worker ant, soldier ant
@@ -1328,7 +1324,7 @@ ttt5tt.t.tt1t1t.t%1tt.t5tttttt
 ENDMAP
 
 NAME:   wad_woods_river_02
-TAGS:   mini_float extra
+TAGS:   extra
 DEPTH:  Lair, Forest
 : wad_woods_setup(_G, "small", 1, true, 32, 2, 24)
 MAP
@@ -1348,7 +1344,6 @@ ttt1ttt.WWWt.ttt0t1t
 ENDMAP
 
 NAME:   wad_woods_river_03
-TAGS:   mini_float
 DEPTH:  Lair, Forest
 : wad_woods_setup(_G, "decor", 1, false, 32, 3, 24)
 MAP
@@ -1366,7 +1361,7 @@ WWWWt.t.t1t
 ENDMAP
 
 NAME:   wad_woods_river_04
-TAGS:   no_vmirror no_rotate mini_float
+TAGS:   no_vmirror no_rotate
 DEPTH:  D, Lair, Forest
 TILE:   X = wall_brick_dark_leak
 TILE:   x = wall_brick_dark
@@ -1779,7 +1774,8 @@ NAME: nicolae_quartered_pool_little
 DEPTH: Lair
 TAGS: transparent extra decor luniq_qpool
 SHUFFLE: Aa, Bb, Cc, Dd, Ee, Ff, Gg, Hh, Ii, Jj, Kk, Ll, Mm, Nn, Oo, Pp, Qq
-SUBST: abcdefghijklmnopq = ., ABCDEFGHIJKLMNOPQ = W, 7 = t
+SUBST: abcdefghijklmnopq = ., ABCDEFGHIJKLMNOPQ = W
+NSUBST: 7 = t@
 MAP
     777777
    7qolLOQ7
@@ -1802,7 +1798,8 @@ DEPTH: Lair
 TAGS: transparent extra decor luniq_qpool
 SHUFFLE: Aa, Bb, Cc, Dd, Ee, Ff, Gg, Hh, Ii, Jj, Kk, Ll, Mm
 SHUFFLE: Nn, Oo, Pp, Qq, Rr, Ss, Tt, Uu
-SUBST: abcdefghijklmnopqrstu = ., ABCDEFGHIJKLMNOPQRSTU = W, 7 = t
+SUBST: abcdefghijklmnopqrstu = ., ABCDEFGHIJKLMNOPQRSTU = W
+NSUBST: 7 = t@
 MAP
       7777
     77spPS77
@@ -1829,7 +1826,7 @@ SHUFFLE: Aa, Bb, Cc, Dd, Ee, Ff, Gg, Hh, Ii, Jj, Kk, Ll, Mm
 SHUFFLE: Nn, Oo, Pp, Qq, Rr, Ss, Tt, Uu, Vv, Ww, Xx, Yy, Zz
 SHUFFLE: 12, 34, 56
 SUBST: abcdefghijklmnopqrstuvwxyz135 = ., ABCDEFGHIJKLMNOPQRSTUVWXYZ246 = W
-SUBST: 7 = t
+NSUBST: 7 = @ / t@
 MAP
       777777
     771xtTX277
@@ -1991,7 +1988,7 @@ xttt.......tttx
 xxtttt...ttttxx
  xxxtt..ttxxxx
   xxxtt..ttxx
-   xxtt..ttx
+   xxtt@@ttx
 ENDMAP
 
 NAME:    bh_autumn_forest_stairs
@@ -2037,33 +2034,33 @@ SHUFFLE: Ww. / ''` / ''`
 SUBST: t = t.., '` = 1:49 d:36 .:405
 SUBST: G = w., W = WW., w = wwW
 MAP
- tt...tt
+ tt@@@tt
 t.......t
 t..WWW..t
-..WwwwW..
-..WwGwW..
-..WwwwW..
+@.WwwwW.@
+@.WwGwW.@
+@.WwwwW.@
 t..WWW..t
 t.......t
- tt...tt
+ tt@@@tt
 ENDMAP
 
 NAME: grunt_forest_small_clearing_treed
 TAGS: transparent patrolling
 DEPTH: Lair
-MONS: plant / bush, spriggan
+MONS: plant / bush
 SUBST: t = t..
 KPROP: * = no_rtele_into
 MAP
- tt...tt
+ tt@@@tt
 t.......t
 t.1...1.t
-...ttt...
-...t*t...
-...ttt...
+@..ttt..@
+@..t*t..@
+@..ttt..@
 t.1...1.t
 t.......t
- tt...tt
+ tt@@@tt
 ENDMAP
 
 # Prviously large_clearing_fruit, _statues, _slash, _guards
@@ -2083,7 +2080,7 @@ SHUFFLE: wW'"^~-_9 / ''GG''''* / '''0''''% / ``````22G
 SUBST:   t = t.., '. = 1:49 d:36 .:405, W = WW., "w = wwW
 NSUBST:  2 = 3:2 / 2:3 / 1:4 / *:.
 MAP
-      tt...tt
+      tt@@@tt
     ttt.....ttt
   ttt.........ttt
   tww...........t
@@ -2091,9 +2088,9 @@ MAP
  t..www..'.......t
 tt...w"w....'....tt
 t.....ww-._.......t
-.......-~W^_.......
-.....'..W9W..'.....
-......._^W~-.......
+@......-~W^_......@
+@....'..W9W..'....@
+@......_^W~-......@
 t.....'._.-ww.....t
 tt.........w"w...tt
  t.......'..www..t
@@ -2101,7 +2098,7 @@ tt.........w"w...tt
   t...........wwt
   ttt.........ttt
     ttt.....ttt
-      tt...tt
+      tt@@@tt
 ENDMAP
 
 NAME:  grunt_forest_large_clearing_hut
@@ -2113,7 +2110,7 @@ SUBST: . = 1 .:90
 COLOUR: -*29 = lightgrey
 FTILE:  -*29 = floor_normal
 MAP
-      tt...tt
+      tt@@@tt
     ttt.....ttt
   ttt.........ttt
   t.............t
@@ -2121,9 +2118,9 @@ MAP
  t...............t
 tt...............tt
 t......ccccc......t
-.......c-9*c.......
-.......+-*2c.......
-.......c-9*c.......
+@......c-9*c......@
+@......+-*2c......@
+@......c-9*c......@
 t......ccccc......t
 tt...............tt
  t...............t
@@ -2131,7 +2128,7 @@ tt...............tt
   t.............t
   ttt.........ttt
     ttt.....ttt
-      tt...tt
+      tt@@@tt
 ENDMAP
 
 ###############################################################################

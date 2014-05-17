@@ -268,7 +268,9 @@ static const char* _prop_name[] =
     "*Tele",
     "-Tele",
     "*Rage",
+#if TAG_MAJOR_VERSION == 34
     "Hungr",
+#endif
     "Contm",
     "Acc",
     "Dam",
@@ -320,7 +322,9 @@ static int8_t _prop_type[] =
     ARTP_VAL_BOOL, //CAUSE_TELEPORTATION
     ARTP_VAL_BOOL, //PREVENT_TELEPORTATION
     ARTP_VAL_POS,  //ANGRY
+#if TAG_MAJOR_VERSION == 34
     ARTP_VAL_POS,  //METABOLISM
+#endif
     ARTP_VAL_POS,  //MUTAGENIC
     ARTP_VAL_ANY,  //ACCURACY
     ARTP_VAL_ANY,  //DAMAGE
@@ -1205,8 +1209,10 @@ static void _debug_acquirement_stats(FILE *ostat)
         for (int i = 0; i < NUM_SPECIAL_ARMOURS; ++i)
         {
             if (ego_quants[i] > 0)
+            {
                 fprintf(ostat, "%17s: %5.2f\n", names[i],
                         100.0 * (float) ego_quants[i] / (float) non_art);
+            }
         }
         fprintf(ostat, "\n\n");
     }

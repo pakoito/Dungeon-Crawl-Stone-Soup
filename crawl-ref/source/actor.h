@@ -237,7 +237,8 @@ public:
     virtual int beam_resists(bolt &beam, int hurted, bool doEffects,
                              string source = "") = 0;
 
-    virtual int  skill(skill_type sk, int scale = 1, bool real = false) const = 0;
+    virtual int  skill(skill_type sk, int scale = 1,
+                       bool real = false, bool drained = true) const = 0;
     int  skill_rdiv(skill_type sk, int mult = 1, int div = 1) const;
 
     virtual int stat_hp() const = 0;
@@ -355,8 +356,10 @@ public:
     virtual bool haloed() const;
     // Within an umbra?
     virtual bool umbraed() const;
+#if TAG_MAJOR_VERSION == 34
     // Being heated by a heat aura?
     virtual bool heated() const;
+#endif
     // Squared halo radius.
     virtual int halo_radius2() const = 0;
     // Squared silence radius.
@@ -364,7 +367,9 @@ public:
     // Squared liquefying radius
     virtual int liquefying_radius2() const = 0;
     virtual int umbra_radius2() const = 0;
+#if TAG_MAJOR_VERSION == 34
     virtual int heat_radius2() const = 0;
+#endif
 
     virtual bool glows_naturally() const = 0;
 

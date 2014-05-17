@@ -919,10 +919,6 @@ static bool _sif_muna_retribution()
         break;
 
     case 7:
-        if (!forget_spell())
-            mpr("You get a splitting headache.");
-        break;
-
     case 8:
         if (you.magic_points > 0
 #if TAG_MAJOR_VERSION == 34
@@ -1385,7 +1381,7 @@ static bool _dithmenos_retribution()
     // shadow theme
     const god_type god = GOD_DITHMENOS;
 
-    switch(random2(4))
+    switch (random2(4))
     {
     case 0:
     {
@@ -1447,7 +1443,7 @@ static bool _qazlal_retribution()
     // disaster/elemental theme
     const god_type god = GOD_QAZLAL;
 
-    switch(random2(3))
+    switch (random2(3))
     {
     case 0:
     {
@@ -1882,7 +1878,7 @@ void gozag_incite(monster *mon)
         int tries = 3;
         do
         {
-            switch(random2(3))
+            switch (random2(3))
             {
                 case 0:
                     if (mon->has_ench(ENCH_MIGHT))

@@ -115,7 +115,7 @@ LUARET1(you_res_fire, number, player_res_fire(false))
 LUARET1(you_res_cold, number, player_res_cold(false))
 LUARET1(you_res_draining, number, player_prot_life(false))
 LUARET1(you_res_shock, number, player_res_electricity(false))
-LUARET1(you_res_statdrain, number, player_sust_abil(false))
+LUARET1(you_res_statdrain, boolean, player_sust_abil(false))
 LUARET1(you_res_mutation, number, you.rmut_from_item(false) ? 1 : 0)
 LUARET1(you_see_invisible, boolean, you.can_see_invisible(false))
 // Returning a number so as not to break existing scripts.
@@ -166,7 +166,8 @@ LUARET1(you_where, string, level_id::current().describe().c_str())
 LUARET1(you_branch, string, level_id::current().describe(false, false).c_str())
 LUARET1(you_depth, number, you.depth)
 LUARET1(you_depth_fraction, number,
-        (float)you.depth / brdepth[you.where_are_you])
+        (brdepth[you.where_are_you] <= 1) ? 1
+        : ((float)(you.depth - 1) / (brdepth[you.where_are_you] - 1)))
 // [ds] Absolute depth is 1-based for Lua to match things like DEPTH:
 // which are also 1-based. Yes, this is confusing. FIXME: eventually
 // change you.absdepth0 to be 1-based as well.

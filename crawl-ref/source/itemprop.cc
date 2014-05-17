@@ -498,13 +498,11 @@ bool curse_an_item(bool ignore_holy_wrath)
             if (you.inv[i].cursed())
                 continue;
 
-            // Melded items cannot be cursed.
-            if (item_is_melded(you.inv[i]))
-                continue;
-
             if (ignore_holy_wrath && you.inv[i].base_type == OBJ_WEAPONS
                 && get_weapon_brand(you.inv[i]) == SPWPN_HOLY_WRATH)
+            {
                 continue;
+            }
 
             // Item is valid for cursing, so we'll give it a chance.
             count++;
@@ -958,7 +956,9 @@ int armour_max_enchant(const item_def &item)
     if (eq_slot == EQ_BODY_ARMOUR
         || item.sub_type == ARM_CENTAUR_BARDING
         || item.sub_type == ARM_NAGA_BARDING)
+    {
         max_plus = property(item, PARM_AC);
+    }
     else if (eq_slot == EQ_SHIELD)
         max_plus = 3;
 
@@ -1070,9 +1070,6 @@ bool item_is_rechargeable(const item_def &it, bool hide_charged)
     }
     else if (it.base_type == OBJ_RODS)
     {
-        if (item_is_melded(it))
-            return false;
-
         if (!hide_charged)
             return true;
 
@@ -1156,10 +1153,6 @@ bool is_offensive_wand(const item_def& item)
 bool is_enchantable_armour(const item_def &arm, bool uncurse, bool unknown)
 {
     if (arm.base_type != OBJ_ARMOUR)
-        return false;
-
-    // Melded armour cannot be enchanted.
-    if (item_is_melded(arm))
         return false;
 
     // If we don't know the plusses, assume enchanting is possible.
@@ -1491,7 +1484,9 @@ bool is_brandable_weapon(const item_def &wpn, bool allow_ranged)
 
     if (you.duration[DUR_WEAPON_BRAND] != 0
         && you.weapon() == &wpn)
+    {
         return false;
+    }
 
     return true;
 }
@@ -2355,7 +2350,9 @@ bool gives_ability(const item_def &item)
 
         if (ego == SPARM_DARKNESS || ego == SPARM_FLYING
             || ego == SPARM_JUMPING)
+        {
             return true;
+        }
         break;
     }
     default:
@@ -2649,9 +2646,9 @@ void seen_item(const item_def &item)
     {
         // Known brands will be set in set_item_flags().
         if (item.base_type == OBJ_WEAPONS)
-            you.seen_weapon[item.sub_type] |= 1 << SP_UNKNOWN_BRAND;
+            you.seen_weapon[item.sub_type] |= 1U << SP_UNKNOWN_BRAND;
         if (item.base_type == OBJ_ARMOUR)
-            you.seen_armour[item.sub_type] |= 1 << SP_UNKNOWN_BRAND;
+            you.seen_armour[item.sub_type] |= 1U << SP_UNKNOWN_BRAND;
         if (item.base_type == OBJ_MISCELLANY
             && !is_deck(item))
         {

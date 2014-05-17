@@ -118,8 +118,10 @@ public:
   bool dead; // ... but pending revival
   int lives;
   int deaths;
+#if TAG_MAJOR_VERSION == 34
   float temperature; // For lava orcs.
   float temperature_last;
+#endif
 
   FixedVector<uint8_t, NUM_SKILLS>  skills; //!< skill level
   FixedVector<int8_t, NUM_SKILLS>  train; //!< 0: disabled, 1: normal, 2: focus.
@@ -187,8 +189,8 @@ public:
   FixedVector<uint8_t, NUM_GODS>  piety_max;
 
   FixedVector<uint8_t, NUM_MUTATIONS> mutation;
-  FixedVector<uint8_t, NUM_MUTATIONS> innate_mutations;
-  FixedVector<uint8_t, NUM_MUTATIONS> temp_mutations;
+  FixedVector<uint8_t, NUM_MUTATIONS> innate_mutation;
+  FixedVector<uint8_t, NUM_MUTATIONS> temp_mutation;
 
   struct demon_trait
   {
@@ -331,7 +333,9 @@ public:
   bool redraw_title;
   bool redraw_hit_points;
   bool redraw_magic_points;
+#if TAG_MAJOR_VERSION == 34
   bool redraw_temperature;
+#endif
   FixedVector<bool, NUM_STATS> redraw_stats;
   bool redraw_experience;
   bool redraw_armour_class;
@@ -653,7 +657,9 @@ public:
     int silence_radius2() const;
     int liquefying_radius2() const;
     int umbra_radius2() const;
+#if TAG_MAJOR_VERSION == 34
     int heat_radius2() const;
+#endif
     bool glows_naturally() const;
     bool petrifying() const;
     bool petrified() const;
@@ -698,7 +704,8 @@ public:
     int shield_tohit_penalty(bool random_factor, int scale = 1) const;
 
     bool wearing_light_armour(bool with_skill = false) const;
-    int  skill(skill_type skill, int scale =1, bool real = false) const;
+    int  skill(skill_type skill, int scale =1,
+               bool real = false, bool drained = true) const;
 
     bool do_shaft();
 
@@ -903,7 +910,7 @@ int player_speed(void);
 
 int player_spell_levels(void);
 
-int player_sust_abil(bool calc_unid = true);
+bool player_sust_abil(bool calc_unid = true);
 
 int player_teleport(bool calc_unid = true);
 
@@ -1031,6 +1038,7 @@ bool need_expiration_warning(coord_def p = you.pos());
 void count_action(caction_type type, int subtype = 0);
 bool player_has_orb();
 
+#if TAG_MAJOR_VERSION == 34
 enum temperature_level
 {
     TEMP_MIN = 1, // Minimum (and starting) temperature. Not any warmer than bare rock.
@@ -1069,4 +1077,6 @@ bool temperature_effect(int which);
 int temperature_colour(int temp);
 string temperature_string(int temp);
 string temperature_text(int temp);
+#endif
+
 #endif

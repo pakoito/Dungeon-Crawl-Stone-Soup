@@ -221,6 +221,7 @@ static void _check_odd_card(uint8_t flags)
 static bool _card_forbidden(card_type card)
 {
     if (crawl_state.game_is_zotdef())
+    {
         switch (card)
         {
         case CARD_TOMB:
@@ -230,6 +231,7 @@ static bool _card_forbidden(card_type card)
         default:
             break;
         }
+    }
     return false;
 }
 
@@ -2584,7 +2586,7 @@ static void _mercenary_card(int power, deck_rarity_type rarity)
     {
         MONS_BIG_KOBOLD, MONS_MERFOLK, MONS_NAGA,
         MONS_TENGU, MONS_ORC_KNIGHT, MONS_CENTAUR_WARRIOR,
-        MONS_SPRIGGAN_RIDER, MONS_OGRE_MAGE, MONS_MINOTAUR,
+        RANDOM_BASE_DEMONSPAWN, MONS_OGRE_MAGE, MONS_MINOTAUR,
         RANDOM_BASE_DRACONIAN, MONS_DEEP_ELF_BLADEMASTER,
     };
 

@@ -3125,7 +3125,6 @@ static const char* _describe_attack_flavour(attack_flavour flavour)
     case AF_BLINK:           return "blink self";
     case AF_COLD:            return "deal extra cold damage";
     case AF_CONFUSE:         return "cause confusion";
-    case AF_DISEASE:         return "cause sickness";
     case AF_DRAIN_STR:       return "drain strength";
     case AF_DRAIN_INT:       return "drain intelligence";
     case AF_DRAIN_DEX:       return "drain dexterity";
@@ -3156,7 +3155,6 @@ static const char* _describe_attack_flavour(attack_flavour flavour)
     case AF_PURE_FIRE:       return "deal pure fire damage";
     case AF_DRAIN_SPEED:     return "drain speed";
     case AF_VULN:            return "reduce resistance to hostile enchantments";
-    case AF_PLAGUE:          return "cause sickness and retching";
     case AF_WEAKNESS_POISON: return "cause poison and weakness";
     case AF_SHADOWSTAB:      return "deal extra damage from the shadows";
     case AF_DROWN:           return "deal drowning damage";
@@ -3832,8 +3830,10 @@ void get_monster_db_desc(const monster_info& mi, describe_info &inf,
     monster& mons = *monster_at(mi.pos);
 
     if (mons.has_originating_map())
+    {
         inf.body << make_stringf("\nPlaced by map: %s",
                                  mons.originating_map().c_str());
+    }
 
     inf.body << "\nMonster health: "
              << mons.hit_points << "/" << mons.max_hit_points << "\n";
@@ -3857,9 +3857,11 @@ void get_monster_db_desc(const monster_info& mi, describe_info &inf,
     if (mons.wont_attack())
         attitude.push_back("wont_attack");
     if (!attitude.empty())
+    {
         inf.body << "; " << comma_separated_line(attitude.begin(),
                                                  attitude.end(),
                                                  "; ", "; ");
+    }
 
     if (mons.can_use_spells())
     {
@@ -4022,7 +4024,9 @@ string get_ghost_description(const monster_info &mi, bool concise)
     case SP_OGRE:
     case SP_MINOTAUR:
     case SP_HILL_ORC:
+#if TAG_MAJOR_VERSION == 34
     case SP_LAVA_ORC:
+#endif
     case SP_CENTAUR:
     case SP_NAGA:
     case SP_MUMMY:

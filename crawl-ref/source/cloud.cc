@@ -227,7 +227,9 @@ static void _spread_fire(const cloud_struct &cloud)
         if (!in_bounds(*ai)
             || env.cgrid(*ai) != EMPTY_CLOUD
             || is_sanctuary(*ai))
+        {
             continue;
+        }
 
         // burning trees produce flames all around
         if (!cell_is_solid(*ai) && make_flames)
@@ -1062,7 +1064,7 @@ static bool _actor_apply_cloud_side_effects(actor *act,
     case CLOUD_NEGATIVE_ENERGY:
     {
         actor* agent = find_agent(cloud.source, cloud.whose);
-        if (act->drain_exp(agent, "cloud of negative energy"))
+        if (act->drain_exp(agent))
         {
             if (cloud.whose == KC_YOU)
                 did_god_conduct(DID_NECROMANCY, 5 + random2(3));

@@ -67,12 +67,13 @@
 
 static bool _handle_pickup(monster* mons);
 static void _mons_in_cloud(monster* mons);
+#if TAG_MAJOR_VERSION == 34
 static void _heated_area(monster* mons);
+#endif
 static bool _is_trap_safe(const monster* mons, const coord_def& where,
                           bool just_check = false);
 static bool _monster_move(monster* mons);
 static spell_type _map_wand_to_mspell(wand_type kind);
-static void _shedu_movement_clamp(monster* mons);
 
 // [dshaligram] Doesn't need to be extern.
 static coord_def mmov;
@@ -1737,7 +1738,9 @@ static void _pre_monster_move(monster* mons)
             {
                 if (mons->props["foe_pos"].get_coord().distance_from(mons->pos())
                     > foe->pos().distance_from(mons->pos()))
+                {
                     mons->props["foe_approaching"].get_bool() = true;
+                }
                 else
                     mons->props["foe_approaching"].get_bool() = false;
 
@@ -1779,7 +1782,9 @@ static void _pre_monster_move(monster* mons)
         // Update constriction durations
         mons->accum_has_constricted();
 
+#if TAG_MAJOR_VERSION == 34
         _heated_area(mons);
+#endif
         if (mons->type == MONS_NO_MONSTER)
             return;
     }
@@ -2034,7 +2039,9 @@ void handle_monster_move(monster* mons)
     const bool avoid_cloud = mons_avoids_cloud(mons, cloud_num);
 
     _mons_in_cloud(mons);
+#if TAG_MAJOR_VERSION == 34
     _heated_area(mons);
+#endif
     if (!mons->alive())
         return;
 
@@ -2067,6 +2074,7 @@ void handle_monster_move(monster* mons)
 
     const int gold = gozag_gold_in_los(mons);
     if (!mons->asleep()
+        && !mons_is_avatar(mons->type)
         && !mons->wont_attack() && gold > 0)
     {
         for (int i = 0; i < gold; i++)
@@ -2176,7 +2184,6 @@ void handle_monster_move(monster* mons)
     {
         // Calculates mmov based on monster target.
         _handle_movement(mons);
-        _shedu_movement_clamp(mons);
 
         if (mons_is_confused(mons)
             || mons->type == MONS_AIR_ELEMENTAL
@@ -3344,7 +3351,9 @@ bool mon_can_move_to_pos(const monster* mons, const coord_def& delta,
 
         if (targmonster->type == MONS_TOADSTOOL
             && mons->type == MONS_WANDERING_MUSHROOM)
+        {
             return true;
+        }
 
         // Cut down plants only when no alternative, or they're
         // our target.
@@ -3702,7 +3711,9 @@ static bool _may_cutdown(monster* mons, monster* targ)
         // Don't try to attack briars unless their damage will be insignificant
         if (targ->type == MONS_BRIAR_PATCH && mons->type != MONS_THORN_HUNTER
             && (mons->armour_class() * mons->hit_points) < 400)
+        {
             return false;
+        }
         else
             return true;
     }
@@ -4111,6 +4122,7 @@ static void _mons_in_cloud(monster* mons)
     actor_apply_cloud(mons);
 }
 
+#if TAG_MAJOR_VERSION == 34
 static void _heated_area(monster* mons)
 {
     if (!heated(mons->pos()))
@@ -4141,9 +4153,11 @@ static void _heated_area(monster* mons)
     if (final_damage > 0)
     {
         if (mons->observable())
+        {
             mprf("%s is %s by your radiant heat.",
                  mons->name(DESC_THE).c_str(),
                  (final_damage) > 10 ? "blasted" : "burned");
+        }
 
         behaviour_event(mons, ME_DISTURB, 0, mons->pos());
 
@@ -4160,6 +4174,7 @@ static void _heated_area(monster* mons)
             print_wounds(mons);
     }
 }
+#endif
 
 static spell_type _map_wand_to_mspell(wand_type kind)
 {
@@ -4184,18 +4199,4 @@ static spell_type _map_wand_to_mspell(wand_type kind)
     case WAND_DIGGING:         return SPELL_DIG;
     default:                   return SPELL_NO_SPELL;
     }
-}
-
-// Keep kraken tentacles from wandering too far away from the boss monster.
-static void _shedu_movement_clamp(monster *shedu)
-{
-    if (!mons_is_shedu(shedu))
-        return;
-
-    monster *my_pair = get_shedu_pair(shedu);
-    if (!my_pair)
-        return;
-
-    if (grid_distance(shedu->pos(), my_pair->pos()) >= 10)
-        mmov = (my_pair->pos() - shedu->pos()).sgn();
 }

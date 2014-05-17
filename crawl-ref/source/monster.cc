@@ -1928,7 +1928,9 @@ bool monster::pickup_armour(item_def &item, int near, bool force)
 
         if (eq != EQ_HELMET && eq != EQ_SHIELD
             && mons_genus(type) == MONS_OCTOPODE)
+        {
             return false;
+        }
     }
 
     // Bardings are only wearable by the appropriate monster.
@@ -3266,8 +3268,7 @@ bool monster::paralysed() const
 
 bool monster::cannot_act() const
 {
-    return paralysed() || petrified()
-           || has_ench(ENCH_PREPARING_RESURRECT);
+    return paralysed() || petrified();
 }
 
 bool monster::cannot_move() const
@@ -3285,16 +3286,20 @@ bool monster::backlit(bool check_haloed, bool self_halo) const
     if (has_ench(ENCH_CORONA) || has_ench(ENCH_STICKY_FLAME) || has_ench(ENCH_SILVER_CORONA))
         return true;
     if (check_haloed)
+    {
         return !umbraed() && haloed() &&
                (self_halo || halo_radius2() == -1);
+    }
     return false;
 }
 
 bool monster::umbra(bool check_haloed, bool self_halo) const
 {
     if (check_haloed)
+    {
         return umbraed() && !haloed() &&
                (self_halo || umbra_radius2() == -1);
+    }
     return false;
 }
 
@@ -3414,6 +3419,9 @@ int monster::armour_class() const
     if (has_ench(ENCH_WRETCHED))
         a -= get_ench(ENCH_WRETCHED).degree;
 
+    if (has_ench(ENCH_CORROSION))
+        a /= 2;
+
     return max(a, 0);
 }
 
@@ -3491,8 +3499,10 @@ void monster::blame_damage(const actor* attacker, int amount)
     ASSERT(amount >= 0);
     damage_total = min<int>(MAX_DAMAGE_COUNTER, damage_total + amount);
     if (attacker)
+    {
         damage_friendly = min<int>(MAX_DAMAGE_COUNTER * 2,
                       damage_friendly + amount * exp_rate(attacker->mindex()));
+    }
 }
 
 void monster::suicide(int hp)
@@ -3573,11 +3583,9 @@ bool monster::is_unclean(bool check_spells) const
     if (has_unclean_spell() && check_spells)
         return true;
 
-    if (has_attack_flavour(AF_DISEASE)
-        || has_attack_flavour(AF_HUNGER)
+    if (has_attack_flavour(AF_HUNGER)
         || has_attack_flavour(AF_ROT)
-        || has_attack_flavour(AF_STEAL)
-        || has_attack_flavour(AF_PLAGUE))
+        || has_attack_flavour(AF_STEAL))
     {
         return true;
     }
@@ -4130,7 +4138,7 @@ bool monster::poison(actor *agent, int amount, bool force)
     return poison_monster(this, agent, amount, force);
 }
 
-int monster::skill(skill_type sk, int scale, bool real) const
+int monster::skill(skill_type sk, int scale, bool real, bool drained) const
 {
     // Let spectral weapons have necromancy skill for pain brand.
     if (mons_intel(this) < I_NORMAL && !mons_is_avatar(this->type))
@@ -5481,8 +5489,7 @@ bool monster::can_drink_potion(potion_type ptype) const
     // These monsters cannot drink.
     if (is_skeletal() || is_insubstantial()
         || mons_species() == MONS_LICH || mons_genus(type) == MONS_MUMMY
-        || type == MONS_GASTRONOK
-        || has_ench(ENCH_RETCHING))
+        || type == MONS_GASTRONOK)
     {
         return false;
     }
@@ -5831,12 +5838,14 @@ void monster::react_to_damage(const actor *oppressor, int damage,
             {
                 hit_points = 0;
                 if (observable())
+                {
                     mprf("As %s mount dies, %s plunges down into %s!",
                          pronoun(PRONOUN_POSSESSIVE).c_str(),
                          name(DESC_THE).c_str(),
                          grd(pos()) == DNGN_LAVA ?
                              "lava and is incinerated" :
                              "deep water and drowns");
+                }
             }
             else if (fly_died && observable())
             {

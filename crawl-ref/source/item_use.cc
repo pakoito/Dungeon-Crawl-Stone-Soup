@@ -150,12 +150,13 @@ bool can_wield(item_def *weapon, bool say_reason,
         return false;
     }
 
-    // Only ogres and trolls can wield giant clubs (>= 30 aum).
+    // Only ogres and trolls can wield giant clubs or large rocks
+    // (sandblast).
     if (you.body_size() < SIZE_LARGE
         && ((weapon->base_type == OBJ_WEAPONS
-             && (is_giant_club_type(weapon->sub_type)))
-             || (weapon->base_type == OBJ_MISSILES &&
-                 weapon->sub_type == MI_LARGE_ROCK)))
+             && is_giant_club_type(weapon->sub_type))
+            || (weapon->base_type == OBJ_MISSILES &&
+                weapon->sub_type == MI_LARGE_ROCK)))
     {
         SAY(mpr("That's too large and heavy for you to wield."));
         return false;
@@ -647,8 +648,10 @@ bool can_wear_armour(const item_def &item, bool verbose, bool ignore_temporary)
     if (bad_size)
     {
         if (verbose)
+        {
             mprf("This armour is too %s for you!",
                  (bad_size > 0) ? "big" : "small");
+        }
 
         return false;
     }
@@ -1165,7 +1168,9 @@ static bool _swap_rings(int ring_slot)
     vector<equipment_type> ring_types = _current_ring_types();
     const int num_rings = ring_types.size();
     int unwanted = 0;
+    int last_inscribed = 0;
     int cursed = 0;
+    int inscribed = 0;
     int melded = 0; // Both melded rings and unavailable slots.
     int available = 0;
     bool all_same = true;
@@ -1194,12 +1199,24 @@ static bool _swap_rings(int ring_slot)
 
             if (ring->cursed())
                 cursed++;
+            else if (strstr(ring->inscription.c_str(), "=R"))
+            {
+                inscribed++;
+                last_inscribed = you.equip[*eq_it];
+            }
             else
             {
                 available++;
                 unwanted = you.equip[*eq_it];
             }
         }
+    }
+
+    // If the only swappable rings are inscribed =R, go ahead and use them.
+    if (available == 0 && inscribed > 0)
+    {
+        available += inscribed;
+        unwanted = last_inscribed;
     }
 
     // We can't put a ring on, because we're wearing all cursed ones.
@@ -1916,12 +1933,6 @@ void drink(int slot)
         return;
     }
 
-    if (you.duration[DUR_RETCHING])
-    {
-        mpr("You can't gag anything down in your present state!");
-        return;
-    }
-
     if (you.duration[DUR_NO_POTIONS])
     {
         mpr("You cannot drink potions in your current state!");
@@ -2163,16 +2174,31 @@ static void _brand_weapon(item_def &wpn)
     return;
 }
 
+static object_selector _enchant_selector(scroll_type scroll)
+{
+    if (scroll == SCR_BRAND_WEAPON)
+        return OSEL_BRANDABLE_WEAPON;
+    else if (scroll == SCR_ENCHANT_WEAPON_I)
+        return OSEL_ENCHANTABLE_WEAPON_I;
+    else if (scroll == SCR_ENCHANT_WEAPON_II)
+        return OSEL_ENCHANTABLE_WEAPON_II;
+    else if (scroll == SCR_ENCHANT_WEAPON_III)
+        return OSEL_ENCHANTABLE_WEAPON_III;
+    die("Invalid scroll type %d for _enchant_selector", (int)scroll);
+}
+
 // Returns NULL if no weapon was chosen.
 static item_def* _scroll_choose_weapon(bool alreadyknown, string *pre_msg, scroll_type scroll)
 {
     int item_slot;
-    bool branding = scroll == SCR_BRAND_WEAPON;
+    const bool branding = scroll == SCR_BRAND_WEAPON;
+    const object_selector selector = _enchant_selector(scroll);
 
     while (true)
     {
-        item_slot = prompt_invent_item(branding ? "Brand which weapon?" : "Enchant which weapon?",
-                                       MT_INVLIST, branding ? OSEL_BRANDABLE_WEAPON : OSEL_ENCHANTABLE_WEAPON,
+        item_slot = prompt_invent_item(branding ? "Brand which weapon?"
+                                                : "Enchant which weapon?",
+                                       MT_INVLIST, selector,
                                        true, true, false);
 
         // The scroll is used up if we didn't know what it was originally.
@@ -2194,8 +2220,7 @@ static item_def* _scroll_choose_weapon(bool alreadyknown, string *pre_msg, scrol
 
         item_def* wpn = &you.inv[item_slot];
 
-        if (branding && !is_brandable_weapon(*wpn, true)
-            || !branding && !is_item_selected(*wpn, OSEL_ENCHANTABLE_WEAPON))
+        if (!is_item_selected(*wpn, selector))
         {
             mpr("Choose a valid weapon, or Esc to abort.");
             more();
@@ -2349,7 +2374,7 @@ static bool _identify(bool alreadyknown, string *pre_msg)
 
 static bool _handle_enchant_weapon(bool alreadyknown, string *pre_msg, scroll_type scr)
 {
-    item_def* weapon = _scroll_choose_weapon(alreadyknown, pre_msg, SCR_ENCHANT_WEAPON_I);
+    item_def* weapon = _scroll_choose_weapon(alreadyknown, pre_msg, scr);
     if (!weapon)
         return !alreadyknown;
 
@@ -2652,12 +2677,14 @@ void read_scroll(int slot)
         return;
     }
 
+#if TAG_MAJOR_VERSION == 34
     // Prevent hot lava orcs reading scrolls
     if (you.species == SP_LAVA_ORC && temperature_effect(LORC_NO_SCROLLS))
     {
         crawl_state.zero_turns_taken();
         return mpr("You'd burn any scroll you tried to read!");
     }
+#endif
 
     const scroll_type which_scroll = static_cast<scroll_type>(scroll.sub_type);
     const bool alreadyknown = item_type_known(scroll);
@@ -2686,7 +2713,7 @@ void read_scroll(int slot)
         case SCR_ENCHANT_WEAPON_I:
         case SCR_ENCHANT_WEAPON_II:
         case SCR_ENCHANT_WEAPON_III:
-            if (!any_items_to_select(OSEL_ENCHANTABLE_WEAPON, true))
+            if (!any_items_to_select(_enchant_selector(which_scroll), true))
                 return;
             break;
 
@@ -2867,26 +2894,27 @@ void read_scroll(int slot)
     }
 
     case SCR_CURSE_WEAPON:
-        if (!you.weapon()
-            || !is_weapon(*you.weapon())
-            || you.weapon()->cursed())
+    {
+        // Not you.weapon() because we want to handle melded weapons too.
+        item_def * const weapon = you.slot_item(EQ_WEAPON, true);
+        if (!weapon || !is_weapon(*weapon) || weapon->cursed())
         {
             bool plural = false;
-            string weapon_name =
-                you.weapon()
-                ? you.weapon()->name(DESC_YOUR)
-                : "Your " + you.hand_name(true, &plural);
+            const string weapon_name =
+                weapon ? weapon->name(DESC_YOUR)
+                       : "Your " + you.hand_name(true, &plural);
             mprf("%s very briefly gain%s a black sheen.",
                  weapon_name.c_str(), plural ? "" : "s");
         }
         else
         {
             // Also sets wield_change.
-            do_curse_item(*you.weapon(), false);
+            do_curse_item(*weapon, false);
             learned_something_new(HINT_YOU_CURSED);
             bad_effect = true;
         }
         break;
+    }
 
     case SCR_ENCHANT_WEAPON_I:
     case SCR_ENCHANT_WEAPON_II:

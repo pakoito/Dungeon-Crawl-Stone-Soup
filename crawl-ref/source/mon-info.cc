@@ -45,7 +45,9 @@ static monster_info_flags ench_to_mb(const monster& mons, enchant_type ench)
                       || ench == ENCH_SWIFT
                       || ench == ENCH_PETRIFIED
                       || ench == ENCH_PETRIFYING))
+    {
         return NUM_MB_FLAGS;
+    }
 
     if (ench == ENCH_HASTE && mons.has_ench(ENCH_SLOW))
         return NUM_MB_FLAGS;
@@ -113,8 +115,6 @@ static monster_info_flags ench_to_mb(const monster& mons, enchant_type ench)
         return MB_PARALYSED;
     case ENCH_SOUL_RIPE:
         return MB_POSSESSABLE;
-    case ENCH_PREPARING_RESURRECT:
-        return MB_PREP_RESURRECT;
     case ENCH_REGENERATION:
         return MB_REGENERATION;
     case ENCH_RAISED_MR:
@@ -166,8 +166,6 @@ static monster_info_flags ench_to_mb(const monster& mons, enchant_type ench)
             return MB_WATER_HOLD_DROWN;
     case ENCH_FLAYED:
         return MB_FLAYED;
-    case ENCH_RETCHING:
-        return MB_RETCHING;
     case ENCH_WEAK:
         return MB_WEAK;
     case ENCH_DIMENSION_ANCHOR:
@@ -200,6 +198,8 @@ static monster_info_flags ench_to_mb(const monster& mons, enchant_type ench)
         return MB_SAP_MAGIC;
     case ENCH_SHROUD:
         return MB_SHROUD;
+    case ENCH_CORROSION:
+        return MB_CORROSION;
     default:
         return NUM_MB_FLAGS;
     }
@@ -471,7 +471,6 @@ monster_info::monster_info(const monster* m, int milev)
     // these use number for internal information
     if (type == MONS_SIXFIRHY
         || type == MONS_JIANGSHI
-        || type == MONS_SHEDU
         || type == MONS_KRAKEN_TENTACLE
         || type == MONS_KRAKEN_TENTACLE_SEGMENT
         || type == MONS_ELDRITCH_TENTACLE_SEGMENT
@@ -1568,8 +1567,6 @@ vector<string> monster_info::attributes() const
     }
     if (is(MB_FLAYED))
         v.push_back("covered in terrible wounds");
-    if (is(MB_RETCHING))
-        v.push_back("retching with violent nausea");
     if (is(MB_WEAK))
         v.push_back("weak");
     if (is(MB_DIMENSION_ANCHOR))
@@ -1602,6 +1599,8 @@ vector<string> monster_info::attributes() const
         v.push_back("magic-sapped");
     if (is(MB_SHROUD))
         v.push_back("shrouded");
+    if (is(MB_CORROSION))
+        v.push_back("covered in acid");
     return v;
 }
 

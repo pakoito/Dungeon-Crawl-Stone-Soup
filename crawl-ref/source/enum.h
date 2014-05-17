@@ -1677,7 +1677,9 @@ enum duration_type
     DUR_WATER_HOLD,
     DUR_WATER_HOLD_IMMUNITY,
     DUR_FLAYED,
+#if TAG_MAJOR_VERSION == 34
     DUR_RETCHING,
+#endif
     DUR_WEAK,
     DUR_DIMENSION_ANCHOR,
     DUR_ANTIMAGIC,
@@ -1716,6 +1718,7 @@ enum duration_type
     DUR_QAZLAL_COLD_RES,
     DUR_QAZLAL_ELEC_RES,
     DUR_QAZLAL_AC,
+    DUR_CORROSION,
     NUM_DURATIONS
 };
 
@@ -1780,8 +1783,8 @@ enum enchant_type
     ENCH_ANTIMAGIC,
 #if TAG_MAJOR_VERSION == 34
     ENCH_FADING_AWAY,
-#endif
     ENCH_PREPARING_RESURRECT,
+#endif
     ENCH_REGENERATION,
     ENCH_RAISED_MR,
     ENCH_MIRROR_DAMAGE,
@@ -1815,7 +1818,9 @@ enum enchant_type
     ENCH_WATER_HOLD,     // Silence and asphyxiation damage
     ENCH_FLAYED,
     ENCH_HAUNTING,
+#if TAG_MAJOR_VERSION == 34
     ENCH_RETCHING,
+#endif
     ENCH_WEAK,
     ENCH_DIMENSION_ANCHOR,
     ENCH_AWAKEN_VINES,   // Is presently animating snaplasher vines
@@ -1847,6 +1852,7 @@ enum enchant_type
     ENCH_PHANTOM_MIRROR,
     ENCH_BRIBED,
     ENCH_PERMA_BRIBED,
+    ENCH_CORROSION,
     // Update enchantment names in mon-ench.cc when adding or removing
     // enchantments.
     NUM_ENCHANTMENTS
@@ -2582,9 +2588,6 @@ enum monster_type                      // menv[].type
     MONS_ORC_KNIGHT,
     MONS_ORC_SORCERER,
     MONS_ORC_WARLORD,
-#if TAG_MAJOR_VERSION > 34
-    MONS_LAVA_ORC,
-#endif
     MONS_DWARF,
     MONS_DEEP_DWARF,
 #if TAG_MAJOR_VERSION == 34
@@ -2855,7 +2858,9 @@ enum monster_type                      // menv[].type
     MONS_SKELETON,
     MONS_SIMULACRUM,
 #endif
+#if TAG_MAJOR_VERSION == 34
     MONS_PLAGUE_SHAMBLER,
+#endif
     MONS_NECROPHAGE,
     MONS_GHOUL,
 #if TAG_MAJOR_VERSION == 34
@@ -2913,8 +2918,8 @@ enum monster_type                      // menv[].type
     MONS_PHOENIX,
     MONS_SILVER_STAR,
     MONS_BLESSED_TOE,
-#endif
     MONS_SHEDU,
+#endif
     MONS_OPHAN,
 #if TAG_MAJOR_VERSION == 34
     MONS_SPIRIT,
@@ -3772,8 +3777,8 @@ enum species_type
     SP_OCTOPODE,
 #if TAG_MAJOR_VERSION == 34
     SP_DJINNI,
-#endif
     SP_LAVA_ORC,
+#endif
     SP_GARGOYLE,
     SP_FORMICID,
     SP_VINE_STALKER,
@@ -3788,6 +3793,7 @@ enum species_type
 #if TAG_MAJOR_VERSION > 34
     SP_SLUDGE_ELF,                     // (placeholder)
     SP_DJINNI,                         // (placeholder)
+    SP_LAVA_ORC,                       // (placeholder)
 #endif
 
     NUM_SPECIES,                       // always after the last species

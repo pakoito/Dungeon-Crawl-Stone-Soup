@@ -57,10 +57,7 @@
 #define RANDART_BOOK_TYPE_THEME "theme"
 
 // The list of spells in spellbooks:
-static spell_type spellbook_template_array[][SPELLBOOK_SIZE] =
-{
-#   include "book-data.h"
-};
+#include "book-data.h"
 
 spell_type which_spell_in_book(const item_def &book, int spl)
 {
@@ -576,7 +573,6 @@ bool you_cannot_memorise(spell_type spell, bool &form)
     {
         rc = true, form = false;
     }
-#endif
 
     if (you.species == SP_LAVA_ORC
         && (spell == SPELL_STONESKIN
@@ -584,6 +580,7 @@ bool you_cannot_memorise(spell_type spell, bool &form)
     {
         rc = true, form = false;
     }
+#endif
 
     if (you.form == TRAN_WISP)
     {
