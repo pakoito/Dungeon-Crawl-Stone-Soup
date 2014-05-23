@@ -99,6 +99,8 @@ enum tag_minor_version
     TAG_MINOR_CALC_UNRAND_REACTS,  // Compute you.unrand_reacts on load
     TAG_MINOR_SAPROVOROUS,         // Remove Saprovorous from several species
     TAG_MINOR_WEIGHTLESS,          // Removal of inventory weight.
+    TAG_MINOR_CE_HA_DIET,          // Remove intrinsic diet muts from Ce & Ha
+    TAG_MINOR_NO_POT_FOOD,         // Remove Royal Jellies & Ambrosia
 #endif
     NUM_TAG_MINORS,
     TAG_MINOR_VERSION = NUM_TAG_MINORS - 1

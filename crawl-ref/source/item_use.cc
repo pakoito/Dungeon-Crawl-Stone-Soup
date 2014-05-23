@@ -152,11 +152,11 @@ bool can_wield(item_def *weapon, bool say_reason,
 
     // Only ogres and trolls can wield giant clubs or large rocks
     // (sandblast).
-    if (you.body_size() < SIZE_LARGE
+    if (you.body_size(PSIZE_TORSO, true) < SIZE_LARGE
         && ((weapon->base_type == OBJ_WEAPONS
              && is_giant_club_type(weapon->sub_type))
-            || (weapon->base_type == OBJ_MISSILES &&
-                weapon->sub_type == MI_LARGE_ROCK)))
+            || (weapon->base_type == OBJ_MISSILES
+                && weapon->sub_type == MI_LARGE_ROCK)))
     {
         SAY(mpr("That's too large and heavy for you to wield."));
         return false;
@@ -1191,7 +1191,7 @@ static bool _swap_rings(int ring_slot)
                 if (ring->sub_type != first_ring->sub_type
                     || ring->plus  != first_ring->plus
                     || ring->plus2 != first_ring->plus2
-                    || is_artefact(*ring))
+                    || is_artefact(*ring) || is_artefact(*first_ring))
                 {
                     all_same = false;
                 }
@@ -2104,11 +2104,7 @@ static void _brand_weapon(item_def &wpn)
 {
     you.wield_change = true;
 
-    // If there's no brand, make it vorpal.
-    if (get_weapon_brand(wpn) == SPWPN_NORMAL)
-        set_item_ego_type(wpn, OBJ_WEAPONS, SPWPN_VORPAL);
-    else
-        _rebrand_weapon(wpn);
+    _rebrand_weapon(wpn);
 
     const string itname = wpn.name(DESC_YOUR);
     bool success = true;

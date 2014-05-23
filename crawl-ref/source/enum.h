@@ -3322,6 +3322,9 @@ enum mutation_type
     MUT_CLARITY,
     MUT_CLEVER,
     MUT_CLUMSY,
+#if TAG_MAJOR_VERSION > 34
+    MUT_COLD_BLOODED,
+#endif
     MUT_COLD_RESISTANCE,
 #if TAG_MAJOR_VERSION > 34
     MUT_COLD_VULNERABILITY,
@@ -3421,6 +3424,7 @@ enum mutation_type
     MUT_BLACK_MARK,
 #if TAG_MAJOR_VERSION == 34
     MUT_SHOCK_VULNERABILITY,
+    MUT_COLD_BLOODED,
 #endif
     NUM_MUTATIONS,
 
@@ -3486,9 +3490,9 @@ enum orb_type
 
 enum recite_type
 {
+    RECITE_HERETIC,
     RECITE_CHAOTIC,
     RECITE_IMPURE,
-    RECITE_HERETIC,
     RECITE_UNHOLY,
     NUM_RECITE_TYPES
 };

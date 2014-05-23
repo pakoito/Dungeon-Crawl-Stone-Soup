@@ -428,10 +428,9 @@ bool player::could_wield(const item_def &item, bool ignore_brand,
 
     // Only ogres and trolls can wield giant clubs or large rocks (sandblast).
     if (bsize < SIZE_LARGE
-        && ((item.base_type == OBJ_WEAPONS
-             && is_giant_club_type(item.sub_type))
-            || (item.base_type == OBJ_MISSILES &&
-                item.sub_type == MI_LARGE_ROCK)))
+        && ((item.base_type == OBJ_WEAPONS && is_giant_club_type(item.sub_type))
+            || (item.base_type == OBJ_MISSILES
+                && item.sub_type == MI_LARGE_ROCK)))
     {
         return false;
     }

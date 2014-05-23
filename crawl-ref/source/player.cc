@@ -2340,8 +2340,7 @@ int player_speed(void)
 }
 
 // Get level of player mutation, ignoring mutations with an activity level
-// less than minact (unless they have MUTACT_HUNGER, in which case check
-// the player's hunger state).
+// less than minact.
 static int _mut_level(mutation_type mut, mutation_activity_type minact)
 {
     const int mlevel = you.mutation[mut];
@@ -2350,28 +2349,12 @@ static int _mut_level(mutation_type mut, mutation_activity_type minact)
 
     if (active >= minact)
         return mlevel;
-    else if (active == MUTACT_HUNGER)
-    {
-        switch (you.hunger_state)
-        {
-        case HS_ENGORGED:
-            return mlevel;
-        case HS_VERY_FULL:
-        case HS_FULL:
-            return min(mlevel, 2);
-        case HS_SATIATED:
-            return min(mlevel, 1);
-        default:
-            return 0;
-        }
-    }
 
     return 0;
 }
 
 // Output level of player mutation.  If temp is true (the default), take into
-// account the suppression of mutations by non-"Alive" Vampires and by changes
-// of form.
+// account the suppression of mutations by changes of form.
 int player_mutation_level(mutation_type mut, bool temp)
 {
     return _mut_level(mut, temp ? MUTACT_PARTIAL : MUTACT_INACTIVE);
@@ -4963,12 +4946,11 @@ bool curare_hits_player(int death_source, int levels, string name,
     return hurted > 0;
 }
 
-void paralyse_player(string source, int amount, int factor)
+void paralyse_player(string source, int amount)
 {
     if (!amount)
         amount = 2 + random2(6 + you.duration[DUR_PARALYSIS] / BASELINE_DELAY);
 
-    amount /= factor;
     you.paralyse(NULL, amount, source);
 }
 
@@ -6054,8 +6036,6 @@ flight_type player::flight_mode() const
 #endif
         || attribute[ATTR_PERM_FLIGHT]
         || form == TRAN_WISP
-        // dragon and bat should be FL_WINGED, but we don't want paralysis
-        // instakills over lava
         || form == TRAN_DRAGON
         || form == TRAN_BAT)
     {
@@ -7676,8 +7656,7 @@ bool player::can_safely_mutate() const
         return false;
 
     return !is_undead
-           || is_undead == US_SEMI_UNDEAD
-              && hunger_state == HS_ENGORGED;
+           || is_undead == US_SEMI_UNDEAD;
 }
 
 // Is the player too undead to bleed, rage, and polymorph?

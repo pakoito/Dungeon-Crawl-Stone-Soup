@@ -391,10 +391,6 @@ helmet
 
 En hovedbeklædning af metal.
 %%%%
-honeycomb
-
-En klump lækker bikage, som er lavet af kæmpebier.
-%%%%
 ice dragon hide
 
 Det skællede skind fra en drage med kuldeånde. Det kan laves om til en rigtig
@@ -504,12 +500,6 @@ phial of floods
 Dette fortryllede kar er ved at flyde over af elementarvand. Hvis man fjerner
 proppen, flyder en rivende strøm af vand fra karret og slipper vandånderne i
 den fri.
-%%%%
-piece of ambrosia
-
-En del af en sælsom substans, som spøgelsesmøl producerer. Man får både magisk
-energi og næring, når man spiser den, på bekostning af at miste sit mentale
-fokus i en kort periode.
 %%%%
 potion of agility
 

@@ -2583,12 +2583,14 @@ static void tag_read_you(reader &th)
             you.innate_mutation[MUT_NO_DEVICE_HEAL] = 2;
         }
     }
+
     if (th.getMinorVersion() < TAG_MINOR_DIET_MUT)
     {
         you.mutation[MUT_CARNIVOROUS] = you.innate_mutation[MUT_CARNIVOROUS];
         you.mutation[MUT_HERBIVOROUS] = you.innate_mutation[MUT_HERBIVOROUS];
 
     }
+
     if (th.getMinorVersion() < TAG_MINOR_SAPROVOROUS)
     {
         if (you.species == SP_LAVA_ORC || you.species == SP_HILL_ORC
@@ -2604,6 +2606,24 @@ static void tag_read_you(reader &th)
             you.innate_mutation[MUT_FAST_METABOLISM] -= 1;
         }
     }
+
+    if (th.getMinorVersion() < TAG_MINOR_CE_HA_DIET)
+    {
+        if (you.species == SP_CENTAUR)
+        {
+            you.mutation[MUT_FAST_METABOLISM] -= 1;
+            you.innate_mutation[MUT_FAST_METABOLISM] -= 1;
+
+            you.mutation[MUT_HERBIVOROUS] -= 1;
+            you.innate_mutation[MUT_HERBIVOROUS] -= 1;
+        }
+        else if (you.species == SP_HALFLING)
+        {
+            you.mutation[MUT_SLOW_METABOLISM] -= 1;
+            you.innate_mutation[MUT_SLOW_METABOLISM] -= 1;
+        }
+    }
+
 #endif
 
     count = unmarshallUByte(th);
@@ -3095,7 +3115,7 @@ static void tag_read_you_items(reader &th)
         const int oldstate = you.force_autopickup[OBJ_FOOD][NUM_FOODS];
         you.force_autopickup[OBJ_FOOD][FOOD_MEAT_RATION] = oldstate;
         you.force_autopickup[OBJ_FOOD][FOOD_PEAR] = oldstate;
-        you.force_autopickup[OBJ_FOOD][FOOD_HONEYCOMB] = oldstate;
+        you.force_autopickup[OBJ_FOOD][FOOD_ROYAL_JELLY] = oldstate;
 
         you.force_autopickup[OBJ_BOOKS][BOOK_MANUAL] =
             you.force_autopickup[OBJ_BOOKS][NUM_BOOKS];
@@ -3670,6 +3690,23 @@ void unmarshallItem(reader &th, item_def &item)
             artefact_set_property(item, ARTP_STEALTH, 0);
         }
     }
+
+    if (th.getMinorVersion() < TAG_MINOR_NO_POT_FOOD)
+    {
+        // Replace War Chants with Battle to avoid empty-book errors.
+
+        // Moved under TAG_MINOR_NO_POT_FOOD because it was formerly
+        // not restricted to a particular range of minor tags.
+        if (item.base_type == OBJ_BOOKS && item.sub_type == BOOK_WAR_CHANTS)
+            item.sub_type = BOOK_BATTLE;
+
+        if (item.base_type == OBJ_FOOD && (item.sub_type == FOOD_UNUSED
+                                           || item.sub_type == FOOD_AMBROSIA))
+        {
+            item.sub_type = FOOD_ROYAL_JELLY;
+        }
+    }
+
 #endif
 
     if (is_unrandom_artefact(item))

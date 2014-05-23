@@ -252,9 +252,10 @@ static bool _should_butcher(int corpse_id, bool bottle_blood = false)
              && !you.has_spell(SPELL_SUBLIMATION_OF_BLOOD)
              && !you.has_spell(SPELL_SIMULACRUM))
     {
-        const string msg = make_stringf("You could %s this corpse's blood instead. Continue anyway?",
-                                        can_bottle_blood_from_corpse(corpse.mon_type)
-                                        ? "drain or bottle" : "drain");
+        bool can_bottle = can_bottle_blood_from_corpse(corpse.mon_type);
+        const string msg = make_stringf("You could drain this corpse's blood with <w>%s</w> instead%s. Continue anyway?",
+                                        command_to_string(CMD_EAT).c_str(),
+                                        can_bottle ? ", or drain it" : "");
         if (Options.confirm_butcher != CONFIRM_NEVER)
         {
             if (!yesno(msg.c_str(), true, 'n'))
@@ -1848,18 +1849,8 @@ void finished_eating_message(int food_type)
 
     switch (food_type)
     {
-    case FOOD_HONEYCOMB:
-        mpr("That honeycomb was delicious!");
-        break;
     case FOOD_ROYAL_JELLY:
         mpr("That royal jelly was delicious!");
-        restore_stat(STAT_ALL, 0, false);
-        break;
-    case FOOD_AMBROSIA:                       // XXX: could put some more
-        mpr("That ambrosia tasted strange."); // inspired messages here --evk
-        potion_effect(POT_CONFUSION, 0, nullptr, false);
-        you.duration[DUR_AMBROSIA] += 30 + random2(41);
-        // It will be converted to mp by normal food use (but not costs).
         break;
     case FOOD_PIZZA:
     {
@@ -2105,10 +2096,6 @@ bool is_preferred_food(const item_def &food)
     // Poisoned, mutagenic, etc. food should never be marked as "preferred".
     if (is_bad_food(food))
         return false;
-
-    // Royal jellies restore stats for everyone.
-    if (food.sub_type == FOOD_ROYAL_JELLY)
-        return true;
 
     // Ghouls specifically like rotten food.
     if (you.species == SP_GHOUL)

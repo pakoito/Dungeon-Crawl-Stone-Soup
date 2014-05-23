@@ -630,10 +630,6 @@ helmet
 
 A piece of metal headgear.
 %%%%
-honeycomb
-
-A lump of the delicious honeycomb made by giant bees.
-%%%%
 horn of Geryon
 
 The horn belonging to Geryon, guardian of the Vestibule of Hell. Legends say
@@ -826,12 +822,6 @@ phial of floods
 An enchanted vessel brimming over with elemental water. Removing the stopper
 unleashes a torrent of water from the phial and sets free the water spirits
 that dwell within it.
-%%%%
-piece of ambrosia
-
-A portion of strange substance, produced by ghost moths. Consuming it provides
-magical energy as well as nutrition, at the cost of losing your mental focus
-for a short period.
 %%%%
 plate armour
 
@@ -1150,8 +1140,7 @@ This rod allows its wielder to summon a swarm of insects.
 %%%%
 royal jelly
 
-A particularly rich and golden gelatinous thing. Consuming it will restore lost
-abilities, in addition to the nutrition it provides.
+A particularly rich and golden gelatinous thing.
 %%%%
 rune of zot
 

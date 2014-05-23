@@ -183,9 +183,7 @@ mutation_activity_type mutation_activity_level(mutation_type mut)
     if (you.form == TRAN_STATUE)
     {
         // Statues get all but the AC benefit from scales, but are not affected
-        // by other changes in body material or speed.  We assume here that
-        // scale mutations are physical and therefore do not need the vampire
-        // checks below.
+        // by other changes in body material or speed.
         switch (mut)
         {
         case MUT_GELATINOUS_BODY:
@@ -210,29 +208,7 @@ mutation_activity_type mutation_activity_level(mutation_type mut)
         }
     }
 
-    // Vampires may find their mutations suppressed by thirst.
-    if (you.is_undead == US_SEMI_UNDEAD)
-    {
-        // Innate mutations are always active
-        if (you.innate_mutation[mut])
-            return MUTACT_FULL;
-
-        // ... as are all mutations for semi-undead who are fully alive
-        if (you.hunger_state == HS_ENGORGED)
-            return MUTACT_FULL;
-
-        // ... as are physical mutations.
-        if (get_mutation_def(mut).physical)
-            return MUTACT_FULL;
-
-        // Other mutations are partially active at satiated and above.
-        if (you.hunger_state >= HS_SATIATED)
-            return MUTACT_HUNGER;
-        else
-            return MUTACT_INACTIVE;
-    }
-    else
-        return MUTACT_FULL;
+    return MUTACT_FULL;
 }
 
 // Counts of various statuses/types of mutations from the current/most
@@ -240,7 +216,6 @@ mutation_activity_type mutation_activity_level(mutation_type mut)
 static int _num_full_suppressed = 0;
 static int _num_part_suppressed = 0;
 static int _num_form_based = 0;
-static int _num_hunger_based = 0;
 static int _num_transient = 0;
 
 // Can the player transform?  Returns true if the player is ever capable
@@ -309,7 +284,7 @@ string describe_mutations(bool center_title)
     string scale_type = "plain brown";
 
     _num_full_suppressed = _num_part_suppressed = 0;
-    _num_form_based = _num_hunger_based = 0;
+    _num_form_based = 0;
     _num_transient = 0;
 
     if (center_title)
@@ -645,7 +620,7 @@ string describe_mutations(bool center_title)
         num << 4 + you.experience_level / 3
                  + (you.species == SP_GREY_DRACONIAN ? 5 : 0);
 
-        string msg = "Your " + scale_type + " scales are "
+        const string msg = "Your " + scale_type + " scales are "
               + (you.species == SP_GREY_DRACONIAN ? "very " : "") + "hard"
               + " (AC +" + num.str() + ").";
 
@@ -653,12 +628,6 @@ string describe_mutations(bool center_title)
                       player_is_shapechanged() && you.form != TRAN_DRAGON);
 
         result += "Your body does not fit into most forms of armour.\n";
-
-        msg = "Your cold-blooded metabolism reacts poorly to cold.";
-        if (player_res_cold(false) <= 0)
-            result += msg + "\n";
-        else
-            result += "<darkgrey>" + msg + "</darkgrey>\n";
 
         have_any = true;
     }
@@ -748,7 +717,7 @@ static void _display_vampire_attributes()
 
     string result;
 
-    const int lines = 15;
+    const int lines = 12;
     string column[lines][7] =
     {
         {"                     ", "<lightgreen>Alive</lightgreen>      ", "<green>Full</green>    ",
@@ -774,18 +743,11 @@ static void _display_vampire_attributes()
 
         {"Torment resistance   ", "           ", "        ", "          ", "         ", "         ", " +    "},
 
-        {"\n<w>Other effects</w>\n"
-         "Mutation chance      ", "always     ", "often   ", "sometimes ", "never    ", "never    ", "never "},
+        {"\n<w>Transformations</w>\n"
+         "Bat form             ", "no         ", "no      ", "yes       ", "yes      ", "yes      ", "yes   "},
 
-        {"Non-physical \n"
-         "mutation effects     ", "full       ", "capped  ", "capped    ", "none     ", "none     ", "none  "},
-
-        {"Potion effects       ", "full       ", "full    ", "full      ", "halved   ", "halved   ", "halved"},
-
-        {"Bat Form             ", "no         ", "no      ", "yes       ", "yes      ", "yes      ", "yes   "},
-
-        {"Other transformation \n"
-         "or going berserk     ", "yes        ", "yes     ", "no        ", "no       ", "no       ", "no    "}
+        {"Other forms and \n"
+         "berserk              ", "yes        ", "yes     ", "no        ", "no       ", "no       ", "no    "}
     };
 
     int current = 0;
@@ -932,8 +894,6 @@ void display_mutations()
         extra += "<darkgrey>(())</darkgrey>: Completely suppressed.\n";
     if (_num_form_based) // TODO: check for form spells?
         extra += "<yellow>*</yellow>   : Suppressed by some changes of form.\n";
-    if (_num_hunger_based)
-        extra += "<lightred>+</lightred>   : Suppressed by thirst.\n";
     if (_num_transient)
         extra += "<magenta>[]</magenta>   : Transient mutations.";
     if (you.species == SP_VAMPIRE)
@@ -1492,23 +1452,11 @@ static const char* _stat_mut_desc(mutation_type mut, bool gain)
     return stat_desc(stat, positive ? SD_INCREASE : SD_DECREASE);
 }
 
-bool undead_mutation_rot(bool is_beneficial_mutation)
+// Undead can't be mutated, and fall apart instead.
+// Vampires mutate as normal.
+bool undead_mutation_rot()
 {
-    if (you.is_undead == US_SEMI_UNDEAD)
-    {
-        if (is_beneficial_mutation)
-            return false;
-        switch (you.hunger_state)
-        {
-        case HS_SATIATED:  return !one_chance_in(3);
-        case HS_FULL:      return coinflip();
-        case HS_VERY_FULL: return one_chance_in(3);
-        case HS_ENGORGED:  return false;
-        default: return true;
-        }
-    }
-
-    return you.is_undead;
+    return you.is_undead && you.is_undead != US_SEMI_UNDEAD;
 }
 
 bool mutate(mutation_type which_mutation, const string &reason, bool failMsg,
@@ -1568,7 +1516,7 @@ bool mutate(mutation_type which_mutation, const string &reason, bool failMsg,
 
     // Undead bodies don't mutate, they fall apart. -- bwr
     // except for demonspawn (or other permamutations) in lichform -- haranp
-    if (undead_mutation_rot(beneficial) && !demonspawn)
+    if (undead_mutation_rot() && !demonspawn)
     {
         if (no_rot)
             return false;
@@ -1942,7 +1890,7 @@ bool delete_mutation(mutation_type which_mutation, const string &reason,
             }
         }
 
-        if (undead_mutation_rot(false))
+        if (undead_mutation_rot())
             return false;
     }
 
@@ -2075,9 +2023,7 @@ string mutation_desc(mutation_type mut, int level, bool colour)
     const bool ignore_player = (level != -1);
 
     const mutation_activity_type active = mutation_activity_level(mut);
-    const bool lowered = you.mutation[mut] > player_mutation_level(mut);
-    const bool partially_active = (active == MUTACT_PARTIAL
-        || active == MUTACT_HUNGER && lowered);
+    const bool partially_active = (active == MUTACT_PARTIAL);
     const bool fully_inactive = (active == MUTACT_INACTIVE);
 
     const bool temporary   = (you.temp_mutation[mut] > 0);
@@ -2131,13 +2077,6 @@ string mutation_desc(mutation_type mut, int level, bool colour)
             ++_num_form_based;
             result += colour ? "<yellow>*</yellow>" : "*";
         }
-
-        if (you.species == SP_VAMPIRE && !mdef.physical
-            && !you.innate_mutation[mut])
-        {
-            ++_num_hunger_based;
-            result += colour ? "<lightred>+</lightred>" : "+";
-        }
     }
 
     if (temporary)
@@ -2165,7 +2104,7 @@ string mutation_desc(mutation_type mut, int level, bool colour)
             const bool demonspawn = (you.species == SP_DEMONSPAWN);
             const bool extra = (you.mutation[mut] > you.innate_mutation[mut]);
 
-            if (fully_inactive)
+            if (fully_inactive || (mut == MUT_COLD_BLOODED && player_res_cold(false) > 0))
                 colourname = "darkgrey";
             else if (partially_active)
                 colourname = demonspawn ? "yellow"    : "blue";

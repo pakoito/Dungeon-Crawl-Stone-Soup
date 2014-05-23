@@ -377,10 +377,9 @@ void item_colour(item_def &item)
             break;
         case FOOD_BANANA:
         case FOOD_CHEESE:
-        case FOOD_HONEYCOMB:
+        case FOOD_ROYAL_JELLY:
         case FOOD_LEMON:
         case FOOD_PIZZA:
-        case FOOD_ROYAL_JELLY:
             item.colour = YELLOW;
             break;
         case FOOD_PEAR:
@@ -2232,28 +2231,27 @@ static void _generate_food_item(item_def& item, int force_quant, int force_type)
     // Determine sub_type:
     if (force_type == OBJ_RANDOM)
     {
-        item.sub_type = random_choose_weighted(250, FOOD_MEAT_RATION,
-                                                300, FOOD_BREAD_RATION,
-                                                100, FOOD_PEAR,
-                                                100, FOOD_APPLE,
-                                                100, FOOD_CHOKO,
-                                                 10, FOOD_CHEESE,
-                                                 10, FOOD_PIZZA,
-                                                 10, FOOD_SNOZZCUMBER,
-                                                 10, FOOD_APRICOT,
-                                                 10, FOOD_ORANGE,
-                                                 10, FOOD_BANANA,
-                                                 10, FOOD_STRAWBERRY,
-                                                 10, FOOD_RAMBUTAN,
-                                                 10, FOOD_LEMON,
-                                                 10, FOOD_GRAPE,
-                                                 10, FOOD_SULTANA,
-                                                 10, FOOD_LYCHEE,
-                                                 10, FOOD_BEEF_JERKY,
-                                                 10, FOOD_SAUSAGE,
-                                                  5, FOOD_HONEYCOMB,
-                                                  5, FOOD_ROYAL_JELLY,
-                                                  0);
+        item.sub_type = random_choose_weighted( 30, FOOD_BREAD_RATION,
+                                                25, FOOD_MEAT_RATION,
+                                                10, FOOD_PEAR,
+                                                10, FOOD_APPLE,
+                                                10, FOOD_CHOKO,
+                                                 1, FOOD_CHEESE,
+                                                 1, FOOD_PIZZA,
+                                                 1, FOOD_SNOZZCUMBER,
+                                                 1, FOOD_APRICOT,
+                                                 1, FOOD_ORANGE,
+                                                 1, FOOD_BANANA,
+                                                 1, FOOD_STRAWBERRY,
+                                                 1, FOOD_RAMBUTAN,
+                                                 1, FOOD_LEMON,
+                                                 1, FOOD_GRAPE,
+                                                 1, FOOD_SULTANA,
+                                                 1, FOOD_LYCHEE,
+                                                 1, FOOD_BEEF_JERKY,
+                                                 1, FOOD_SAUSAGE,
+                                                 1, FOOD_ROYAL_JELLY,
+                                                 0);
     }
     else
         item.sub_type = force_type;
@@ -2374,41 +2372,38 @@ static void _generate_scroll_item(item_def& item, int force_type,
         int tries = 500;
         do
         {
-            // total weight: 7824 if depth_mod < 4,
-            //               8524 if 4 <= depth_mod < 7,
-            //               8944 if depth_mod >= 7,
-            //               and -1133 in sprint
+            // total weight:    688  if depth_mod <4
+            //                  786  otherwise
+            //                  -103 in sprint
             item.sub_type = random_choose_weighted(
-                1800, SCR_IDENTIFY,
-                1120, SCR_REMOVE_CURSE,
+                180, SCR_IDENTIFY,
+                112, SCR_REMOVE_CURSE,
                  // [Cha] don't generate teleportation scrolls if in sprint
-                 802, (crawl_state.game_is_sprint() ? NUM_SCROLLS : SCR_TELEPORTATION),
-                 331, SCR_FEAR,
-                 331, SCR_MAGIC_MAPPING,
-                 331, SCR_FOG,
-                 331, SCR_RANDOM_USELESSNESS,
-                 331, SCR_RECHARGING,
-                 331, SCR_BLINKING,
-                 331, SCR_ENCHANT_ARMOUR,
-                 331, SCR_ENCHANT_WEAPON_I,
-                 331, SCR_ENCHANT_WEAPON_II,
-                 331, SCR_AMNESIA,
+                 80, (crawl_state.game_is_sprint() ? NUM_SCROLLS : SCR_TELEPORTATION),
+                 33, SCR_FEAR,
+                 33, SCR_MAGIC_MAPPING,
+                 33, SCR_FOG,
+                 33, SCR_RANDOM_USELESSNESS,
+                 33, SCR_RECHARGING,
+                 33, SCR_BLINKING,
+                 33, SCR_ENCHANT_ARMOUR,
+                 33, SCR_ENCHANT_WEAPON_I,
+                 33, SCR_ENCHANT_WEAPON_II,
+                 33, SCR_AMNESIA,
                  // [Cha] don't generate noise scrolls if in sprint
-                 331, (crawl_state.game_is_sprint() ? NUM_SCROLLS : SCR_NOISE),
+                 33, (crawl_state.game_is_sprint() ? NUM_SCROLLS : SCR_NOISE),
 
-                 331, SCR_IMMOLATION,
+                 33, SCR_IMMOLATION,
 
-                 // Medium-level scrolls.
-                 140, (depth_mod < 4 ? NUM_SCROLLS : SCR_ACQUIREMENT),
-                 140, (depth_mod < 4 ? NUM_SCROLLS : SCR_ENCHANT_WEAPON_III),
-                 140, (depth_mod < 4 ? NUM_SCROLLS : SCR_SUMMONING),
-                 140, (depth_mod < 4 ? NUM_SCROLLS : SCR_SILENCE),
-                 270, (depth_mod < 4 ? NUM_SCROLLS : SCR_VULNERABILITY),
-
-                 // High-level scrolls.
-                 140, (depth_mod < 7 ? NUM_SCROLLS : SCR_BRAND_WEAPON),
-                 140, (depth_mod < 7 ? NUM_SCROLLS : SCR_TORMENT),
-                 140, (depth_mod < 7 ? NUM_SCROLLS : SCR_HOLY_WORD),
+                 // Higher-level scrolls.
+                 27, (depth_mod < 4 ? NUM_SCROLLS : SCR_VULNERABILITY),
+                 14, (depth_mod < 4 ? NUM_SCROLLS : SCR_ACQUIREMENT),
+                 14, (depth_mod < 4 ? NUM_SCROLLS : SCR_ENCHANT_WEAPON_III),
+                 14, (depth_mod < 4 ? NUM_SCROLLS : SCR_SUMMONING),
+                 14, (depth_mod < 4 ? NUM_SCROLLS : SCR_SILENCE),
+                 14, (depth_mod < 4 ? NUM_SCROLLS : SCR_BRAND_WEAPON),
+                 14, (depth_mod < 4 ? NUM_SCROLLS : SCR_TORMENT),
+                 14, (depth_mod < 4 ? NUM_SCROLLS : SCR_HOLY_WORD),
 
                  0);
         }

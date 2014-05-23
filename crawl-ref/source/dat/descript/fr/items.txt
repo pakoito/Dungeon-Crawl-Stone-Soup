@@ -543,10 +543,6 @@ helmet
 
 Un couvre-chef en métal.
 %%%%
-honeycomb
-
-Un morceau de ruche d'abeilles géantes, gorgé de succulent miel.
-%%%%
 horn of Geryon
 
 La corne de Geryon, le gardien du Vestibule des Enfers. Les légendes racontent
@@ -674,12 +670,6 @@ phial of floods
 Un récipient enchanté qui déborde d'eau élémentaire. Retirer le bouchon déverse
 un torrent d'eau de la fiole et libère les esprits de l'eau qui résident à
 l'intérieur.
-%%%%
-piece of ambrosia
-
-Une partie de l'étrange substance produite par les papillons de nuits fantômes.
-Le consommer fournit de l'énergie magique ainsi que la nutrition, au prix d'une
-perte de concentration mentale pour une courte période.
 %%%%
 potion of agility
 

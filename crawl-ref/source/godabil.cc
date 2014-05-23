@@ -734,11 +734,14 @@ bool zin_recite_to_single_monster(const coord_def& where)
     if (_zin_check_recite_to_single_monster(mon, eligibility) < 1)
         return false;
 
-    recite_type prayertype = RECITE_CHAOTIC;
-    for (int i = RECITE_CHAOTIC; i != NUM_RECITE_TYPES; i++)
+    recite_type prayertype = RECITE_HERETIC;
+    for (int i = NUM_RECITE_TYPES - 1; i >= RECITE_HERETIC; i--)
     {
-            if (eligibility[i] > eligibility[prayertype])
-                    prayertype = static_cast <recite_type>(i);
+        if (eligibility[i] > 0)
+        {
+            prayertype = static_cast <recite_type>(i);
+            break;
+        }
     }
 
     // Second check: because this affects the whole screen over several turns,
@@ -4212,10 +4215,10 @@ bribability mons_bribability[] =
 
     { MONS_MERFOLK,            BRANCH_SHOALS, 1 },
     { MONS_MERMAID,            BRANCH_SHOALS, 1 },
-    { MONS_MERFOLK_IMPALER,    BRANCH_SHOALS, 2 },
-    { MONS_MERFOLK_JAVELINEER, BRANCH_SHOALS, 2 },
     { MONS_SIREN,              BRANCH_SHOALS, 2 },
-    { MONS_MERFOLK_AQUAMANCER, BRANCH_SHOALS, 3 },
+    { MONS_MERFOLK_IMPALER,    BRANCH_SHOALS, 3 },
+    { MONS_MERFOLK_JAVELINEER, BRANCH_SHOALS, 3 },
+    { MONS_MERFOLK_AQUAMANCER, BRANCH_SHOALS, 4 },
 
     // Humans
     { MONS_HUMAN,               BRANCH_VAULTS, 1 },
@@ -4434,8 +4437,8 @@ bool qazlal_upheaval(coord_def target, bool quiet)
     beam.source_name = "you";
     beam.thrower     = KILL_YOU;
     beam.range       = LOS_RADIUS;
-    beam.damage      = calc_dice(3, 37 + pow / 3);
-    beam.hit         = 10 + you.skill(SK_INVOCATIONS);
+    beam.damage      = calc_dice(3, 27 + div_rand_round(2 * pow, 5));
+    beam.hit         = AUTOMATIC_HIT;
     beam.glyph       = dchar_glyph(DCHAR_EXPLOSION);
     beam.loudness    = 10;
 #ifdef USE_TILE

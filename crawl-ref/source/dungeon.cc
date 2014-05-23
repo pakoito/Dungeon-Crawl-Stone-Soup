@@ -2644,8 +2644,12 @@ static void _prepare_water()
 
 static bool _vault_can_use_layout(const map_def *vault, const map_def *layout)
 {
-    if (!vault->has_tag_prefix("layout_"))
+    bool permissive = false;
+    if (!vault->has_tag_prefix("layout_")
+        && !(permissive = vault->has_tag_prefix("nolayout_")))
+    {
         return true;
+    }
 
     ASSERT(layout->has_tag_prefix("layout_type_"));
 
@@ -2658,10 +2662,12 @@ static bool _vault_can_use_layout(const map_def *vault, const map_def *layout)
             string type = strip_tag_prefix(tags[i], "layout_type_");
             if (vault->has_tag("layout_" + type))
                 return true;
+            else if (vault->has_tag("nolayout_" + type))
+                return false;
         }
     }
 
-    return false;
+    return permissive;
 }
 
 static const map_def *_pick_layout(const map_def *vault)
@@ -5383,7 +5389,7 @@ struct coord_comparator
     static int dist(const coord_def &a, const coord_def &b)
     {
         const coord_def del = a - b;
-        return abs(del.x) * GYM + abs(del.y);
+        return abs(del.x) + abs(del.y);
     }
 
     bool operator () (const coord_def &a, const coord_def &b) const
@@ -5397,6 +5403,7 @@ typedef set<coord_def, coord_comparator> coord_set;
 static void _jtd_init_surrounds(coord_set &coords, uint32_t mapmask,
                                 const coord_def &c)
 {
+    vector<coord_def> cur;
     for (orth_adjacent_iterator ai(c); ai; ++ai)
     {
         if (!in_bounds(*ai) || travel_point_distance[ai->x][ai->y]
@@ -5404,10 +5411,15 @@ static void _jtd_init_surrounds(coord_set &coords, uint32_t mapmask,
         {
             continue;
         }
-        coords.insert(*ai);
+        cur.insert(cur.begin() + random2(cur.size()), *ai);
+    }
+    for (vector<coord_def>::const_iterator ci = cur.begin();
+         ci != cur.end(); ci++)
+    {
+        coords.insert(*ci);
 
-        const coord_def dp = *ai - c;
-        travel_point_distance[ai->x][ai->y] = (-dp.x + 2) * 4 + (-dp.y + 2);
+        const coord_def dp = *ci - c;
+        travel_point_distance[ci->x][ci->y] = (-dp.x + 2) * 4 + (-dp.y + 2);
     }
 }
 

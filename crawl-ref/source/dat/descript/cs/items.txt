@@ -123,10 +123,6 @@ helmet
 
 Část kovové pokrývky hlavy.
 %%%%
-honeycomb
-
-Kus lahodného plástve obřích včel.
-%%%%
 lajatang
 
 Velmi vzácná a velmi efektivní dovážená zbraň. Představuje jí tyč s
@@ -165,11 +161,6 @@ Pár bot.
 pair of gloves
 
 Pár rukavic.
-%%%%
-piece of ambrosia
-
-Kousek podivné hmoty vytvářené přízračnými motýli. Konzumací dojde k doplnění
-živin i magické energie, avšak za cenu dočasné ztráty mentálního soustředění.
 %%%%
 potion of agility
 

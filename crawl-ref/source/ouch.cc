@@ -451,11 +451,6 @@ static bool _expose_invent_to_element(beam_type flavour, int strength)
     if (target_class == OBJ_UNASSIGNED)
         return false;
 
-    // Wisp form semi-melds all of inventory, making it unusable for you,
-    // but also immune to destruction.  No message is needed.
-    if (you.form == TRAN_WISP)
-        return false;
-
     // Fedhas worshipers are exempt from the food destruction effect
     // of spores.
     if (flavour == BEAM_SPORE
@@ -616,7 +611,7 @@ bool expose_player_to_element(beam_type flavour, int strength,
     _maybe_melt_player_enchantments(flavour, strength ? strength : 10);
     qazlal_element_adapt(flavour, strength);
 
-    if (flavour == BEAM_COLD && slow_dracs && player_genus(GENPC_DRACONIAN)
+    if (flavour == BEAM_COLD && slow_dracs && you.innate_mutation[MUT_COLD_BLOODED]
         && you.res_cold() <= 0 && coinflip())
     {
         you.slow_down(0, strength);

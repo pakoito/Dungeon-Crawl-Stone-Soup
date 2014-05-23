@@ -2493,7 +2493,7 @@ static int _autopickup_subtype(const item_def &item)
         return (item.sub_type == FOOD_CHUNK) ? item.sub_type
              : food_is_meaty(item)           ? FOOD_MEAT_RATION
              : is_fruit(item)                ? FOOD_PEAR
-                                             : FOOD_HONEYCOMB;
+                                             : FOOD_ROYAL_JELLY;
     case OBJ_MISCELLANY:
         return (item.sub_type == MISC_RUNE_OF_ZOT) ? item.sub_type : max_type;
     case OBJ_BOOKS:
@@ -4054,6 +4054,13 @@ void corrode_item(item_def &item, actor *holder)
     // Only weapons and armour can be corroded.
     if (item.base_type != OBJ_ARMOUR && item.base_type != OBJ_WEAPONS)
         return;
+
+    // Don't corrode spectral weapons.
+    if (holder && holder->is_monster()
+        && mons_is_avatar(holder->as_monster()->type))
+    {
+        return;
+    }
 
     // Anti-corrosion items protect against 90% of corrosion.
     if (holder && holder->res_corr() && !one_chance_in(10))

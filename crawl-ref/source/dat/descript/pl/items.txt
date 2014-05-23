@@ -293,11 +293,6 @@ helmet
 
 Metalowe nakrycie głowy.
 %%%%
-honeycomb
-
-Jakkolwiek pszczoły spotykane w tych lochach osiągają ogromne rozmiary, miód
-przez nie produkowany w niczym nie ustępuje temu z powierzchni.
-%%%%
 ice dragon hide
 
 Łuskowata skóra lodowego smoka, w surowej postaci. Można z niej zrobić dobrą
@@ -404,13 +399,6 @@ phial of floods
 Zaklęty flakon pełen po brzegi żywiołu wody. Odkorkowanie flakonu wyzwala
 zamknięte w środku przyjazne duchy wody, powodując małą powódź oraz pozwalając
 im na zaatakowanie twych wrogów.
-%%%%
-piece of ambrosia
-
-Zadziwiająca substancja, według legend stanowiąca pokarm bogów, jednak tak
-naprawdę będąca wydzieliną mrocznych ciem. Ma spore wartości odżywcze, a także
-daje przypływ magicznych energii, niestety kosztem krótkotrwałego zamroczenia
-umysłu.
 %%%%
 potion of agility
 

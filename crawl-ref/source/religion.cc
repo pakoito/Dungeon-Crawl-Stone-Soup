@@ -1466,32 +1466,17 @@ int yred_random_servants(unsigned int threshold, bool force_hostile)
     return created;
 }
 
-static const item_def* _find_missile_launcher(int skill)
-{
-    for (int i = 0; i < ENDOFPACK; ++i)
-    {
-        if (!you.inv[i].defined())
-            continue;
-
-        const item_def &item = you.inv[i];
-        if (is_range_weapon(item)
-            && range_skill(item) == skill_type(skill))
-        {
-            return &item;
-        }
-    }
-    return NULL;
-}
-
 static bool _need_missile_gift(bool forced)
 {
-    const skill_type sk = best_skill(SK_SLINGS, SK_THROWING);
-    if (sk != SK_THROWING && !_find_missile_launcher(sk))
-        return false;
-    return (forced || you.piety >= piety_breakpoint(2)
-                      && random2(you.piety) > 70
-                      && one_chance_in(8))
-           && you.skills[sk] /* no skill boosts */ >= 8;
+    skill_type sk = best_skill(SK_SLINGS, SK_THROWING);
+    // Default to throwing if all missile skills are at zero.
+    if (you.skills[sk] == 0)
+        sk = SK_THROWING;
+    return forced
+           || (you.piety >= piety_breakpoint(2)
+               && random2(you.piety) > 70
+               && one_chance_in(8)
+               && x_chance_in_y(1 + you.skills[sk], 12));
 }
 
 static bool _give_nemelex_gift(bool forced = false)
@@ -2266,7 +2251,7 @@ bool do_god_gift(bool forced)
             const bool need_missiles = _need_missile_gift(forced);
             object_class_type gift_type;
 
-            if (forced && (!need_missiles || one_chance_in(4))
+            if (forced && coinflip()
                 || (!forced && you.piety >= piety_breakpoint(4)
                     && random2(you.piety) > 120
                     && one_chance_in(4)))
@@ -3675,12 +3660,11 @@ static bool _transformed_player_can_join_god(god_type which_god)
 
 int gozag_service_fee()
 {
-    const int gold = you.attribute[ATTR_GOLD_GENERATED];
-    int fee =
-        50 + (int)((double)gold - (double)gold / log10((double)(gold + 10)))/2;
-
     if (you.char_class == JOB_MONK && had_gods() == 0)
-        fee /= 2;
+        return 0;
+
+    const int gold = you.attribute[ATTR_GOLD_GENERATED];
+    int fee = 50 + (int)(gold - gold / log10(gold + 10.0))/2;
 
     dprf("found %d gold, fee %d", gold, fee);
     return fee;
@@ -3852,10 +3836,18 @@ void god_pitch(god_type which_god)
     string service_fee = "";
     if (which_god == GOD_GOZAG)
     {
-        service_fee = make_stringf(
-            "The service fee for joining is currently %d gold; you currently"
-            " have %d.\n",
-            fee, you.gold);
+        if (fee == 0)
+        {
+            service_fee = string("Gozag will waive the service fee if you ")
+                          + (coinflip() ? "act now" : "join today") + "!\n";
+        }
+        else
+        {
+            service_fee = make_stringf(
+                    "The service fee for joining is currently %d gold; you"
+                    " currently have %d.\n",
+                    fee, you.gold);
+        }
     }
     snprintf(info, INFO_SIZE, "%sDo you wish to %sjoin this religion?",
              service_fee.c_str(),
@@ -4105,9 +4097,15 @@ void god_pitch(god_type which_god)
     if (you_worship(GOD_GOZAG))
     {
         bool needs_redraw = false;
-        mprf("You pay a service fee of %d gold.", fee);
-        you.gold -= fee;
-        you.attribute[ATTR_GOZAG_GOLD_USED] += fee;
+        if (fee > 0)
+        {
+            mprf(MSGCH_GOD, "You pay a service fee of %d gold.", fee);
+            you.gold -= fee;
+            you.attribute[ATTR_GOZAG_GOLD_USED] += fee;
+        }
+        else
+            simple_god_message(" waives the service fee.");
+
         for (int i = 0; i < MAX_GOD_ABILITIES; ++i)
         {
             if (_abil_chg_message(god_gain_power_messages[you.religion][i],

@@ -1575,7 +1575,6 @@ string item_def::name_aux(description_level_type desc, bool terse, bool ident,
         case FOOD_PEAR: buff << "pear"; break;
         case FOOD_APPLE: buff << "apple"; break;
         case FOOD_CHOKO: buff << "choko"; break;
-        case FOOD_HONEYCOMB: buff << "honeycomb"; break;
         case FOOD_ROYAL_JELLY: buff << "royal jelly"; break;
         case FOOD_SNOZZCUMBER: buff << "snozzcumber"; break;
         case FOOD_PIZZA: buff << "slice of pizza"; break;
@@ -1591,7 +1590,6 @@ string item_def::name_aux(description_level_type desc, bool terse, bool ident,
         case FOOD_BEEF_JERKY: buff << "beef jerky"; break;
         case FOOD_CHEESE: buff << "cheese"; break;
         case FOOD_SAUSAGE: buff << "sausage"; break;
-        case FOOD_AMBROSIA: buff << "piece of ambrosia"; break;
         case FOOD_CHUNK:
             if (!basename && !dbname)
             {
@@ -2436,7 +2434,7 @@ void check_item_knowledge(bool unknown_items)
         };
         static const int misc_ST_list[] =
         {
-            FOOD_CHUNK, FOOD_MEAT_RATION, FOOD_PEAR, FOOD_HONEYCOMB,
+            FOOD_CHUNK, FOOD_MEAT_RATION, FOOD_PEAR, FOOD_ROYAL_JELLY,
             BOOK_MANUAL, NUM_RODS, 1, MISC_RUNE_OF_ZOT,
             NUM_MISCELLANY
         };
@@ -3075,11 +3073,6 @@ bool is_bad_item(const item_def &item, bool temp)
             // Poison is not that bad if you're poison resistant.
             return player_res_poison(false) <= 0
                    || !temp && you.species == SP_VAMPIRE;
-        case POT_MUTATION:
-            // Not bad_item, just useless, for mummies, ghouls, and liches,
-            // as they can't even drink known mutation potions.
-            return temp && you.species == SP_VAMPIRE
-                   && you.hunger_state < HS_SATIATED;
         default:
             return false;
         }
@@ -3148,8 +3141,11 @@ bool is_dangerous_item(const item_def &item, bool temp)
         switch (item.sub_type)
         {
         case POT_MUTATION:
+            // Non-vampire undead can't be mutated.
+            return !you.is_undead
+                   || you.is_undead == US_SEMI_UNDEAD;
         case POT_LIGNIFY:
-            // Only living characters can mutate or change form
+            // Only living characters can change form.
             return !you.is_undead
                    || temp && you.species == SP_VAMPIRE
                       && you.hunger_state >= HS_SATIATED;
@@ -3354,14 +3350,9 @@ bool is_useless_item(const item_def &item, bool temp)
         case POT_GAIN_INTELLIGENCE:
         case POT_GAIN_DEXTERITY:
 #endif
-            if (you.species == SP_VAMPIRE)
-            {
-                return temp && you.hunger_state < HS_SATIATED
-                       && item.sub_type != POT_BENEFICIAL_MUTATION;
-            }
             if (you.form == TRAN_LICH)
                 return temp;
-            return you.is_undead;
+            return you.is_undead && you.is_undead != US_SEMI_UNDEAD;
 
         case POT_LIGNIFY:
             return you.is_undead
@@ -3633,15 +3624,21 @@ string item_prefix(const item_def &item, bool temp)
         }
         break;
 
+    case OBJ_STAVES:
+    case OBJ_RODS:
     case OBJ_WEAPONS:
+        if (is_range_weapon(item))
+            prefixes.push_back("ranged");
+        else if (is_melee_weapon(item)) // currently redundant
+            prefixes.push_back("melee");
+        // fall through
+
     case OBJ_ARMOUR:
     case OBJ_JEWELLERY:
         if (is_artefact(item))
             prefixes.push_back("artefact");
         // fall through
 
-    case OBJ_STAVES:
-    case OBJ_RODS:
     case OBJ_MISSILES:
         if (item_is_equipped(item, true))
             prefixes.push_back("equipped");
