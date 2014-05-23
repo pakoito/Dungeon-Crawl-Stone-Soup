@@ -8150,59 +8150,6 @@ void player::weaken(actor *attacker, int pow)
 }
 
 /*
- * Auto-drop any items that have exceeded their current inventory limit.
- *
- * Currently only applies to large rocks.
- */
-void player::item_limit_change()
-{
-    map<pair<object_class_type, int>, int> item_map;
-    pair<object_class_type, int> p;
-
-    for (int i = 0; i < ENDOFPACK; ++i)
-    {
-        if (you.inv[i].defined())
-        {
-            p.first = you.inv[i].base_type;
-            p.second = you.inv[i].sub_type;
-            if (item_map.count(p))
-                item_map[p] += you.inv[i].quantity;
-            else
-                item_map[p] = you.inv[i].quantity;
-        }
-    }
-
-    map<pair<object_class_type, int>, int>::iterator mi = item_map.begin();
-    bool did_drop = false;
-    for (; mi != item_map.end(); mi++)
-    {
-        int inv_limit = you.item_limit(mi->first.first, mi->first.second);
-        if (inv_limit < 0 || inv_limit >= item_map[mi->first])
-            continue;
-
-        short int need_drop = item_map[mi->first] - inv_limit;
-        for (int i = 0; i < ENDOFPACK; ++i)
-        {
-            int quant_drop = min(you.inv[i].quantity, need_drop);
-            if (you.inv[i].base_type == mi->first.first
-                && you.inv[i].sub_type == mi->first.second)
-            {
-                force_drop_item(i, quant_drop);
-                need_drop -= quant_drop;
-                did_drop = true;
-                if (!need_drop)
-                    break;
-            }
-        }
-    }
-
-    // Stop travel if we dropped items
-    if (did_drop)
-        interrupt_activity(AI_BURDEN_CHANGE);
-}
-
-
-/*
  * Check if the player is about to die from flight/form expiration.
  *
  * Check whether the player is on a cell which would be deadly if not for some
@@ -8334,33 +8281,6 @@ bool player::form_uses_xl() const
 bool player::can_device_heal()
 {
     return mutation[MUT_NO_DEVICE_HEAL] < 2;
-}
-
-int player::item_limit(const item_def& it) const
-{
-    return item_limit(it.base_type, it.sub_type);
-}
-
-int player::item_limit(object_class_type base_type, int sub_type) const
-{
-    if (base_type == OBJ_MISSILES && sub_type == MI_LARGE_ROCK)
-        return strength(true) / 3;
-    else
-        return -1;
-}
-
-int player::item_count(const item_def& it) const
-{
-    int count = 0;
-    for (int i = 0; i < ENDOFPACK; ++i)
-    {
-        if (inv[i].defined() && inv[i].base_type == it.base_type
-            && inv[i].sub_type == it.sub_type)
-        {
-            count += inv[i].quantity;
-        }
-    }
-    return count;
 }
 
 #if TAG_MAJOR_VERSION == 34

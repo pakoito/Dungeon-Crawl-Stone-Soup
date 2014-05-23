@@ -215,7 +215,6 @@ string item_def::name(description_level_type descrip, bool terse, bool ident,
     if (descrip == DESC_INVENTORY_EQUIP)
     {
         string equip_desc = "";
-        const int inv_limit = you.item_limit(*this);
         equipment_type eq = item_equip_slot(*this);
         if (eq != EQ_NONE)
         {
@@ -279,12 +278,6 @@ string item_def::name(description_level_type descrip, bool terse, bool ident,
         {
             equipped = true;
             equip_desc = "quivered";
-        }
-        if (inv_limit > 0)
-        {
-            if (equipped)
-                equip_desc += ", ";
-            equip_desc += make_stringf("max %d", inv_limit);
         }
         if (equip_desc.length())
             buff << " (" << equip_desc << ")";

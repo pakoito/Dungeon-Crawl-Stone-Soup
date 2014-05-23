@@ -749,10 +749,6 @@ public:
     bool has_usable_tentacle() const;
 
     bool form_uses_xl() const;
-    int item_limit(const item_def& it) const;
-    int item_limit(object_class_type base_type, int sub_type) const;
-    int item_count(const item_def& it) const;
-    void item_limit_change();
 
 protected:
     void _removed_beholder(bool quiet = false);

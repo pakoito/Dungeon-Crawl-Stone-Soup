@@ -622,7 +622,7 @@ bool maybe_coagulate_blood_potions_inv(item_def &blood)
 
             ASSERT(props2.exists("timer"));
             CrawlVector &timer2 = props2["timer"].get_vector();
-            if (!dec_inv_item_quantity(blood.link, coag_count + rot_count, true))
+            if (!dec_inv_item_quantity(blood.link, coag_count + rot_count))
                 _compare_blood_quantity(blood, timer.size());
 
             // Update timer -> push(pop).
@@ -2088,8 +2088,6 @@ void revive()
 
     mpr("You rejoin the land of the living...");
     more();
-
-    you.item_limit_change();
 }
 
 ////////////////////////////////////////////////////////////////////////////

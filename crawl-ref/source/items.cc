@@ -292,7 +292,7 @@ stack_iterator stack_iterator::operator++(int dummy)
 // Reduce quantity of an inventory item, do cleanup if item goes away.
 //
 // Returns true if stack of items no longer exists.
-bool dec_inv_item_quantity(int obj, int amount, bool suppress_item_limit)
+bool dec_inv_item_quantity(int obj, int amount)
 {
     bool ret = false;
 
@@ -332,9 +332,6 @@ bool dec_inv_item_quantity(int obj, int amount, bool suppress_item_limit)
     }
     else
         you.inv[obj].quantity -= amount;
-
-    if (!suppress_item_limit)
-        you.item_limit_change();
 
     return ret;
 }
@@ -1543,13 +1540,10 @@ void note_inscribe_item(item_def &item)
  * @param quant_got The quantity of this item to move.
  * @param quiet If true, most messages notifying the player of item
  *              pickup (or item pickup failure) aren't printed.
- * @param ignore_item_limit Don't consider the player's inventory limit for
- *                          this item type when moving the item.
  * @returns The quantity of items moved and -1 if the player's
  *          inventory is full.
  */
-int move_item_to_player(int obj, int quant_got, bool quiet,
-                        bool ignore_item_limit)
+int move_item_to_player(int obj, int quant_got, bool quiet)
 {
     item_def &it = mitm[obj];
 
@@ -1659,8 +1653,6 @@ int move_item_to_player(int obj, int quant_got, bool quiet,
         return retval;
     }
 
-    const int inv_limit = you.item_limit(it);
-    const int num_inv = you.item_count(it);
     if (quant_got > it.quantity || quant_got <= 0)
         quant_got = it.quantity;
 
@@ -1705,30 +1697,12 @@ int move_item_to_player(int obj, int quant_got, bool quiet,
         }
     }
 
-    bool partial_pickup = false;
-    if (!ignore_item_limit && inv_limit >= 0 && inv_limit < num_inv + quant_got)
-    {
-        // calculate quantity we can actually pick up
-        int part = inv_limit - num_inv;
-        if (part < 1)
-            return 0;
-
-        // only pickup 'part' items
-        quant_got = part;
-        partial_pickup = true;
-
-        retval = part;
-    }
-
     if (is_stackable_item(it))
     {
         for (int m = 0; m < ENDOFPACK; m++)
         {
             if (items_stack(you.inv[m], it))
             {
-                if (!quiet && partial_pickup)
-                    mpr("You can only carry some of what is here.");
-
                 _check_note_item(it);
 
                 // If the object on the ground is inscribed, but not
@@ -1767,9 +1741,6 @@ int move_item_to_player(int obj, int quant_got, bool quiet,
         drop_spoiled_chunks();
     if (inv_count() >= ENDOFPACK)
         return -1;
-
-    if (!quiet && partial_pickup)
-        mpr("You can only carry some of what is here.");
 
     int freeslot = find_free_slot(it);
     ASSERT_RANGE(freeslot, 0, ENDOFPACK);
@@ -2236,41 +2207,6 @@ bool drop_item(int item_dropped, int quant_drop)
     you.last_pickup.erase(item_dropped);
 
     return true;
-}
-
-void force_drop_item(int item_dropped, int quant_drop)
-{
-    if (quant_drop < 0 || quant_drop > you.inv[item_dropped].quantity)
-        quant_drop = you.inv[item_dropped].quantity;
-
-    if (item_dropped == you.equip[EQ_WEAPON]
-        && quant_drop >= you.inv[item_dropped].quantity)
-    {
-        unequip_item(EQ_WEAPON, true);
-        you.wield_change     = true;
-        you.redraw_quiver    = true;
-        you.attribute[ATTR_WEAPON_SWAP_INTERRUPTED] = 0;
-    }
-
-    const dungeon_feature_type my_grid = grd(you.pos());
-
-    if (!copy_item_to_grid(you.inv[item_dropped],
-                            you.pos(), quant_drop, true, true))
-    {
-        die("Unable to force drop item to grid");
-    }
-
-    mprf("You drop %s.",
-         quant_name(you.inv[item_dropped], quant_drop, DESC_A).c_str());
-
-    bool quiet = silenced(you.pos());
-
-    // If you drop an item in as a merfolk, it is below the water line and
-    // makes no noise falling.
-    if (you.swimming())
-        quiet = true;
-    feat_destroys_item(my_grid, you.inv[item_dropped], !quiet);
-    dec_inv_item_quantity(item_dropped, quant_drop, true);
 }
 
 void drop_last()
@@ -2894,25 +2830,6 @@ static void _do_autopickup()
         if (item_needs_autopickup(mitm[o]))
         {
             int num_to_take = mitm[o].quantity;
-            int item_limit = you.item_limit(mitm[o]);
-            if (item_limit > 0)
-            {
-                int num_can_take = item_limit - you.item_count(mitm[o]);
-                if (num_can_take < num_to_take)
-                {
-                    if (!n_tried_pickup)
-                        mpr("You can't pick up everything.");
-                    n_tried_pickup++;
-                    num_to_take = num_can_take;
-                }
-
-                if (num_can_take == 0)
-                {
-                    o = next;
-                    continue;
-                }
-            }
-
             // Do this before it's picked up, otherwise the picked up
             // item will be in inventory and _interesting_explore_pickup()
             // will always return false.

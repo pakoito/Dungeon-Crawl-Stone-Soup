@@ -216,7 +216,6 @@ void wizard_change_species(void)
     calc_hp();
     calc_mp();
 
-    you.item_limit_change();
     // The player symbol depends on species.
     update_player_symbol();
 #ifdef USE_TILE
