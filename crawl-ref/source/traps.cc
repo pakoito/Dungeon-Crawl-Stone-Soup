@@ -284,7 +284,7 @@ static void _maybe_split_nets(item_def &item, const coord_def& where)
 {
     if (item.quantity == 1)
     {
-        set_item_stationary(item);
+        set_net_stationary(item);
         return;
     }
 
@@ -300,7 +300,7 @@ static void _maybe_split_nets(item_def &item, const coord_def& where)
     item_colour(it);
 
     item.quantity = 1;
-    set_item_stationary(item);
+    set_net_stationary(item);
 
     copy_item_to_grid(it, where);
 }

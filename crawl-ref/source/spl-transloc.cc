@@ -817,6 +817,15 @@ spret_type cast_apportation(int pow, bolt& beam, bool fail)
 
     item_def& item = mitm[item_idx];
 
+    // Nets can be apported when they have a victim trapped.
+    if (item_is_stationary(item)
+        && !(item.base_type == OBJ_MISSILES
+             && item.sub_type == MI_THROWING_NET))
+    {
+        mpr("You cannot apport that!");
+        return SPRET_ABORT;
+    }
+
     // Can't apport the Orb in zotdef or sprint
     if (item_is_orb(item)
         && (crawl_state.game_is_zotdef()
