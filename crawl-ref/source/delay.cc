@@ -22,6 +22,7 @@
 #include "describe.h"
 #include "directn.h"
 #include "dungeon.h"
+#include "effects.h"
 #include "exercise.h"
 #include "enum.h"
 #include "fprop.h"
@@ -440,12 +441,12 @@ void handle_interrupted_swap()
     you.attribute[ATTR_WEAPON_SWAP_INTERRUPTED] = 0;
 }
 
-bool you_are_delayed(void)
+bool you_are_delayed()
 {
     return !you.delay_queue.empty();
 }
 
-delay_type current_delay_action(void)
+delay_type current_delay_action()
 {
     return you_are_delayed() ? you.delay_queue.front().type
                              : DELAY_NOT_DELAYED;
@@ -1675,6 +1676,11 @@ static inline bool _monster_warning(activity_interrupt_type ai,
                     dec_penance(GOD_GOZAG, 1);
                 }
             }
+        }
+        if (player_mutation_level(MUT_SCREAM)
+            && x_chance_in_y(3 + player_mutation_level(MUT_SCREAM) * 3, 100))
+        {
+            yell(mon);
         }
         const_cast<monster* >(mon)->seen_context = SC_JUST_SEEN;
     }

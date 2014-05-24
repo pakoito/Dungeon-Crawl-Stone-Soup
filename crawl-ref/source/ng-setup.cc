@@ -36,7 +36,7 @@
 static void _newgame_give_item(object_class_type base, int sub_type,
                                int qty = 1, int plus = 0, int plus2 = 0);
 
-static void _init_player(void)
+static void _init_player()
 {
     you.init();
     dlua.callfn("dgn_clear_data", "");
@@ -327,7 +327,7 @@ void give_basic_mutations(species_type speci)
         you.mutation[MUT_ANTIMAGIC_BITE] = 1;
         you.mutation[MUT_REGENERATION]   = 1;
         you.mutation[MUT_MANA_SHIELD]    = 1;
-        you.mutation[MUT_NO_DEVICE_HEAL] = 2;
+        you.mutation[MUT_NO_DEVICE_HEAL] = 3;
         break;
     default:
         break;
