@@ -1242,7 +1242,7 @@ void pickup(bool partial_quantity)
     // just one movable item?
     else if (num_items == 1)
     {
-        // Get the link to the non-corpse item in the pile.
+        // Get the link to the movable item in the pile.
         while (item_is_stationary(mitm[o]))
             o = mitm[o].link;
         pickup_single_item(o, partial_quantity ? 0 : mitm[o].quantity);
