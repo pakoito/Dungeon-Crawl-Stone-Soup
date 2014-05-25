@@ -6880,7 +6880,7 @@ int player::res_rotting(bool temp) const
         return 3;
     }
 
-    if (species == SP_GARGOYLE || species == SP_VINE_STALKER)
+    if (player_mutation_level(MUT_ROT_IMMUNITY))
         return 3;
 
     if (mutation[MUT_FOUL_STENCH])
@@ -7566,7 +7566,7 @@ bool player::can_see_invisible() const
 
 bool player::invisible() const
 {
-    return (duration[DUR_INVIS] || you.form == TRAN_SHADOW)
+    return (duration[DUR_INVIS] || form == TRAN_SHADOW)
            && !backlit();
 }
 
@@ -7621,7 +7621,7 @@ bool player::glows_naturally() const
 // This is the imperative version.
 void player::backlight()
 {
-    if (!duration[DUR_INVIS] && you.form != TRAN_SHADOW)
+    if (!duration[DUR_INVIS] && form != TRAN_SHADOW)
     {
         if (duration[DUR_CORONA] || glows_naturally())
             mpr("You glow brighter.");
@@ -7689,7 +7689,7 @@ bool player::can_bleed(bool allow_tran) const
 
     if (is_lifeless_undead()
 #if TAG_MAJOR_VERSION == 34
-        || you.species == SP_DJINNI
+        || species == SP_DJINNI
 #endif
         || holiness() == MH_NONLIVING)
     {   // demonspawn and demigods have a mere drop of taint
@@ -7701,7 +7701,7 @@ bool player::can_bleed(bool allow_tran) const
 
 bool player::is_stationary() const
 {
-    return you.form == TRAN_TREE;
+    return form == TRAN_TREE;
 }
 
 bool player::malmutate(const string &reason)
@@ -7940,7 +7940,7 @@ bool player::do_shaft()
 
 bool player::can_do_shaft_ability(bool quiet) const
 {
-    if (you.attribute[ATTR_HELD])
+    if (attribute[ATTR_HELD])
     {
         if (!quiet)
             mprf("You can't shaft yourself while %s.", held_status());
@@ -8254,7 +8254,7 @@ bool player::form_uses_xl() const
     // users of one particular [non-]weapon be effective for this
     // unintentional form while others can just run or die.  I believe this
     // should apply to more forms, too.  [1KB]
-    return you.form == TRAN_WISP || you.form == TRAN_FUNGUS;
+    return form == TRAN_WISP || form == TRAN_FUNGUS;
 }
 
 bool player::can_device_heal()
