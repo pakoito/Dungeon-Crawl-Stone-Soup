@@ -962,7 +962,7 @@ static void _add_status_light_to_out(int i, vector<status_light>& out)
 // - blue, light blue           for good enchantments
 // - magenta, light magenta     for "better" enchantments (deflect, fly)
 //
-// Prints burden, hunger,
+// Prints hunger,
 // pray, holy, teleport, regen, fly/lev, invis, silence,
 //   conf. touch, sage
 // confused, mesmerised, fire, poison, disease, rot, held, glow, swift,
@@ -1007,7 +1007,6 @@ static void _get_status_lights(vector<status_light>& out)
         DUR_DEATHS_DOOR,
         DUR_EXHAUSTED,
         DUR_QUAD_DAMAGE,
-        STATUS_BURDEN,
     };
 
     for (unsigned i = 0; i < ARRAYSZ(important_statuses) ; ++i)
@@ -2481,7 +2480,6 @@ static string _status_mut_abilities(int sw)
         DUR_PETRIFIED,
         DUR_SLEEP,
         DUR_PETRIFYING,
-        STATUS_BURDEN,
         STATUS_STR_ZERO, STATUS_INT_ZERO, STATUS_DEX_ZERO,
         DUR_BREATH_WEAPON,
         STATUS_BEHELD,
