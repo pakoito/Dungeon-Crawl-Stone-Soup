@@ -2273,13 +2273,6 @@ FILE* _make_bones_file(string * return_gfilename)
             continue;
         }
 
-        if (file_size(gfil) > 0) // bones file already exists
-        {
-            dprf("%s already exists", g_file_name.c_str());
-            lk_close(gfil, g_file_name);
-            continue;
-        }
-
         dprf("found %s", g_file_name.c_str());
 
         *return_gfilename = g_file_name;
