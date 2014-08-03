@@ -2469,4 +2469,15 @@
        SPELL_MASS_CONFUSION
       }
     },
+
+    {  MST_BALAUR,
+      {
+       SPELL_NO_SPELL,
+       SPELL_NO_SPELL,
+       SPELL_NO_SPELL,
+       SPELL_NO_SPELL,
+       SPELL_NO_SPELL,
+       SPELL_NO_SPELL
+      }
+    },
 #endif
