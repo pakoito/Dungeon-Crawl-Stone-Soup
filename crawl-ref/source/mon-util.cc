@@ -2557,9 +2557,14 @@ void define_monster(monster* mons)
 
         for (unsigned int i = 0; i < nheads; ++i)
         {
-            int which_spell = random2(ARRAYSZ(balaur_breaths));
-            spell_type head_type = balaur_breaths[which_spell];
-            heads.push_back(CrawlStoreValue(head_type));
+            int which_spell;
+            spell_type head_type;
+            do {
+                which_spell = random2(ARRAYSZ(balaur_breaths));
+                head_type = balaur_breaths[which_spell];
+            } while (head_type == SPELL_NO_SPELL);
+            heads.push_back(CrawlStoreValue(static_cast<int>(head_type)));
+            balaur_breaths[which_spell] = SPELL_NO_SPELL;
         }
         mons->props["balaur_heads"] = heads;
         break;
