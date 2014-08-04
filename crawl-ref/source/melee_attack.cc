@@ -2109,6 +2109,11 @@ bool melee_attack::chop_hydra_head(int dam,
         return false;
     }
 
+    // make it a bit harder to chop off balaur heads (so they don't become
+    // entirely trivial)
+    if (defender->type == MONS_BALAUR && coinflip())
+        return false;
+
     // Only cutting implements.
     if (dam_type != DVORP_SLICING && dam_type != DVORP_CHOPPING
         && dam_type != DVORP_CLAWING || dam <= 0)
