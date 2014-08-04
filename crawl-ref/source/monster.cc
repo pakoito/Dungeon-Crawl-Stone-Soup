@@ -4860,7 +4860,8 @@ void monster::load_ghost_spells()
 
 bool monster::has_hydra_multi_attack() const
 {
-    return mons_genus(mons_base_type(this)) == MONS_HYDRA;
+    return mons_genus(mons_base_type(this)) == MONS_HYDRA
+        || mons_species(mons_base_type(this)) == MONS_BALAUR;
 }
 
 bool monster::has_multitargeting() const
