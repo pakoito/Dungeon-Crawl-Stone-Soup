@@ -3792,6 +3792,19 @@ static const struct spell_desc spelldata[] =
 },
 
 {
+    SPELL_BALAUR_BREATH, "Balaur Breath",
+    SPTYP_CONJURATION,
+    SPFLAG_DIR_OR_TARGET | SPFLAG_MONSTER | SPFLAG_INNATE | SPFLAG_NOISY,
+    5,
+    0,
+    6, 6,
+    0,
+    NULL,
+    true,
+    false
+},
+
+{
     SPELL_NO_SPELL, "nonexistent spell",
      0,
      SPFLAG_TESTING,

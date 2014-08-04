@@ -2472,11 +2472,11 @@
 
     {  MST_BALAUR,
       {
+       SPELL_BALAUR_BREATH,
+       SPELL_BALAUR_BREATH,
        SPELL_NO_SPELL,
-       SPELL_NO_SPELL,
-       SPELL_NO_SPELL,
-       SPELL_NO_SPELL,
-       SPELL_NO_SPELL,
+       SPELL_BALAUR_BREATH,
+       SPELL_BALAUR_BREATH,
        SPELL_NO_SPELL
       }
     },

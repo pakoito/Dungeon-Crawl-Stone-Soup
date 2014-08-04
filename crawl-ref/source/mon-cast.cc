@@ -312,6 +312,20 @@ bolt mons_spell_beam(monster* mons, spell_type spell_cast, int power,
         case 5: real_spell = SPELL_CRYSTAL_BOLT;         break;
         }
     }
+    else if (spell_cast == SPELL_BALAUR_BREATH)
+    {
+        spell_type balaur_breaths[7] = {
+            SPELL_BOLT_OF_FIRE,
+            SPELL_BOLT_OF_COLD,
+            SPELL_LIGHTNING_BOLT,
+            SPELL_POISONOUS_CLOUD,
+            SPELL_QUICKSILVER_BOLT,
+            SPELL_SPIT_ACID,
+            SPELL_STICKY_FLAME_SPLASH
+        };
+        ASSERT(mons->number <= ARRAYSZ(balaur_breaths));
+        real_spell = balaur_breaths[random2(7)];
+    }
     beam.glyph = dchar_glyph(DCHAR_FIRED_ZAP); // default
     beam.thrower = KILL_MON_MISSILE;
     beam.origin_spell = real_spell;
