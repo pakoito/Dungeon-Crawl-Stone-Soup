@@ -2169,10 +2169,16 @@ bool melee_attack::chop_hydra_head(int dam,
                  attacker->conj_verb(verb).c_str(),
                  def_name(DESC_THE).c_str());
         }
+
+        if (defender->type == MONS_BALAUR)
+        {
+            int to_remove = random2(defender->as_monster()->number);
+            defender->props["balaur_heads"].get_vector().erase(to_remove);
+        }
         defender->as_monster()->number--;
 
         // Only living hydras get to regenerate heads.
-        if (defender->holiness() == MH_NATURAL)
+        if (defender->holiness() == MH_NATURAL && defender->type != MONS_BALAUR)
         {
             unsigned int limit = 20;
             if (defender->type == MONS_LERNAEAN_HYDRA)
