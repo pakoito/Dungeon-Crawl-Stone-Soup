@@ -2539,6 +2539,31 @@ void define_monster(monster* mons)
         ev    += mbase->ev;
         break;
     }
+    case MONS_BALAUR:
+    {
+        unsigned int nheads = random_range(3, 7);
+        CrawlVector heads;
+
+        spell_type balaur_breaths[] = {
+            SPELL_BOLT_OF_FIRE,
+            SPELL_BOLT_OF_COLD,
+            SPELL_LIGHTNING_BOLT,
+            SPELL_POISONOUS_CLOUD,
+            SPELL_QUICKSILVER_BOLT,
+            SPELL_SPIT_ACID,
+            SPELL_STICKY_FLAME_SPLASH
+        };
+        ASSERT(nheads <= ARRAYSZ(balaur_breaths));
+
+        for (unsigned int i = 0; i < nheads; ++i)
+        {
+            int which_spell = random2(ARRAYSZ(balaur_breaths));
+            spell_type head_type = balaur_breaths[which_spell];
+            heads.push_back(CrawlStoreValue(head_type));
+        }
+        mons->props["balaur_heads"] = heads;
+        break;
+    }
 
     default:
         break;

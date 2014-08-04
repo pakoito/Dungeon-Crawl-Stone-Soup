@@ -4654,21 +4654,14 @@ void mons_cast(monster* mons, bolt &pbolt, spell_type spell_cast,
 {
     if (spell_cast == SPELL_BALAUR_BREATH)
     {
-        spell_type balaur_breaths[7] = {
-            SPELL_BOLT_OF_FIRE,
-            SPELL_BOLT_OF_COLD,
-            SPELL_LIGHTNING_BOLT,
-            SPELL_POISONOUS_CLOUD,
-            SPELL_QUICKSILVER_BOLT,
-            SPELL_SPIT_ACID,
-            SPELL_STICKY_FLAME_SPLASH
-        };
-        ASSERT(mons->number <= ARRAYSZ(balaur_breaths));
-        for (int i = 0; i < 7; ++i)
+        const CrawlVector &heads = mons->props["balaur_heads"];
+        ASSERT(!heads.empty());
+
+        for (CrawlVector::const_iterator it = heads.begin(); it != heads.end(); ++it)
         {
-            setup_mons_cast(mons, pbolt, balaur_breaths[i]);
-            mons_cast(mons, pbolt, balaur_breaths[i],
-                      do_noise, special_ability);
+            spell_type head_spell = static_cast<spell_type>(it->get_int());
+            setup_mons_cast(mons, pbolt, head_spell);
+            mons_cast(mons, pbolt, head_spell, do_noise, special_ability);
         }
         return;
     }
