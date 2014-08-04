@@ -2541,7 +2541,7 @@ void define_monster(monster* mons)
     }
     case MONS_BALAUR:
     {
-        unsigned int nheads = random_range(3, 7);
+        monnumber = random_range(3, 7);
         CrawlVector heads;
 
         spell_type balaur_breaths[] = {
@@ -2553,9 +2553,9 @@ void define_monster(monster* mons)
             SPELL_SPIT_ACID,
             SPELL_STICKY_FLAME_SPLASH
         };
-        ASSERT(nheads <= ARRAYSZ(balaur_breaths));
+        ASSERT((unsigned int)monnumber <= ARRAYSZ(balaur_breaths));
 
-        for (unsigned int i = 0; i < nheads; ++i)
+        for (int i = 0; i < monnumber; ++i)
         {
             int which_spell;
             spell_type head_type;
