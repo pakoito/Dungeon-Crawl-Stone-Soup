@@ -314,17 +314,8 @@ bolt mons_spell_beam(monster* mons, spell_type spell_cast, int power,
     }
     else if (spell_cast == SPELL_BALAUR_BREATH)
     {
-        spell_type balaur_breaths[7] = {
-            SPELL_BOLT_OF_FIRE,
-            SPELL_BOLT_OF_COLD,
-            SPELL_LIGHTNING_BOLT,
-            SPELL_POISONOUS_CLOUD,
-            SPELL_QUICKSILVER_BOLT,
-            SPELL_SPIT_ACID,
-            SPELL_STICKY_FLAME_SPLASH
-        };
-        ASSERT(mons->number <= ARRAYSZ(balaur_breaths));
-        real_spell = balaur_breaths[random2(7)];
+        // just for now, mons_cast will fix it up later
+        real_spell = SPELL_BOLT_OF_FIRE;
     }
     beam.glyph = dchar_glyph(DCHAR_FIRED_ZAP); // default
     beam.thrower = KILL_MON_MISSILE;
@@ -4661,6 +4652,27 @@ static void _branch_summon_helper(monster* mons, spell_type spell_cast,
 void mons_cast(monster* mons, bolt &pbolt, spell_type spell_cast,
                bool do_noise, bool special_ability)
 {
+    if (spell_cast == SPELL_BALAUR_BREATH)
+    {
+        spell_type balaur_breaths[7] = {
+            SPELL_BOLT_OF_FIRE,
+            SPELL_BOLT_OF_COLD,
+            SPELL_LIGHTNING_BOLT,
+            SPELL_POISONOUS_CLOUD,
+            SPELL_QUICKSILVER_BOLT,
+            SPELL_SPIT_ACID,
+            SPELL_STICKY_FLAME_SPLASH
+        };
+        ASSERT(mons->number <= ARRAYSZ(balaur_breaths));
+        for (int i = 0; i < 7; ++i)
+        {
+            setup_mons_cast(mons, pbolt, balaur_breaths[i]);
+            mons_cast(mons, pbolt, balaur_breaths[i],
+                      do_noise, special_ability);
+        }
+        return;
+    }
+
     // Always do setup.  It might be done already, but it doesn't hurt
     // to do it again (cheap).
     setup_mons_cast(mons, pbolt, spell_cast);
