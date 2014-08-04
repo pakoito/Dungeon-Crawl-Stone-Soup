@@ -420,8 +420,41 @@ void attack::init_attack(skill_type unarmed_skill, int attack_number)
         mon_attack_def mon_attk = mons_attack_spec(attacker->as_monster(),
                                                    attack_number);
 
-        attk_type       = mon_attk.type;
-        attk_flavour    = mon_attk.flavour;
+        attk_type = mon_attk.type;
+
+        if (attacker->type == MONS_BALAUR)
+        {
+            switch (attacker->props["balaur_heads"][attack_number].get_int())
+            {
+            case SPELL_BOLT_OF_FIRE:
+                attk_flavour = AF_FIRE;
+                break;
+            case SPELL_BOLT_OF_COLD:
+                attk_flavour = AF_COLD;
+                break;
+            case SPELL_LIGHTNING_BOLT:
+                attk_flavour = AF_ELEC;
+                break;
+            case SPELL_POISONOUS_CLOUD:
+                attk_flavour = AF_POISON;
+                break;
+            case SPELL_QUICKSILVER_BOLT:
+                attk_flavour = AF_ANTIMAGIC;
+                break;
+            case SPELL_SPIT_ACID:
+                attk_flavour = AF_ACID;
+                break;
+            case SPELL_STICKY_FLAME_SPLASH:
+                attk_flavour = AF_STICKY_FLAME;
+                break;
+            default:
+                ASSERT(false);
+            }
+        }
+        else
+        {
+            attk_flavour = mon_attk.flavour;
+        }
 
         // Don't scale damage for YOU_FAULTLESS etc.
         if (attacker->get_experience_level() == 0)
