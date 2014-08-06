@@ -2551,6 +2551,12 @@ void define_monster(monster* mons)
         break;
     }
 
+    case MONS_SERPENT_OF_HELL:
+    case MONS_SERPENT_OF_HELL_COCYTUS:
+    case MONS_SERPENT_OF_HELL_DIS:
+    case MONS_SERPENT_OF_HELL_TARTARUS:
+        monnumber = 3;
+
     default:
         break;
     }
