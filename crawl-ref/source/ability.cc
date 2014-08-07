@@ -1718,6 +1718,8 @@ bool activate_talent(const talent& tal)
     }
 
     // Doing these would outright kill the player.
+    // (or, in the case of the stat-zeros, they'd at least be extremely
+    // dangerous.)
     if (tal.which == ABIL_STOP_FLYING)
     {
         if (is_feat_dangerous(grd(you.pos()), false, true))
@@ -1729,10 +1731,8 @@ bool activate_talent(const talent& tal)
     }
     else if (tal.which == ABIL_TRAN_BAT)
     {
-        if (you.strength() <= 5
-            && !yesno("Turning into a bat will reduce your strength to zero. Continue?", false, 'n'))
+        if (!check_form_stat_safety(TRAN_BAT))
         {
-            canned_msg(MSG_OK);
             crawl_state.zero_turns_taken();
             return false;
         }
@@ -1747,10 +1747,9 @@ bool activate_talent(const talent& tal)
             crawl_state.zero_turns_taken();
             return false;
         }
-        if (you.form == TRAN_BAT && you.dex() <= 5
-            && !yesno("Turning back will reduce your dexterity to zero. Continue?", false, 'n'))
+
+        if (!check_form_stat_safety(TRAN_NONE))
         {
-            canned_msg(MSG_OK);
             crawl_state.zero_turns_taken();
             return false;
         }
