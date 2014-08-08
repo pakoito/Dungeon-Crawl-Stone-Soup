@@ -229,7 +229,7 @@ public:
            "",  // description
            EQF_NONE,  // blocked slots
            0, 0,    // str mod, dex mod
-           SIZE_CHARACTER, 0,    // size, stealth mod
+           SIZE_CHARACTER, 10, 0,    // size, hp mod, stealth mod
            0, 3, LIGHTGREY,  // unarmed acc bonus, damage, & ui colour
            default_attacks, // verbs used for uc
            DEFAULT, DEFAULT,     // can_fly, can_swim
@@ -251,7 +251,7 @@ public:
            "a venomous arachnid creature.",  // description
            EQF_PHYSICAL,  // blocked slots
            0, 5,    // str mod, dex mod
-           SIZE_TINY, 21,    // size, stealth mod
+           SIZE_TINY, 10, 21,    // size, hp mod, stealth mod
            10, 5, LIGHTGREEN,  // unarmed acc bonus, damage, & ui colour
            animal_attacks, // verbs used for uc
            DEFAULT, FORBID,     // can_fly, can_swim
@@ -267,7 +267,7 @@ public:
            "",  // description
            EQF_HANDS,  // blocked slots
            0, 0,    // str mod, dex mod
-           SIZE_CHARACTER, 0,    // size, stealth mod
+           SIZE_CHARACTER, 10, 0,    // size, hp mod, stealth mod
            12, -1, RED,  // unarmed acc bonus, damage, & ui colour
            blade_attacks, // verbs used for uc
            DEFAULT, DEFAULT,     // can_fly, can_swim
@@ -327,7 +327,7 @@ public:
            "a stone statue.",  // description
            EQF_STATUE,  // blocked slots
            2, -2,    // str mod, dex mod
-           SIZE_CHARACTER, 0,    // size, stealth mod
+           SIZE_CHARACTER, 13, 0,    // size, hp mod, stealth mod
            9, -1, LIGHTGREY,  // unarmed acc bonus, damage, & ui colour
            default_attacks, // verbs used for uc
            DEFAULT, FORBID,     // can_fly, can_swim
@@ -397,7 +397,7 @@ public:
            "a creature of crystalline ice.",  // description
            EQF_PHYSICAL | EQF_OCTO,  // blocked slots
            0, 0,    // str mod, dex mod
-           SIZE_LARGE, 15,    // size, stealth mod
+           SIZE_LARGE, 12, 15,    // size, hp mod, stealth mod
            10, 12, WHITE,  // unarmed acc bonus, damage, & ui colour
            default_attacks, // verbs used for uc
            DEFAULT, ENABLE,     // can_fly, can_swim
@@ -426,7 +426,7 @@ public:
            "a fearsome dragon!",  // description
            EQF_PHYSICAL | EQF_OCTO,  // blocked slots
            10, 0,    // str mod, dex mod
-           SIZE_GIANT, 6,    // size, stealth mod
+           SIZE_GIANT, 15, 6,    // size, hp mod, stealth mod
            10, -1, GREEN,  // unarmed acc bonus, damage, & ui colour
            dragon_attacks, // verbs used for uc
            ENABLE, FORBID,     // can_fly, can_swim
@@ -462,7 +462,7 @@ public:
            "a lich.",  // description
            EQF_NONE,  // blocked slots
            0, 0,    // str mod, dex mod
-           SIZE_CHARACTER, 0,    // size, stealth mod
+           SIZE_CHARACTER, 10, 0,    // size, hp mod, stealth mod
            10, 5, MAGENTA,  // unarmed acc bonus, damage, & ui colour
            default_attacks, // verbs used for uc
            DEFAULT, DEFAULT,     // can_fly, can_swim
@@ -497,7 +497,7 @@ public:
            "",  // description
            EQF_PHYSICAL | EQF_RINGS,  // blocked slots
            -5, 5,    // str mod, dex mod
-           SIZE_TINY, 17,    // size, stealth mod
+           SIZE_TINY, 10, 17,    // size, hp mod, stealth mod
            12, -1, LIGHTGREY,  // unarmed acc bonus, damage, & ui colour
            animal_attacks, // verbs used for uc
            ENABLE, FORBID,     // can_fly, can_swim
@@ -562,7 +562,7 @@ public:
            "a filthy swine.",  // description
            EQF_PHYSICAL | EQF_RINGS,  // blocked slots
            0, 0,    // str mod, dex mod
-           SIZE_SMALL, 9,    // size, stealth mod
+           SIZE_SMALL, 10, 9,    // size, hp mod, stealth mod
            0, 3, LIGHTGREY,  // unarmed acc bonus, damage, & ui colour
            animal_attacks, // verbs used for uc
            DEFAULT, FORBID,  // can_fly (false for most pigs), can_swim
@@ -578,7 +578,7 @@ public:
            "",  // description
            EQF_NONE,  // blocked slots
            0, 0,    // str mod, dex mod
-           SIZE_CHARACTER, 0,    // size, stealth mod
+           SIZE_CHARACTER, 10, 0,    // size, hp mod, stealth mod
            0, 3, LIGHTGREY,  // unarmed acc bonus, damage, & ui colour
            default_attacks, // verbs used for uc
            DEFAULT, DEFAULT,     // can_fly, can_swim
@@ -632,7 +632,7 @@ public:
            "a tree.",  // description
            EQF_LEAR | SLOTF(EQ_CLOAK) | EQF_OCTO,  // blocked slots
            0, 0,    // str mod, dex mod
-           SIZE_CHARACTER, 27,    // size, stealth mod
+           SIZE_CHARACTER, 15, 27,    // size, hp mod, stealth mod
            10, 12, BROWN,  // unarmed acc bonus, damage, & ui colour
            tree_attacks, // verbs used for uc
            FORBID, FORBID,     // can_fly, can_swim
@@ -653,7 +653,7 @@ public:
            "a spiny porcupine.",  // description
            EQF_ALL,  // blocked slots
            0, 0,    // str mod, dex mod
-           SIZE_TINY, 12,    // size, stealth mod
+           SIZE_TINY, 10, 12,    // size, hp mod, stealth mod
            0, 3, LIGHTGREY,  // unarmed acc bonus, damage, & ui colour
            animal_attacks, // verbs used for uc
            DEFAULT, FORBID,     // can_fly, can_swim
@@ -669,7 +669,7 @@ public:
            "an insubstantial wisp.",  // description
            EQF_ALL,  // blocked slots
            0, 0,    // str mod, dex mod
-           SIZE_TINY, 21,    // size, stealth mod
+           SIZE_TINY, 10, 21,    // size, hp mod, stealth mod
            10, 5, LIGHTGREY,  // unarmed acc bonus, damage, & ui colour
            wisp_attacks, // verbs used for uc
            ENABLE, FORBID,     // can_fly, can_swim
@@ -691,7 +691,7 @@ public:
            "a lump of jelly.",  // description
            EQF_PHYSICAL | EQF_RINGS,  // blocked slots
            0, 0,    // str mod, dex mod
-           SIZE_CHARACTER, 21,    // size, stealth mod
+           SIZE_CHARACTER, 10, 21,    // size, hp mod, stealth mod
            0, 3, LIGHTGREY,  // unarmed acc bonus, damage, & ui colour
            default_attacks, // verbs used for uc
            DEFAULT, FORBID,     // can_fly, can_swim
@@ -708,7 +708,7 @@ public:
            "a sentient fungus.",  // description
            EQF_PHYSICAL | EQF_OCTO,  // blocked slots
            0, 0,    // str mod, dex mod
-           SIZE_TINY, 30,    // size, stealth mod
+           SIZE_TINY, 10, 30,    // size, hp mod, stealth mod
            10, 12, BROWN,  // unarmed acc bonus, damage, & ui colour
            fungus_attacks, // verbs used for uc
            DEFAULT, FORBID,     // can_fly, can_swim
@@ -724,7 +724,7 @@ public:
            "a swirling mass of dark shadows.",  // description
            EQF_NONE,  // blocked slots
            0, 0,    // str mod, dex mod
-           SIZE_CHARACTER, 30,    // size, stealth mod
+           SIZE_CHARACTER, 10, 30,    // size, hp mod, stealth mod
            0, 3, MAGENTA,  // unarmed acc bonus, damage, & ui colour
            default_attacks, // verbs used for uc
            DEFAULT, FORBID,     // can_fly, can_swim
@@ -1211,18 +1211,7 @@ monster_type dragon_form_dragon_type()
 // with a denominator of 10
 int form_hp_mod()
 {
-    switch (you.form)
-    {
-    case TRAN_STATUE:
-        return 13;
-    case TRAN_ICE_BEAST:
-        return 12;
-    case TRAN_DRAGON:
-    case TRAN_TREE:
-        return 15;
-    default:
-        return 10;
-    }
+    return get_form()->hp_mod;
 }
 
 static bool _flying_in_new_form(transformation_type which_trans)
