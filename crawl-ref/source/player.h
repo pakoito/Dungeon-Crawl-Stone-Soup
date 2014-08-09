@@ -117,8 +117,6 @@ public:
   FixedVector<int, NUM_TIMERS> last_timer_effect;
   FixedVector<int, NUM_TIMERS> next_timer_effect;
 
-  undead_state_type is_undead;
-
   bool dead; // ... but pending revival
   int lives;
   int deaths;
@@ -433,6 +431,7 @@ public:
     bool can_see_invisible(bool unid, bool items = true) const;
     bool visible_to(const actor *looker) const;
     bool can_see(const actor* a) const;
+    undead_state_type undead_state(bool temp = true) const;
     bool nightvision() const;
     reach_type reach_range() const;
     bool see_cell(const coord_def& p) const;
@@ -576,7 +575,7 @@ public:
     bool berserk() const;
     bool has_lifeforce() const;
     bool can_mutate() const;
-    bool can_safely_mutate() const;
+    bool can_safely_mutate(bool temp = true) const;
     bool is_lifeless_undead() const;
     bool can_polymorph() const;
     bool can_bleed(bool allow_tran = true) const;

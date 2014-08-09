@@ -1821,9 +1821,20 @@ int player_kiku_res_torment()
 // If temp is set to false, temporary sources or resistance won't be counted.
 int player_res_poison(bool calc_unid, bool temp, bool items)
 {
-    if ((you.is_undead == US_SEMI_UNDEAD ? you.hunger_state == HS_STARVING
-            : you.is_undead && (temp || you.form != TRAN_LICH))
-        || you.is_artificial()
+    switch (you.undead_state(temp))
+    {
+        case US_ALIVE:
+            break;
+        case US_HUNGRY_DEAD: //ghouls
+        case US_UNDEAD: // mummies & lichform
+            return 3;
+        case US_SEMI_UNDEAD: // vampire
+            if (you.hunger_state == HS_STARVING) // XXX: && temp?
+                return 3;
+            break;
+    }
+
+    if (you.is_artificial()
         || (temp && you.form == TRAN_SHADOW)
         || player_equip_unrand(UNRAND_OLGREB)
         || you.duration[DUR_DIVINE_STAMINA])
@@ -3993,9 +4004,12 @@ static string _constriction_description();
 
 void display_char_status()
 {
-    if (you.is_undead == US_SEMI_UNDEAD && you.hunger_state == HS_ENGORGED)
+    if (you.undead_state() == US_SEMI_UNDEAD
+        && you.hunger_state == HS_ENGORGED)
+    {
         mpr("You feel almost alive.");
-    else if (you.is_undead)
+    }
+    else if (you.undead_state())
         mpr("You are undead.");
     else if (you.duration[DUR_DEATHS_DOOR])
     {
@@ -4916,8 +4930,9 @@ void handle_player_poison(int delay)
     // Transforming into a form with no metabolism merely suspends the poison
     // but doesn't let your body get rid of it.
     // Hungry vampires are less affected by poison (not at all when bloodless).
-    if (you.is_artificial() || you.is_undead
-        && (you.is_undead != US_SEMI_UNDEAD || x_chance_in_y(4 - you.hunger_state, 4)))
+    if (you.is_artificial() || you.undead_state()
+        && (you.undead_state() != US_SEMI_UNDEAD
+            || x_chance_in_y(4 - you.hunger_state, 4)))
     {
         return;
     }
@@ -5612,8 +5627,6 @@ void player::init()
     last_timer_effect.init(0);
     next_timer_effect.init(20 * BASELINE_DELAY);
 
-    is_undead       = US_ALIVE;
-
     dead = false;
     lives = 0;
     deaths = 0;
@@ -6056,7 +6069,7 @@ void player::banish(actor *agent, const string &who)
 // to 50% (hungry, very hungry) or zero (near starving, starving).
 int calc_hunger(int food_cost)
 {
-    if (you.is_undead == US_SEMI_UNDEAD && you.hunger_state < HS_SATIATED)
+    if (you.undead_state() == US_SEMI_UNDEAD && you.hunger_state < HS_SATIATED)
     {
         if (you.hunger_state <= HS_NEAR_STARVING)
             return 0;
@@ -6590,7 +6603,7 @@ mon_holy_type player::holiness() const
         return MH_NONLIVING;
     }
 
-    if (is_undead)
+    if (undead_state())
         return MH_UNDEAD;
 
     return MH_NATURAL;
@@ -6599,7 +6612,7 @@ mon_holy_type player::holiness() const
 bool player::undead_or_demonic() const
 {
     // This is only for TSO-related stuff, so demonspawn are included.
-    return is_undead || species == SP_DEMONSPAWN;
+    return undead_state() || species == SP_DEMONSPAWN;
 }
 
 bool player::holy_wrath_susceptible() const
@@ -6742,7 +6755,7 @@ int player::res_rotting(bool temp) const
     if (player_mutation_level(MUT_ROT_IMMUNITY))
         return 3;
 
-    switch (is_undead)
+    switch (undead_state(temp))
     {
     default:
     case US_ALIVE:
@@ -6757,8 +6770,6 @@ int player::res_rotting(bool temp) const
         return 0; // no permanent resistance
 
     case US_UNDEAD:
-        if (!temp && form == TRAN_LICH)
-            return 0;
         return 3; // full immunity
     }
 }
@@ -6973,9 +6984,24 @@ bool player::spellcasting_unholy() const
     return player_equip_unrand(UNRAND_MAJIN);
 }
 
+/**
+ * What is the player's (current) place on the Undead Spectrum?
+ * (alive, hungry undead (vampire), semi-undead (ghoul), or very dead (mummy,
+ * lich)
+ *
+ * @param temp  Whether to consider temporary effects (lichform)
+ * @return      The player's undead state.
+ */
+undead_state_type player::undead_state(bool temp) const
+{
+    if (temp && you.form == TRAN_LICH)
+        return US_UNDEAD;
+    return species_undead_type(you.species);
+}
+
 bool player::nightvision() const
 {
-    return is_undead
+    return undead_state()
            || (religion == GOD_DITHMENOS && piety >= piety_breakpoint(0))
            || (religion == GOD_YREDELEMNUL && piety >= piety_breakpoint(2));
 }
@@ -7538,22 +7564,28 @@ bool player::can_mutate() const
     return true;
 }
 
-bool player::can_safely_mutate() const
+/**
+ * Can the player be mutated without rotting instead?
+ *
+ * @param temp      Whether to consider temporary modifiers (lichform)
+ * @return Whether the player will mutate when mutated, instead of rotting.
+ */
+bool player::can_safely_mutate(bool temp) const
 {
     if (!can_mutate())
         return false;
 
-    return !is_undead
-           || is_undead == US_SEMI_UNDEAD;
+    return undead_state(temp) == US_ALIVE
+           || undead_state(temp) == US_SEMI_UNDEAD;
 }
 
-// Is the player too undead to bleed, rage, and polymorph?
+// Is the player too undead to bleed, rage, or polymorph?
 bool player::is_lifeless_undead() const
 {
-    if (is_undead == US_SEMI_UNDEAD)
+    if (undead_state() == US_SEMI_UNDEAD)
         return hunger_state <= HS_SATIATED;
     else
-        return is_undead != US_ALIVE;
+        return undead_state() != US_ALIVE;
 }
 
 bool player::can_polymorph() const
