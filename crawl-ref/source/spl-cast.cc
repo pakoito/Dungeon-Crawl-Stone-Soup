@@ -958,10 +958,14 @@ bool is_prevented_teleport(spell_type spell)
 
 bool spell_is_uncastable(spell_type spell, string &msg)
 {
-    // Normally undead can't memorise these spells, so this check is
-    // to catch those in Lich form.  As such, we allow the Lich form
-    // to be extended here. - bwr
-    if (spell != SPELL_NECROMUTATION && you_cannot_memorise(spell))
+    // XXX: refactor me
+    if (you.undead_state() == US_UNDEAD
+        && (spell == SPELL_BORGNJORS_REVIVIFICATION
+            || spell == SPELL_DEATHS_DOOR
+            || spell == SPELL_SUBLIMATION_OF_BLOOD
+            || spell == SPELL_INTOXICATE
+            || spell == SPELL_REGENERATION
+            || spell_is_form(spell) && spell != SPELL_NECROMUTATION))
     {
         msg = "You cannot cast that spell in your current form!";
         return true;

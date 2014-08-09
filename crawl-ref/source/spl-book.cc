@@ -127,7 +127,7 @@ int spellbook_contents(item_def &book, read_book_action_type action,
         {
             if (you.has_spell(stype))
                 colour = COL_MEMORIZED;
-            else if (you_cannot_memorise(stype)
+            else if (!you_can_memorise(stype)
                 || you.experience_level < level_diff
                 || spell_levels < levels_req
                 || book.base_type == OBJ_BOOKS
@@ -499,119 +499,16 @@ int read_book(item_def &book, read_book_action_type action)
     return keyin;
 }
 
-bool you_cannot_memorise(spell_type spell)
+/**
+ * Is the player ever allowed to memorise the given spell? (Based on race, not
+ * spell slot restrictions, etc)
+ *
+ * @param spell     The type of spell in question.
+ * @return          Whether the the player is allowed to memorise the spell.
+ */
+bool you_can_memorise(spell_type spell)
 {
-    bool temp;
-    return you_cannot_memorise(spell, temp);
-}
-
-// form is set to true if a form (lich) prevents us from
-// memorising the spell.
-bool you_cannot_memorise(spell_type spell, bool &form)
-{
-    bool rc = false;
-
-    if (you.undead_state())
-    {
-        switch (spell)
-        {
-        case SPELL_BORGNJORS_REVIVIFICATION:
-        case SPELL_DEATHS_DOOR:
-        case SPELL_NECROMUTATION:
-            // Prohibited to all undead.
-            rc = true;
-            break;
-
-        case SPELL_CURE_POISON:
-        case SPELL_STONESKIN:
-        case SPELL_BEASTLY_APPENDAGE:
-        case SPELL_BLADE_HANDS:
-        case SPELL_DRAGON_FORM:
-        case SPELL_ICE_FORM:
-        case SPELL_SPIDER_FORM:
-        case SPELL_STATUE_FORM:
-            // Allowed for vampires (depending on hunger).
-            rc = (you.undead_state() != US_SEMI_UNDEAD);
-            break;
-
-        case SPELL_INTOXICATE:
-        case SPELL_REGENERATION:
-            // Only prohibited for liches and mummies.
-            rc = (you.undead_state() == US_UNDEAD);
-            break;
-
-        default:
-            break;
-        }
-
-        // If our undeath is only temporary, mark that fact. This
-        // assumes that the already undead cannot enter lich form.
-        if (rc && you.form == TRAN_LICH)
-            form = true;
-    }
-
-    if (you.species == SP_GARGOYLE && spell == SPELL_CURE_POISON)
-        rc = true, form = false;
-
-    if (you.species == SP_DEEP_DWARF && spell == SPELL_REGENERATION)
-        rc = true, form = false;
-
-    if (you.species == SP_FELID
-        && (spell == SPELL_PORTAL_PROJECTILE
-         // weapon branding is useless
-         || spell == SPELL_WARP_BRAND
-         || spell == SPELL_EXCRUCIATING_WOUNDS
-         || spell == SPELL_SURE_BLADE
-         // could be useful if it didn't require wielding
-         || spell == SPELL_SPECTRAL_WEAPON))
-    {
-        rc = true, form = false;
-    }
-#if TAG_MAJOR_VERSION == 34
-
-    if (you.species == SP_DJINNI
-        && (spell == SPELL_ICE_FORM
-         || spell == SPELL_OZOCUBUS_ARMOUR
-         || spell == SPELL_LEDAS_LIQUEFACTION))
-    {
-        rc = true, form = false;
-    }
-
-    if (you.species == SP_LAVA_ORC
-        && (spell == SPELL_STONESKIN
-         || spell == SPELL_OZOCUBUS_ARMOUR))
-    {
-        rc = true, form = false;
-    }
-#endif
-
-    if (you.species == SP_FORMICID
-        && (spell == SPELL_BLINK
-         || spell == SPELL_CONTROL_TELEPORT
-         || spell == SPELL_CONTROLLED_BLINK))
-    {
-        rc = true, form = false;
-    }
-
-    if (spell == SPELL_SUBLIMATION_OF_BLOOD)
-    {
-        // XXX: Using player::cannot_bleed will incorrectly
-        // catch statue- or lich-formed players.
-        if (you.species == SP_GARGOYLE
-            || you.species == SP_GHOUL
-            || you.species == SP_MUMMY)
-        {
-            rc = true;
-            form = false;
-        }
-        else if (!form_can_bleed(you.form))
-        {
-            rc = true;
-            form = true;
-        }
-    }
-
-    return rc;
+    return !spell_is_useless(spell, false);
 }
 
 bool player_can_memorise(const item_def &book)
@@ -786,7 +683,7 @@ static bool _get_mem_list(spell_list &mem_spells,
 
         if (spell == current_spell || you.has_spell(spell))
             num_known++;
-        else if (you_cannot_memorise(spell, form))
+        else if (!you_can_memorise(spell))
             num_race++;
         else
         {
@@ -1146,21 +1043,10 @@ bool learn_spell()
 }
 
 // Returns a string about why a character can't memorise a spell.
-string desc_cannot_memorise_reason(bool form)
+string desc_cannot_memorise_reason()
 {
-    string desc = "You cannot ";
-    if (form)
-        desc += "currently ";
-    desc += "memorise or cast this spell because you are ";
-
-    if (form)
-        desc += "in " + uppercase_first(transform_name()) + " form";
-    else
-        desc += article_a(species_name(you.species));
-
-    desc += ".";
-
-    return desc;
+    return "You cannot memorise or cast this spell, because you are "
+            + article_a(species_name(you.species)) + ".";
 }
 
 /**
@@ -1178,10 +1064,9 @@ static bool _learn_spell_checks(spell_type specspell)
     if (already_learning_spell((int) specspell))
         return false;
 
-    bool form = false;
-    if (you_cannot_memorise(specspell, form))
+    if (!you_can_memorise(specspell))
     {
-        mpr(desc_cannot_memorise_reason(form).c_str());
+        mpr(desc_cannot_memorise_reason().c_str());
         return false;
     }
 
@@ -1566,7 +1451,7 @@ static void _get_spell_list(vector<spell_type> &spells, int level,
             }
         }
 
-        if (avoid_uncastable && you_cannot_memorise(spell))
+        if (avoid_uncastable && !you_can_memorise(spell))
         {
             uncastable_discard++;
             continue;
