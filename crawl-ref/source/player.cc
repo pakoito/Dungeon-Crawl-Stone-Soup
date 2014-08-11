@@ -5286,10 +5286,13 @@ void dec_elixir_player(int delay)
 
 bool flight_allowed(bool quiet)
 {
-    if (you.form == TRAN_TREE)
+    if (get_form()->forbids_flight())
     {
         if (!quiet)
-            mpr("Your roots keep you in place.");
+        {
+            mpr(you.form == TRAN_TREE ? "Your roots keep you in place."
+                                      : "You can't fly in this form.");
+        }
         return false;
     }
 
@@ -5819,7 +5822,7 @@ player::~player()
 flight_type player::flight_mode() const
 {
     // Might otherwise be airborne, but currently stuck to the ground
-    if (you.duration[DUR_GRASPING_ROOTS] || you.form == TRAN_TREE)
+    if (you.duration[DUR_GRASPING_ROOTS] || get_form()->forbids_flight())
         return FL_NONE;
 
     if (duration[DUR_FLIGHT]
@@ -5827,9 +5830,7 @@ flight_type player::flight_mode() const
         || you.species == SP_DJINNI
 #endif
         || attribute[ATTR_PERM_FLIGHT]
-        || form == TRAN_WISP
-        || form == TRAN_DRAGON
-        || form == TRAN_BAT)
+        || get_form()->enables_flight())
     {
         return FL_LEVITATE;
     }
@@ -6682,7 +6683,9 @@ int player::res_rotting(bool temp) const
 {
     if (player_mutation_level(MUT_ROT_IMMUNITY)
         || temp && (is_artificial() || get_form()->res_rot()))
+    {
         return 3;
+    }
 
     switch (undead_state(temp))
     {
