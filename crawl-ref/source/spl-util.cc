@@ -38,6 +38,7 @@
 #include "spl-cast.h"
 #include "spl-book.h"
 #include "spl-damage.h"
+#include "spl-summoning.h"
 #include "spl-zap.h"
 #include "stringutil.h"
 #include "target.h"
@@ -1088,11 +1089,13 @@ bool spell_is_form(spell_type spell)
  * @param spell     The spell in question.
  * @param temp      Include checks for volatile or temporary states
  *                  (status effects, mana, gods, items, etc.)
+ * @param prevent   Whether to only check for effects which prevent casting,
+ *                  rather than just ones that make it unproductive.
  * @return          Whether the given spell has no chance of being useful.
  */
-bool spell_is_useless(spell_type spell, bool temp)
+bool spell_is_useless(spell_type spell, bool temp, bool prevent)
 {
-    return spell_uselessness_reason(spell, temp) != "";
+    return spell_uselessness_reason(spell, temp, prevent) != "";
 }
 
 /**
@@ -1102,10 +1105,12 @@ bool spell_is_useless(spell_type spell, bool temp)
  * @param spell     The spell in question.
  * @param temp      Include checks for volatile or temporary states
  *                  (status effects, mana, gods, items, etc.)
+ * @param prevent   Whether to only check for effects which prevent casting,
+ *                  rather than just ones that make it unproductive.
  * @return          The reason a spell is useless to the player, if it is;
  *                  "" otherwise;
  */
-string spell_uselessness_reason(spell_type spell, bool temp)
+string spell_uselessness_reason(spell_type spell, bool temp, bool prevent)
 {
     if (temp)
     {
@@ -1113,7 +1118,7 @@ string spell_uselessness_reason(spell_type spell, bool temp)
             return "You're too confused!";
         if (!enough_mp(spell_mana(spell), true, false))
             return "You don't have enough mp!";
-        if (spell_no_hostile_in_range(spell))
+        if (!prevent && spell_no_hostile_in_range(spell))
             return "You can't see any valid targets!";
     }
 
@@ -1160,12 +1165,15 @@ string spell_uselessness_reason(spell_type spell, bool temp)
     case SPELL_CONTROLLED_BLINK:
         if (you.species == SP_FORMICID)
             return "You can't teleport!";
-        if (temp && you.no_tele(false, false, true))
+        if (temp && you.no_tele(false, false, true)
+            && (!prevent || spell != SPELL_CONTROL_TELEPORT))
+        {
             return "You can't teleport right now!";
+        }
         break;
 
     case SPELL_SWIFTNESS:
-        if (temp)
+        if (temp && !prevent)
         {
             if (player_movement_speed() <= FASTEST_PLAYER_MOVE_SPEED)
                 return "You're already traveling as fast as you can!";
@@ -1175,7 +1183,7 @@ string spell_uselessness_reason(spell_type spell, bool temp)
         break;
 
     case SPELL_FLY:
-        if (you.racial_permanent_flight())
+        if (!prevent && you.racial_permanent_flight())
             return "You can already fly whenever you want!";
         if (temp)
         {
@@ -1187,14 +1195,17 @@ string spell_uselessness_reason(spell_type spell, bool temp)
         break;
 
     case SPELL_INVISIBILITY:
-        if (temp && you.backlit())
+        if (!prevent && temp && you.backlit())
             return "Invisibility won't help you when you glow in the dark!";
         break;
 
     case SPELL_DARKNESS:
         // mere corona is not enough, but divine light blocks it completely
-        if (temp && (you.haloed() || in_good_standing(GOD_SHINING_ONE)))
+        if (!prevent && temp && (you.haloed()
+                                 || in_good_standing(GOD_SHINING_ONE)))
+        {
             return "Darkness is useless against divine light!";
+        }
         break;
 
     case SPELL_REPEL_MISSILES:
@@ -1286,6 +1297,27 @@ string spell_uselessness_reason(spell_type spell, bool temp)
         {
             return "You have no blood to sublime!";
         }
+        break;
+
+    case SPELL_MALIGN_GATEWAY:
+        if (temp && !can_cast_malign_gateway())
+        {
+            return "The dungeon can only cope with one malign gateway"
+                    " at a time!";
+        }
+        break;
+
+    case SPELL_TORNADO:
+        if (temp && (you.duration[DUR_TORNADO]
+                     || you.duration[DUR_TORNADO_COOLDOWN]))
+        {
+            return "You need to wait for the winds to calm down.";
+        }
+        break;
+
+    case SPELL_SUMMON_FOREST:
+        if (temp && you.duration[DUR_FORESTED])
+            return "You can only summon one forest at a time!";
         break;
 
     default:
