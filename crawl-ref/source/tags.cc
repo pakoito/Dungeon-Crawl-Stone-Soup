@@ -1313,8 +1313,8 @@ static void tag_construct_you(writer &th)
     for (i = 0; i < NUM_EQUIP; ++i)
         marshallBoolean(th, you.melded[i]);
 
-    marshallByte(th, you.magic_points);
-    marshallByte(th, you.max_magic_points);
+    marshallShort(th, you.magic_points);
+    marshallShort(th, you.max_magic_points);
 
     COMPILE_CHECK(NUM_STATS == 3);
     for (i = 0; i < NUM_STATS; ++i)
@@ -2180,8 +2180,20 @@ static void tag_read_you(reader &th)
     for (i = count; i < NUM_EQUIP; ++i)
         you.melded.set(i, false);
 
-    you.magic_points              = unmarshallByte(th);
-    you.max_magic_points          = unmarshallByte(th);
+#if TAG_MAJOR_VERSION == 34
+    if (th.getMinorVersion() < TAG_MINOR_MP_SIZE)
+    {
+        you.magic_points              = unmarshallByte(th);
+        you.max_magic_points          = unmarshallByte(th);
+    }
+    else
+    {
+#endif
+        you.magic_points              = unmarshallShort(th);
+        you.max_magic_points          = unmarshallShort(th);
+#if TAG_MAJOR_VERSION == 34
+    }
+#endif
 
     for (i = 0; i < NUM_STATS; ++i)
         you.base_stats[i] = unmarshallByte(th);
