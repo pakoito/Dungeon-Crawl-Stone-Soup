@@ -362,7 +362,7 @@ public:
            0, 0,    // str mod, dex mod
            SIZE_CHARACTER, 10, 0,    // size, hp mod, stealth mod
            0,                 // spellcasting penalty
-           0, 3, LIGHTGREY,  // unarmed acc bonus, damage, & ui colour
+           0, 3, SPWPN_NORMAL, LIGHTGREY,  // unarmed acc bonus, damage, brand, & ui colour
            DEFAULT_VERBS, // verbs used for uc
            FC_DEFAULT, FC_DEFAULT,     // can_fly, can_swim
            FC_DEFAULT, true, true,        // can_bleed, breathes, keeps_mutations
@@ -388,7 +388,7 @@ public:
            0, 5,    // str mod, dex mod
            SIZE_TINY, 10, 21,    // size, hp mod, stealth mod
            10,                 // spellcasting penalty
-           10, 5, LIGHTGREEN,  // unarmed acc bonus, damage, & ui colour
+           10, 5, SPWPN_VENOM, LIGHTGREEN,  // unarmed acc bonus, damage, brand, & ui colour
            ANIMAL_VERBS, // verbs used for uc
            FC_DEFAULT, FC_FORBID,     // can_fly, can_swim
            FC_FORBID, true, true,        // can_bleed, breathes, keeps_mutations
@@ -408,7 +408,7 @@ public:
            0, 0,    // str mod, dex mod
            SIZE_CHARACTER, 10, 0,    // size, hp mod, stealth mod
            20,                 // spellcasting penalty
-           12, -1, RED,  // unarmed acc bonus, damage, & ui colour
+           12, -1, SPWPN_NORMAL, RED,  // unarmed acc bonus, damage, brand, & ui colour
            FormAttackVerbs("hit", "slash", "slice", "shred"), // verbs used for uc
            FC_DEFAULT, FC_DEFAULT,     // can_fly, can_swim
            FC_DEFAULT, true, true,        // can_bleed, breathes, keeps_mutations
@@ -472,7 +472,7 @@ public:
            2, -2,    // str mod, dex mod
            SIZE_CHARACTER, 13, 0,    // size, hp mod, stealth mod
            0,                 // spellcasting penalty
-           9, -1, LIGHTGREY,  // unarmed acc bonus, damage, & ui colour
+           9, -1, SPWPN_NORMAL, LIGHTGREY,  // unarmed acc bonus, damage, brand, & ui colour
            DEFAULT_VERBS, // verbs used for uc
            FC_DEFAULT, FC_FORBID,     // can_fly, can_swim
            FC_FORBID, false, true,        // can_bleed, breathes, keeps_mutations
@@ -546,7 +546,7 @@ public:
            0, 0,    // str mod, dex mod
            SIZE_LARGE, 12, 15,    // size, hp mod, stealth mod
            0,                 // spellcasting penalty
-           10, 12, WHITE,  // unarmed acc bonus, damage, & ui colour
+           10, 12, SPWPN_FREEZING, WHITE,  // unarmed acc bonus, damage, brand, & ui colour
            DEFAULT_VERBS, // verbs used for uc
            FC_DEFAULT, FC_ENABLE,     // can_fly, can_swim
            FC_FORBID, true, false,        // can_bleed, breathes, keeps_mutations
@@ -579,7 +579,7 @@ public:
            10, 0,    // str mod, dex mod
            SIZE_GIANT, 15, 6,    // size, hp mod, stealth mod
            0,                 // spellcasting penalty
-           10, -1, GREEN,  // unarmed acc bonus, damage, & ui colour
+           10, -1, SPWPN_NORMAL, GREEN,  // unarmed acc bonus, damage, brand, & ui colour
            FormAttackVerbs("hit", "claw", "bite", "maul"), // verbs used for uc
            FC_ENABLE, FC_FORBID,     // can_fly, can_swim
            FC_ENABLE, true, false,        // can_bleed, breathes, keeps_mutations
@@ -651,7 +651,7 @@ public:
            0, 0,    // str mod, dex mod
            SIZE_CHARACTER, 10, 0,    // size, hp mod, stealth mod
            0,                 // spellcasting penalty
-           10, 5, MAGENTA,  // unarmed acc bonus, damage, & ui colour
+           10, 5, SPWPN_DRAINING, MAGENTA,  // unarmed acc bonus, damage, brand, & ui colour
            DEFAULT_VERBS, // verbs used for uc
            FC_DEFAULT, FC_DEFAULT,     // can_fly, can_swim
            FC_FORBID, false, true,        // can_bleed, breathes, keeps_mutations
@@ -690,7 +690,7 @@ public:
            -5, 5,    // str mod, dex mod
            SIZE_TINY, 10, 17,    // size, hp mod, stealth mod
            10,                 // spellcasting penalty
-           12, -1, LIGHTGREY,  // unarmed acc bonus, damage, & ui colour
+           12, -1, SPWPN_NORMAL, LIGHTGREY,  // unarmed acc bonus, damage, brand, & ui colour
            ANIMAL_VERBS, // verbs used for uc
            FC_ENABLE, FC_FORBID,     // can_fly, can_swim
            FC_ENABLE, true, false,        // can_bleed, breathes, keeps_mutations
@@ -719,6 +719,17 @@ public:
     {
         // vampires handle bat stealth in racial code
         return you.species == SP_VAMPIRE ? 0 : stealth_mod;
+    }
+
+    /**
+     * What brand type does this form attack with when unarmed?
+     */
+    brand_type get_uc_brand() const
+    {
+        // XXX: why does this exist? will it ever, ever matter?
+        if (you.species == SP_VAMPIRE && one_chance_in(8))
+            return SPWPN_VAMPIRISM;
+        return Form::get_uc_brand();
     }
 
     /**
@@ -759,7 +770,7 @@ public:
            0, 0,    // str mod, dex mod
            SIZE_SMALL, 10, 9,    // size, hp mod, stealth mod
            0,                 // spellcasting penalty
-           0, 3, LIGHTGREY,  // unarmed acc bonus, damage, & ui colour
+           0, 3, SPWPN_NORMAL, LIGHTGREY,  // unarmed acc bonus, damage, brand, & ui colour
            ANIMAL_VERBS, // verbs used for uc
            FC_DEFAULT, FC_FORBID,  // can_fly (false for most pigs), can_swim
            FC_ENABLE, true, false,        // can_bleed, breathes, keeps_mutations
@@ -779,7 +790,7 @@ public:
            0, 0,    // str mod, dex mod
            SIZE_CHARACTER, 10, 0,    // size, hp mod, stealth mod
            0,                 // spellcasting penalty
-           0, 3, LIGHTGREY,  // unarmed acc bonus, damage, & ui colour
+           0, 3, SPWPN_NORMAL, LIGHTGREY,  // unarmed acc bonus, damage, brand, & ui colour
            DEFAULT_VERBS, // verbs used for uc
            FC_DEFAULT, FC_DEFAULT,     // can_fly, can_swim
            FC_DEFAULT, true, true,        // can_bleed, breathes, keeps_mutations
@@ -837,7 +848,7 @@ public:
            0, 0,    // str mod, dex mod
            SIZE_CHARACTER, 15, 27,    // size, hp mod, stealth mod
            0,                 // spellcasting penalty
-           10, 12, BROWN,  // unarmed acc bonus, damage, & ui colour
+           10, 12, SPWPN_NORMAL, BROWN,  // unarmed acc bonus, damage, brand, & ui colour
            FormAttackVerbs("hit", "smack", "pummel", "thrash"), // verbs used for uc
            FC_FORBID, FC_FORBID,     // can_fly, can_swim
            FC_FORBID, false, false,        // can_bleed, breathes, keeps_mutations
@@ -862,7 +873,7 @@ public:
            0, 0,    // str mod, dex mod
            SIZE_TINY, 10, 12,    // size, hp mod, stealth mod
            0,                 // spellcasting penalty
-           0, 3, LIGHTGREY,  // unarmed acc bonus, damage, & ui colour
+           0, 3, SPWPN_NORMAL, LIGHTGREY,  // unarmed acc bonus, damage, brand, & ui colour
            ANIMAL_VERBS, // verbs used for uc
            FC_DEFAULT, FC_FORBID,     // can_fly, can_swim
            FC_ENABLE, true, false,        // can_bleed, breathes, keeps_mutations
@@ -882,7 +893,7 @@ public:
            0, 0,    // str mod, dex mod
            SIZE_TINY, 10, 21,    // size, hp mod, stealth mod
            0,                 // spellcasting penalty
-           10, 5, LIGHTGREY,  // unarmed acc bonus, damage, & ui colour
+           10, 5, SPWPN_NORMAL, LIGHTGREY,  // unarmed acc bonus, damage, brand, & ui colour
            FormAttackVerbs("touch", "hit", "engulf", "engulf"), // verbs used for uc
            FC_ENABLE, FC_FORBID,     // can_fly, can_swim
            FC_FORBID, false, false,        // can_bleed, breathes, keeps_mutations
@@ -908,7 +919,7 @@ public:
            0, 0,    // str mod, dex mod
            SIZE_CHARACTER, 10, 21,    // size, hp mod, stealth mod
            0,                 // spellcasting penalty
-           0, 3, LIGHTGREY,  // unarmed acc bonus, damage, & ui colour
+           0, 3, SPWPN_NORMAL, LIGHTGREY,  // unarmed acc bonus, damage, brand, & ui colour
            DEFAULT_VERBS, // verbs used for uc
            FC_DEFAULT, FC_FORBID,     // can_fly, can_swim
            FC_FORBID, false, false,        // can_bleed, breathes, keeps_mutations
@@ -929,7 +940,7 @@ public:
            0, 0,    // str mod, dex mod
            SIZE_TINY, 10, 30,    // size, hp mod, stealth mod
            0,                 // spellcasting penalty
-           10, 12, BROWN,  // unarmed acc bonus, damage, & ui colour
+           10, 12, SPWPN_CONFUSE, BROWN,  // unarmed acc bonus, damage, brand, & ui colour
            FormAttackVerbs("release spores at", "release spores at", "release spores at", "release spores at"), // verbs used for uc
            FC_DEFAULT, FC_FORBID,     // can_fly, can_swim
            FC_FORBID, false, false,        // can_bleed, breathes, keeps_mutations
@@ -965,7 +976,7 @@ public:
            0, 0,    // str mod, dex mod
            SIZE_CHARACTER, 10, 30,    // size, hp mod, stealth mod
            0,                 // spellcasting penalty
-           0, 3, MAGENTA,  // unarmed acc bonus, damage, & ui colour
+           0, 3, SPWPN_NORMAL, MAGENTA,  // unarmed acc bonus, damage, brand, & ui colour
            DEFAULT_VERBS, // verbs used for uc
            FC_DEFAULT, FC_FORBID,     // can_fly, can_swim
            FC_FORBID, true, true,        // can_bleed, breathes, keeps_mutations
