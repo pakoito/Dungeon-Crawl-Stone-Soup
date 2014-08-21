@@ -872,10 +872,12 @@ static vector<equipment_type> _current_ring_types()
     vector<equipment_type> ret;
     if (you.species == SP_OCTOPODE)
     {
-        const int num_rings = (form_keeps_mutations() || you.form == TRAN_SPIDER
-                               ? 8 : 2);
-        for (int i = 0; i != num_rings; ++i)
-            ret.push_back((equipment_type)(EQ_RING_ONE + i));
+        for (int i = 0; i < 8; ++i)
+        {
+            const equipment_type slot = (equipment_type)(EQ_RING_ONE + i);
+            if (get_form()->slot_available(slot))
+                ret.push_back(slot);
+        }
     }
     else
     {
