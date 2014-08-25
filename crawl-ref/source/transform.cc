@@ -389,7 +389,7 @@ public:
            FormDuration(0, PS_NONE, 0), // duration
            0, 0,    // str mod, dex mod
            SIZE_CHARACTER, 10, 0,    // size, hp mod, stealth mod
-           0,                 // spellcasting penalty
+           true, 0,                 // can_cast, spellcasting penalty
            0, 3, SPWPN_NORMAL, LIGHTGREY,  // unarmed acc bonus, damage, brand, & ui colour
            "",             // name of unarmed-combat "weapon" (in UI)
            DEFAULT_VERBS, // verbs used for uc
@@ -417,7 +417,7 @@ public:
            FormDuration(10, PS_DOUBLE, 60), // duration
            0, 5,    // str mod, dex mod
            SIZE_TINY, 10, 21,    // size, hp mod, stealth mod
-           10,                 // spellcasting penalty
+           true, 10,                 // can_cast, spellcasting penalty
            10, 5, SPWPN_VENOM, LIGHTGREEN,  // unarmed acc bonus, damage, brand, & ui colour
            "Fangs",             // name of unarmed-combat "weapon" (in UI)
            ANIMAL_VERBS, // verbs used for uc
@@ -439,7 +439,7 @@ public:
            FormDuration(10, PS_SINGLE, 100), // duration
            0, 0,    // str mod, dex mod
            SIZE_CHARACTER, 10, 0,    // size, hp mod, stealth mod
-           20,                 // spellcasting penalty
+           true, 20,                 // can_cast, spellcasting penalty
            12, -1, SPWPN_NORMAL, RED,  // unarmed acc bonus, damage, brand, & ui colour
            "",             // name of unarmed-combat "weapon" (in UI)
            FormAttackVerbs("hit", "slash", "slice", "shred"), // verbs used for uc
@@ -513,7 +513,7 @@ public:
            DEFAULT_DURATION, // duration
            2, -2,    // str mod, dex mod
            SIZE_CHARACTER, 13, 0,    // size, hp mod, stealth mod
-           0,                 // spellcasting penalty
+           true, 0,                 // can_cast, spellcasting penalty
            9, -1, SPWPN_NORMAL, LIGHTGREY,  // unarmed acc bonus, damage, brand, & ui colour
            "",             // name of unarmed-combat "weapon" (in UI)
            DEFAULT_VERBS, // verbs used for uc
@@ -601,7 +601,7 @@ public:
            FormDuration(30, PS_DOUBLE, 100), // duration
            0, 0,    // str mod, dex mod
            SIZE_LARGE, 12, 15,    // size, hp mod, stealth mod
-           0,                 // spellcasting penalty
+           true, 0,                 // can_cast, spellcasting penalty
            10, 12, SPWPN_FREEZING, WHITE,  // unarmed acc bonus, damage, brand, & ui colour
            "Ice fists",             // name of unarmed-combat "weapon" (in UI)
            DEFAULT_VERBS, // verbs used for uc
@@ -636,7 +636,7 @@ public:
            DEFAULT_DURATION, // duration
            10, 0,    // str mod, dex mod
            SIZE_GIANT, 15, 6,    // size, hp mod, stealth mod
-           0,                 // spellcasting penalty
+           true, 0,                 // can_cast, spellcasting penalty
            10, -1, SPWPN_NORMAL, GREEN,  // unarmed acc bonus, damage, brand, & ui colour
            "Teeth and claws",             // name of unarmed-combat "weapon" (in UI)
            FormAttackVerbs("hit", "claw", "bite", "maul"), // verbs used for uc
@@ -710,7 +710,7 @@ public:
            DEFAULT_DURATION, // duration
            0, 0,    // str mod, dex mod
            SIZE_CHARACTER, 10, 0,    // size, hp mod, stealth mod
-           0,                 // spellcasting penalty
+           true, 0,                 // can_cast, spellcasting penalty
            10, 5, SPWPN_DRAINING, MAGENTA,  // unarmed acc bonus, damage, brand, & ui colour
            "",             // name of unarmed-combat "weapon" (in UI)
            DEFAULT_VERBS, // verbs used for uc
@@ -751,7 +751,7 @@ public:
            DEFAULT_DURATION, // duration
            -5, 5,    // str mod, dex mod
            SIZE_TINY, 10, 17,    // size, hp mod, stealth mod
-           10,                 // spellcasting penalty
+           false, 10,                 // can_cast, spellcasting penalty
            12, -1, SPWPN_NORMAL, LIGHTGREY,  // unarmed acc bonus, damage, brand, & ui colour
            "Teeth",             // name of unarmed-combat "weapon" (in UI)
            ANIMAL_VERBS, // verbs used for uc
@@ -833,7 +833,7 @@ public:
            BAD_DURATION, // duration
            0, 0,    // str mod, dex mod
            SIZE_SMALL, 10, 9,    // size, hp mod, stealth mod
-           0,                 // spellcasting penalty
+           false, 0,                 // can_cast, spellcasting penalty
            0, 3, SPWPN_NORMAL, LIGHTGREY,  // unarmed acc bonus, damage, brand, & ui colour
            "Teeth",             // name of unarmed-combat "weapon" (in UI)
            ANIMAL_VERBS, // verbs used for uc
@@ -855,7 +855,7 @@ public:
            FormDuration(10, PS_DOUBLE, 60), // duration
            0, 0,    // str mod, dex mod
            SIZE_CHARACTER, 10, 0,    // size, hp mod, stealth mod
-           0,                 // spellcasting penalty
+           true, 0,                 // can_cast, spellcasting penalty
            0, 3, SPWPN_NORMAL, LIGHTGREY,  // unarmed acc bonus, damage, brand, & ui colour
            "",             // name of unarmed-combat "weapon" (in UI)
            DEFAULT_VERBS, // verbs used for uc
@@ -915,7 +915,7 @@ public:
            BAD_DURATION, // duration
            0, 0,    // str mod, dex mod
            SIZE_CHARACTER, 15, 27,    // size, hp mod, stealth mod
-           0,                 // spellcasting penalty
+           true, 0,                 // can_cast, spellcasting penalty
            10, 12, SPWPN_NORMAL, BROWN,  // unarmed acc bonus, damage, brand, & ui colour
            "Branches",             // name of unarmed-combat "weapon" (in UI)
            FormAttackVerbs("hit", "smack", "pummel", "thrash"), // verbs used for uc
@@ -942,7 +942,7 @@ public:
            BAD_DURATION, // duration
            0, 0,    // str mod, dex mod
            SIZE_TINY, 10, 12,    // size, hp mod, stealth mod
-           0,                 // spellcasting penalty
+           false, 0,                 // can_cast, spellcasting penalty
            0, 3, SPWPN_NORMAL, LIGHTGREY,  // unarmed acc bonus, damage, brand, & ui colour
            "Teeth",             // name of unarmed-combat "weapon" (in UI)
            ANIMAL_VERBS, // verbs used for uc
@@ -964,7 +964,7 @@ public:
            BAD_DURATION, // duration
            0, 0,    // str mod, dex mod
            SIZE_TINY, 10, 21,    // size, hp mod, stealth mod
-           0,                 // spellcasting penalty
+           false, 0,                 // can_cast, spellcasting penalty
            10, 5, SPWPN_NORMAL, LIGHTGREY,  // unarmed acc bonus, damage, brand, & ui colour
            "Misty tendrils",             // name of unarmed-combat "weapon" (in UI)
            FormAttackVerbs("touch", "hit", "engulf", "engulf"), // verbs used for uc
@@ -992,7 +992,7 @@ public:
            BAD_DURATION, // duration
            0, 0,    // str mod, dex mod
            SIZE_CHARACTER, 10, 21,    // size, hp mod, stealth mod
-           0,                 // spellcasting penalty
+           false, 0,                 // can_cast, spellcasting penalty
            0, 3, SPWPN_NORMAL, LIGHTGREY,  // unarmed acc bonus, damage, brand, & ui colour
            "",             // name of unarmed-combat "weapon" (in UI)
            DEFAULT_VERBS, // verbs used for uc
@@ -1015,7 +1015,7 @@ public:
            BAD_DURATION, // duration
            0, 0,    // str mod, dex mod
            SIZE_TINY, 10, 30,    // size, hp mod, stealth mod
-           0,                 // spellcasting penalty
+           false, 0,                 // can_cast, spellcasting penalty
            10, 12, SPWPN_CONFUSE, BROWN,  // unarmed acc bonus, damage, brand, & ui colour
            "Spores",             // name of unarmed-combat "weapon" (in UI)
            FormAttackVerbs("release spores at", "release spores at", "release spores at", "release spores at"), // verbs used for uc
@@ -1053,7 +1053,7 @@ public:
            DEFAULT_DURATION, // duration
            0, 0,    // str mod, dex mod
            SIZE_CHARACTER, 10, 30,    // size, hp mod, stealth mod
-           0,                 // spellcasting penalty
+           true, 0,                 // can_cast, spellcasting penalty
            0, 3, SPWPN_NORMAL, MAGENTA,  // unarmed acc bonus, damage, brand, & ui colour
            "",             // name of unarmed-combat "weapon" (in UI)
            DEFAULT_VERBS, // verbs used for uc
